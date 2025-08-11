@@ -1,0 +1,79 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Archivos de sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de log
+*.log
+logs/
+
+# Archivos temporales
+*.tmp
+*.temp
+.cache/
+
+# Archivos de build
+dist/
+build/
+out/
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de configuración local
+config.local.js
+settings.local.json
+
+# Archivos de testing
+coverage/
+.nyc_output/
+
+# Archivos de documentación generada
+docs/build/
+
+# Archivos de base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de certificados
+*.pem
+*.key
+*.crt
+
+# Archivos de compresión
+*.zip
+*.tar.gz
+*.rar
+
+# Archivos de imagen temporal
+temp-images/
+uploads/
+
+
+

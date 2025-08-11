@@ -1,3 +1,18 @@
+/**
+ * 🎨 ESTILOS PRINCIPALES - GOLDEN APP
+ * 
+ * Este archivo contiene las variables CSS, estilos base y componentes
+ * reutilizables de la aplicación Golden Bridge.
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2024
+ */
+
+/* ========================================
+   VARIABLES CSS - SISTEMA DE DISEÑO
+   ======================================== */
+
 /* Variables CSS - Golden Bridge */
 :root {
     /* Paleta de Colores Golden Bridge */
@@ -67,6 +82,10 @@
     --transition-normal: 250ms ease-in-out;
     --transition-slow: 350ms ease-in-out;
 }
+
+/* ========================================
+   LAYOUT BASE Y COMPONENTES
+   ======================================== */
 
 /* Layout Base */
 .container {

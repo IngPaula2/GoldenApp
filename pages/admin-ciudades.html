@@ -1,27 +1,45 @@
 <!DOCTYPE html>
+<!--
+    DASHBOARD ADMINISTRATIVO - GOLDEN APP
+    
+    Este archivo contiene la página principal del panel administrativo de ciudades.
+    Incluye sidebar de navegación, barra superior, tablas de datos y modales.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2024
+-->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Bridge - Dashboard</title>
     
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
     <!-- CSS -->
     <link rel="stylesheet" href="../assets/css/reset.css">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/admin-ciudades.css">
     
-    <!-- Fonts -->
+    <!-- Fuentes de Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Icons -->
+    <!-- Iconos Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
     <!-- Sidebar -->
     <aside class="sidebar">
-        <!-- User Profile Section -->
+        <!-- Sección de Perfil de Usuario -->
         <div class="user-profile">
             <div class="user-info">
                 <i class="fas fa-user user-icon"></i>
@@ -29,7 +47,7 @@
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
             </div>
             
-            <!-- Dropdown Menu -->
+            <!-- Menú Desplegable del Usuario -->
             <div class="dropdown-menu" id="userDropdown">
                 <div class="dropdown-item admin-users-item">
                     <i class="fas fa-users-cog dropdown-icon"></i>
@@ -42,7 +60,7 @@
             </div>
         </div>
 
-        <!-- Navigation Menu -->
+        <!-- Menú de Navegación Principal -->
         <nav class="sidebar-nav">
             <ul class="nav-list">
                 <li class="nav-item active">
@@ -90,7 +108,7 @@
             </ul>
         </nav>
 
-        <!-- Logo Section -->
+        <!-- Sección del Logo -->
         <div class="sidebar-logo">
             <div class="logo-container">
                 <img src="../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
@@ -99,9 +117,13 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
     <main class="main-content">
-        <!-- Top Navigation -->
+        <!-- Navegación Superior -->
         <nav class="top-nav">
             <ul class="top-nav-list">
                 <li class="top-nav-item active">
@@ -131,9 +153,9 @@
             </ul>
         </nav>
 
-        <!-- Content Area -->
+        <!-- Área de Contenido -->
         <div class="content-area">
-            <!-- Cities Section -->
+            <!-- Sección de Ciudades -->
             <section class="cities-section">
                 <div class="section-header">
                     <h2>Ciudades</h2>
@@ -168,7 +190,7 @@
                 </div>
             </section>
 
-            <!-- Branches Section -->
+            <!-- Sección de Filiales -->
             <section class="branches-section">
                 <div class="section-header">
                     <h2>Filiales</h2>
@@ -206,11 +228,18 @@
 
 
 
-    <!-- City Selection Modal -->
+    <!-- ========================================
+         MODALES DE INTERACCIÓN
+         ======================================== -->
+    
+    <!-- Modal de Selección de Ciudad -->
     <div class="modal-overlay" id="cityModal">
         <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
+                <button class="modal-close" onclick="hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -231,6 +260,48 @@
         </div>
     </div>
 
+    <!-- Modal de Crear Ciudad -->
+    <div class="modal-overlay" id="createCityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideCreateCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="tldCodigo" class="form-label">Código *</label>
+                    <input type="text" id="tldCodigo" class="form-input" placeholder="Escribe Código de la ciudad">
+                </div>
+                <div class="form-group">
+                    <label for="tNombre" class="form-label">Nombre *</label>
+                    <input type="text" id="tNombre" class="form-input" placeholder="Escribe Nombre de la ciudad">
+                </div>
+                <div class="form-group">
+                    <label for="tDireccion" class="form-label">Dirección *</label>
+                    <input type="text" id="tDireccion" class="form-input" placeholder="Dirección de la ciudad">
+                </div>
+                <div class="form-group">
+                    <label for="tTelefono" class="form-label">Teléfono *</label>
+                    <input type="text" id="tTelefono" class="form-input" placeholder="Teléfono">
+                </div>
+                <div class="form-group">
+                    <label for="tCorreo" class="form-label">Correo Electrónico *</label>
+                    <input type="email" id="tCorreo" class="form-input" placeholder="Escribe el correo electrónico">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideCreateCityModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bCrear">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
     <!-- JavaScript -->
     <script src="../assets/js/admin-ciudades.js"></script>
 </body>

@@ -1,10 +1,28 @@
-// Funcionalidad para la página de login
+/**
+ *  SISTEMA DE AUTENTICACIÓN - GOLDEN APP
+ * 
+ * Este archivo contiene toda la funcionalidad de la página de inicio de sesión.
+ * Incluye validación de formularios, efectos visuales y manejo de autenticación.
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2025
+ */
 
+// Funcionalidad para la página de login
 document.addEventListener('DOMContentLoaded', function() {
+    // ========================================
+    // ELEMENTOS DEL DOM
+    // ========================================
+    
     const loginForm = document.querySelector('.login-form');
     const inputFields = document.querySelectorAll('.input-control');
     const loginButton = document.querySelector('.login-button');
 
+    // ========================================
+    // EFECTOS DE FOCUS EN CAMPOS DE ENTRADA
+    // ========================================
+    
     // Efectos de focus en los campos de entrada
     inputFields.forEach(input => {
         input.addEventListener('focus', function() {
@@ -18,6 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // ========================================
+    // MANEJO DEL FORMULARIO DE LOGIN
+    // ========================================
+    
     // Manejo del formulario de login
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -25,31 +47,39 @@ document.addEventListener('DOMContentLoaded', function() {
         const username = inputFields[0].value.trim();
         const password = inputFields[1].value.trim();
         
-        // Validación básica
+        // Validación básica de campos
         if (!username || !password) {
             showMessage('Por favor, complete todos los campos', 'error');
             return;
         }
         
-        // Simular proceso de login
+        // Simular proceso de login con estado de carga
         loginButton.textContent = 'INICIANDO...';
         loginButton.disabled = true;
         
-        // Simular delay de autenticación
+        // Simular delay de autenticación (1.5 segundos)
         setTimeout(() => {
-            // Aquí iría la lógica real de autenticación
+            // Aquí iría la lógica real de autenticación con backend
             console.log('Intentando iniciar sesión:', { username, password });
             
-            // Marcar como autenticado
+            // Marcar usuario como autenticado en sessionStorage
             sessionStorage.setItem('isAuthenticated', 'true');
             sessionStorage.setItem('username', username);
             
-            // Redirigir al dashboard
+            // Redirigir al dashboard administrativo
             window.location.href = 'pages/admin-ciudades.html';
         }, 1500);
     });
 
-    // Función para mostrar mensajes
+    // ========================================
+    // FUNCIONES DE UTILIDAD
+    // ========================================
+    
+    /**
+     * Muestra mensajes de notificación al usuario
+     * @param {string} message - Mensaje a mostrar
+     * @param {string} type - Tipo de mensaje ('error', 'success', 'info')
+     */
     function showMessage(message, type = 'info') {
         // Crear elemento de mensaje
         const messageElement = document.createElement('div');
@@ -59,13 +89,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Insertar después del formulario
         loginForm.appendChild(messageElement);
         
-        // Remover después de 3 segundos
+        // Remover mensaje después de 3 segundos
         setTimeout(() => {
             messageElement.remove();
         }, 3000);
     }
 
-    // Efectos de hover en el botón
+    // ========================================
+    // EFECTOS VISUALES
+    // ========================================
+    
+    // Efectos de hover en el botón de login
     loginButton.addEventListener('mouseenter', function() {
         this.style.transform = 'translateY(-2px)';
     });
@@ -74,7 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
         this.style.transform = 'translateY(0)';
     });
 
-    // Animación de entrada de elementos
+    // ========================================
+    // ANIMACIONES DE ENTRADA
+    // ========================================
+    
+    // Animación de entrada escalonada de elementos
     const elements = document.querySelectorAll('.logo, .input-group, .login-button');
     
     elements.forEach((element, index) => {
@@ -88,9 +126,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 200);
     });
 
-    // Los elementos decorativos ahora son estáticos
+    // Nota: Los elementos decorativos son estáticos
     // Se eliminó el efecto de parallax para que las figuras no se muevan
 });
+
+// ========================================
+// ESTILOS ADICIONALES DINÁMICOS
+// ========================================
 
 // Estilos adicionales para mensajes (se pueden agregar al CSS)
 const additionalStyles = `
@@ -138,7 +180,7 @@ const additionalStyles = `
     }
 `;
 
-// Agregar estilos adicionales al head
+// Agregar estilos adicionales al head del documento
 const styleSheet = document.createElement('style');
 styleSheet.textContent = additionalStyles;
 document.head.appendChild(styleSheet); 

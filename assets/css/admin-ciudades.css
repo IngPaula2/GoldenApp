@@ -1,3 +1,18 @@
+/**
+ * 🏢 ESTILOS DEL DASHBOARD ADMINISTRATIVO - GOLDEN APP
+ * 
+ * Este archivo contiene todos los estilos específicos para el panel
+ * administrativo de ciudades, incluyendo sidebar, modales y responsive design.
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2024
+ */
+
+/* ========================================
+   LAYOUT PRINCIPAL DEL DASHBOARD
+   ======================================== */
+
 /* Dashboard Styles */
 .dashboard-page {
     display: flex;
@@ -5,6 +20,10 @@
     background-color: #f5f5f5;
     font-family: 'Inter', sans-serif;
 }
+
+/* ========================================
+   SIDEBAR DE NAVEGACIÓN
+   ======================================== */
 
 /* Sidebar */
 .sidebar {
@@ -20,6 +39,10 @@
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
 }
+
+/* ========================================
+   PERFIL DE USUARIO
+   ======================================== */
 
 /* User Profile Section */
 .user-profile {
@@ -54,6 +77,10 @@
 .dropdown-arrow.open {
     transform: rotate(180deg);
 }
+
+/* ========================================
+   MENÚ DESPLEGABLE
+   ======================================== */
 
 /* Dropdown Menu */
 .dropdown-menu {
@@ -129,6 +156,10 @@
     filter: blur(2px);
 }
 
+/* ========================================
+   MENÚ DE NAVEGACIÓN
+   ======================================== */
+
 /* Navigation Menu */
 .sidebar-nav {
     flex: 1;
@@ -176,6 +207,10 @@
     text-align: center;
 }
 
+/* ========================================
+   SECCIÓN DEL LOGO
+   ======================================== */
+
 /* Logo Section */
 .sidebar-logo {
     padding: 40px;
@@ -204,6 +239,10 @@
     font-size: 1.5rem;
 }
 
+/* ========================================
+   CONTENIDO PRINCIPAL
+   ======================================== */
+
 /* Main Content */
 .main-content {
     flex: 1;
@@ -211,6 +250,10 @@
     display: flex;
     flex-direction: column;
 }
+
+/* ========================================
+   NAVEGACIÓN SUPERIOR
+   ======================================== */
 
 /* Top Navigation */
 .top-nav {
@@ -257,6 +300,10 @@
     margin: 5px 2px 0 2px;
 }
 
+/* ========================================
+   ÁREA DE CONTENIDO
+   ======================================== */
+
 /* Content Area */
 .content-area {
     flex: 1;
@@ -287,6 +334,10 @@
     display: flex;
     gap: 10px;
 }
+
+/* ========================================
+   BOTONES Y COMPONENTES
+   ======================================== */
 
 /* Buttons */
 .btn {
@@ -335,6 +386,10 @@
     background-color: #c82333;
 }
 
+/* ========================================
+   TABLAS DE DATOS
+   ======================================== */
+
 /* Data Tables */
 .data-table {
     background: rgba(229, 227, 227, 0.6);
@@ -373,6 +428,10 @@
     border-bottom: none;
 }
 
+/* ========================================
+   MODALES
+   ======================================== */
+
 /* Modal */
 .modal-overlay {
     position: fixed;
@@ -381,7 +440,7 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 2000;
@@ -401,6 +460,10 @@
 .modal-header {
     margin-bottom: 25px;
     text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .modal-title {
@@ -409,6 +472,29 @@
     font-weight: 700;
     color: #333;
     text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
 }
 
 .modal-body {
@@ -455,9 +541,45 @@
     pointer-events: none;
 }
 
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+}
+
 .modal-footer {
     text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
 }
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+/* ========================================
+   MENSAJES Y ESTADOS
+   ======================================== */
 
 /* No Data Message */
 .no-data-message {
@@ -493,6 +615,10 @@
     max-width: 300px;
     line-height: 1.4;
 }
+
+/* ========================================
+   DISEÑO RESPONSIVE
+   ======================================== */
 
 /* Responsive Design */
 @media (max-width: 768px) {
