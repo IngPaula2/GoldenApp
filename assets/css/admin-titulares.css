@@ -1,0 +1,575 @@
+/**
+ * 🎨 ESTILOS PARA DASHBOARD DE TITULARES - GOLDEN APP
+ * 
+ * Este archivo contiene los estilos específicos para la página de titulares.
+ * Extiende los estilos base del dashboard administrativo.
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2024
+ */
+
+/* ========================================
+   ESTILOS ESPECÍFICOS PARA TITULARES
+   ======================================== */
+
+/* Sección de Titulares */
+.titulares-section {
+    margin-bottom: 2rem;
+}
+
+.titulares-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.titulares-section h2 {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Sección de Beneficiarios */
+.beneficiarios-section {
+    margin-bottom: 2rem;
+}
+
+.beneficiarios-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.beneficiarios-section h2 {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.action-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.action-buttons .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+}
+
+.action-buttons .btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+/* Tablas de datos */
+.data-table {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table thead {
+    background: #f8f9fa;
+}
+
+.table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #1a1a1a;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+
+.table tbody tr:hover {
+    background: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* Botones de opciones en las tablas */
+.btn-small {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 0.5rem;
+    background: #DEB448;
+    color: #1a1a1a;
+}
+
+.btn-small:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+}
+
+.btn-small.btn-danger {
+    background: #dc3545;
+    color: #fff;
+}
+
+.btn-small.btn-danger:hover {
+    background: #c82333;
+}
+
+/* Mensaje de "sin datos" */
+.no-data-message {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.no-data-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.no-data-content i {
+    font-size: 3rem;
+    color: #6c757d;
+}
+
+.no-data-content p {
+    font-size: 1.1rem;
+    color: #495057;
+    margin: 0;
+}
+
+.no-data-content small {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   ESTILOS RESPONSIVE PARA TITULARES
+   ======================================== */
+
+@media (max-width: 768px) {
+    .titulares-section .section-header,
+    .beneficiarios-section .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .btn-small {
+        padding: 0.4rem;
+        font-size: 0.7rem;
+        margin-right: 0.25rem;
+    }
+    
+    /* Responsive para formularios */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .modal-large {
+        max-width: 95%;
+        margin: 1rem;
+    }
+    
+    .beneficiario-toggle {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .toggle-buttons {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .titulares-section h2,
+    .beneficiarios-section h2 {
+        font-size: 1.25rem;
+    }
+    
+    .table {
+        font-size: 0.75rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .no-data-content i {
+        font-size: 2rem;
+    }
+    
+    .no-data-content p {
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   ESTILOS PARA MODALES ESPECÍFICOS
+   ======================================== */
+
+/* Modal de crear titular */
+#createTitularModal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Modal grande para formularios complejos */
+.modal-large {
+    max-width: 800px;
+    width: 95%;
+}
+
+/* Filas de formulario */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Toggle de beneficiario */
+.beneficiario-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.beneficiario-toggle .form-input {
+    flex: 1;
+}
+
+.toggle-buttons {
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* ========================================
+   ESTILOS MEJORADOS PARA BOTONES TOGGLE
+   ======================================== */
+
+.toggle-buttons {
+    display: flex;
+    gap: 0.5rem;
+    background: #f8f9fa;
+    padding: 0.25rem;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.toggle-buttons:hover {
+    border-color: #DEB448;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.2);
+}
+
+.btn-toggle {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-toggle:hover::before {
+    left: 100%;
+}
+
+.btn-toggle:hover {
+    background: #e9ecef;
+    color: #495057;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-toggle.active {
+    background: #DEB448;
+    color: #1a1a1a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+.btn-toggle-yes.active {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.btn-toggle-no.active {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* Efecto de pulso para botones activos */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(222, 180, 72, 0.5);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+    }
+}
+
+.btn-toggle.active {
+    animation: pulse 2s infinite;
+}
+
+.btn-toggle-yes.active {
+    animation: none;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.btn-toggle-no.active {
+    animation: none;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* Modal de crear beneficiario */
+#createBeneficiarioModal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* ========================================
+   ANIMACIONES Y TRANSICIONES
+   ======================================== */
+
+.titulares-section,
+.beneficiarios-section {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efecto de carga para las tablas */
+.table tbody tr {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ========================================
+   ESTILOS PARA ESTADOS ESPECIALES
+   ======================================== */
+
+/* Estado de carga */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Estado de error */
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 1rem;
+}
+
+/* Estado de éxito */
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #c3e6cb;
+    margin-bottom: 1rem;
+}
+
+/* ========================================
+   MEJORAS DE ACCESIBILIDAD
+   ======================================== */
+
+/* Focus visible para navegación por teclado */
+.btn:focus,
+.btn-small:focus {
+    outline: 2px solid #DEB448;
+    outline-offset: 2px;
+}
+
+/* Contraste mejorado para texto */
+.table th {
+    color: #000;
+    font-weight: 700;
+}
+
+.table td {
+    color: #333;
+}
+
+/* Indicadores de estado para lectores de pantalla */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ========================================
+   ESTILOS PARA MODAL DE BÚSQUEDA
+   ======================================== */
+
+.search-results-container {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e9ecef;
+}
+
+.search-results-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Modal de búsqueda más grande para acomodar resultados */
+#searchTitularModal .modal-large {
+    max-width: 900px;
+    width: 95%;
+}
+
+#searchTitularModal .modal-body {
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+/* Estilos específicos para la tabla de resultados en el modal */
+#searchTitularModal .data-table {
+    margin-top: 1rem;
+}
+
+#searchTitularModal .table {
+    font-size: 0.85rem;
+}
+
+#searchTitularModal .table th,
+#searchTitularModal .table td {
+    padding: 0.75rem 0.5rem;
+}
+
+/* Responsive para modal de búsqueda */
+@media (max-width: 768px) {
+    #searchTitularModal .modal-large {
+        max-width: 98%;
+        margin: 0.5rem;
+    }
+    
+    #searchTitularModal .table {
+        font-size: 0.75rem;
+    }
+    
+    #searchTitularModal .table th,
+    #searchTitularModal .table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .search-results-title {
+        font-size: 1rem;
+    }
+}

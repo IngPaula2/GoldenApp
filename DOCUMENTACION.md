@@ -1,6 +1,6 @@
-# 📚 DOCUMENTACIÓN COMPLETA - GOLDEN APP
+#  DOCUMENTACIÓN COMPLETA - GOLDEN APP
 
-## 🏗️ ESTRUCTURA DEL PROYECTO
+##  ESTRUCTURA DEL PROYECTO
 
 ```
 GoldenApp-main/
@@ -26,9 +26,9 @@ GoldenApp-main/
 
 ---
 
-## 📄 ARCHIVOS HTML
+## ARCHIVOS HTML
 
-### 🏠 `index.html` - Página Principal
+###  `index.html` - Página Principal
 **Descripción:** Página de inicio/landing de la aplicación Golden Bridge.
 
 **Funcionalidades:**
@@ -43,7 +43,7 @@ GoldenApp-main/
 
 ---
 
-### 🔐 `pages/login.html` - Página de Inicio de Sesión
+###  `pages/login.html` - Página de Inicio de Sesión
 **Descripción:** Formulario de autenticación para usuarios del sistema.
 
 **Funcionalidades:**
@@ -66,7 +66,7 @@ GoldenApp-main/
 
 ---
 
-### 🏢 `pages/admin-ciudades.html` - Dashboard Administrativo
+###  `pages/admin-ciudades.html` - Dashboard Administrativo
 **Descripción:** Panel principal de administración con gestión de ciudades y filiales.
 
 **Funcionalidades principales:**
@@ -84,9 +84,9 @@ GoldenApp-main/
 
 ---
 
-## 🎨 ARCHIVOS CSS
+## ARCHIVOS CSS
 
-### 🔄 `assets/css/reset.css` - Reset de Estilos
+###  `assets/css/reset.css` - Reset de Estilos
 **Descripción:** Normalización de estilos CSS para consistencia entre navegadores.
 
 **Funcionalidades:**
@@ -97,7 +97,7 @@ GoldenApp-main/
 
 ---
 
-### 🎯 `assets/css/main.css` - Estilos Principales
+###  `assets/css/main.css` - Estilos Principales
 **Descripción:** Estilos base y componentes reutilizables de la aplicación.
 
 **Contenido:**
@@ -108,7 +108,7 @@ GoldenApp-main/
 
 ---
 
-### 🔐 `assets/css/login.css` - Estilos del Login
+###  `assets/css/login.css` - Estilos del Login
 **Descripción:** Estilos específicos para la página de inicio de sesión.
 
 **Características:**
@@ -125,7 +125,7 @@ GoldenApp-main/
 
 ---
 
-### 🏢 `assets/css/admin-ciudades.css` - Estilos del Dashboard
+###  `assets/css/admin-ciudades.css` - Estilos del Dashboard
 **Descripción:** Estilos completos para el panel administrativo de ciudades.
 
 **Componentes principales:**
@@ -169,9 +169,9 @@ GoldenApp-main/
 
 ---
 
-## ⚙️ ARCHIVOS JAVASCRIPT
+##  ARCHIVOS JAVASCRIPT
 
-### 🔐 `assets/js/login.js` - Funcionalidad del Login
+###  `assets/js/login.js` - Funcionalidad del Login
 **Descripción:** Lógica de autenticación y validación del formulario de login.
 
 **Funcionalidades:**
@@ -194,7 +194,7 @@ function handleSession()
 
 ---
 
-### 🏢 `assets/js/admin-ciudades.js` - Funcionalidad del Dashboard
+###  `assets/js/admin-ciudades.js` - Funcionalidad del Dashboard
 **Descripción:** Lógica completa del panel administrativo de ciudades.
 
 **Funcionalidades principales:**
@@ -243,9 +243,9 @@ function deleteCity(codigo)
 
 ---
 
-## 🎯 FUNCIONALIDADES ESPECÍFICAS
+##  FUNCIONALIDADES ESPECÍFICAS
 
-### 📋 Modal "SELECCIONE LA CIUDAD"
+###  Modal "SELECCIONE LA CIUDAD"
 **Propósito:** Permitir al usuario seleccionar una ciudad para trabajar.
 
 **Comportamiento:**
@@ -258,7 +258,7 @@ function deleteCity(codigo)
 - Select con opciones de ciudades
 - Botón "Seleccionar"
 
-### 🆕 Modal "CREAR CIUDAD"
+###  Modal "CREAR CIUDAD"
 **Propósito:** Formulario para crear nuevas ciudades en el sistema.
 
 **Campos del formulario:**
@@ -278,7 +278,7 @@ function deleteCity(codigo)
 - Limpiar formulario al cerrar
 - Mostrar mensaje de éxito
 
-### 📊 Tabla de Ciudades
+###  Tabla de Ciudades
 **Estructura:**
 ```
 | Código | Nombre | Correo | Opciones |
@@ -295,7 +295,7 @@ function deleteCity(codigo)
 
 ---
 
-## 🎨 SISTEMA DE DISEÑO
+##  SISTEMA DE DISEÑO
 
 ### 🎨 Paleta de Colores
 ```css
@@ -307,7 +307,7 @@ function deleteCity(codigo)
 --sidebar-color: #4a4a4a;     /* Sidebar oscuro */
 ```
 
-### 📱 Breakpoints Responsive
+###  Breakpoints Responsive
 ```css
 /* Desktop */
 @media (min-width: 1200px)
@@ -328,7 +328,7 @@ function deleteCity(codigo)
 @media (max-width: 359px)
 ```
 
-### 🔤 Tipografía
+###  Tipografía
 - **Fuente principal:** Inter (Google Fonts)
 - **Pesos:** 300, 400, 500, 600, 700
 - **Iconos:** Font Awesome 6.4.0
@@ -346,11 +346,11 @@ function deleteCity(codigo)
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 ```
 
-### 💾 Almacenamiento
+###  Almacenamiento
 - **sessionStorage:** Para datos de sesión
 - **localStorage:** Para preferencias del usuario
 
-### 🔄 Gestión de Estado
+###  Gestión de Estado
 - Estado de autenticación
 - Ciudad seleccionada
 - Sección activa
@@ -358,9 +358,9 @@ function deleteCity(codigo)
 
 ---
 
-## 🚀 FUNCIONALIDADES FUTURAS
+##  FUNCIONALIDADES FUTURAS
 
-### 📝 Pendientes de Implementación
+###  Pendientes de Implementación
 1. **Modal de Edición de Ciudad**
    - Formulario pre-llenado
    - Validación de cambios
@@ -383,9 +383,9 @@ function deleteCity(codigo)
 
 ---
 
-## 🐛 SOLUCIÓN DE PROBLEMAS
+##  SOLUCIÓN DE PROBLEMAS
 
-### ❌ Problemas Comunes
+###  Problemas Comunes
 
 #### Modal no aparece
 **Causa:** CSS con `display: none`
@@ -399,7 +399,7 @@ function deleteCity(codigo)
 **Causa:** Rutas incorrectas de CSS
 **Solución:** Verificar estructura de carpetas
 
-### 🔍 Debugging
+### Debugging
 ```javascript
 // Verificar estado de modales
 console.log('Modal visible:', modalOverlay.style.display);
@@ -413,9 +413,9 @@ console.log('Ciudad seleccionada:', sessionStorage.getItem('selectedCity'));
 
 ---
 
-## 📝 NOTAS DE DESARROLLO
+## NOTAS DE DESARROLLO
 
-### ✅ Implementado
+###  Implementado
 - [x] Sistema de modales
 - [x] Validación de formularios
 - [x] Gestión de ciudades
@@ -423,13 +423,13 @@ console.log('Ciudad seleccionada:', sessionStorage.getItem('selectedCity'));
 - [x] Navegación completa
 - [x] Gestión de sesión
 
-### 🔄 En Desarrollo
+###  En Desarrollo
 - [ ] Modal de edición
 - [ ] Gestión de filiales
 - [ ] Sistema de búsqueda
 - [ ] Backend integration
 
-### 📋 Pendiente
+###  Pendiente
 - [ ] Tests unitarios
 - [ ] Documentación de API
 - [ ] Optimización de performance
@@ -437,12 +437,12 @@ console.log('Ciudad seleccionada:', sessionStorage.getItem('selectedCity'));
 
 ---
 
-## 👥 AUTORES Y VERSIÓN
+##  AUTORES Y VERSIÓN
 
 **Proyecto:** Golden App  
 **Versión:** 1.0.0  
 **Fecha:** 2024  
-**Desarrollado por:** Equipo Golden Bridge  
+**Desarrollado por:** Paula Pachon  
 
 ---
 
