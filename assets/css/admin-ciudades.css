@@ -356,7 +356,7 @@
 .btn-primary {
     background: #DEB448;
     color: #1a1a1a;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
 }
@@ -525,6 +525,11 @@
     border: 1px solid #dbcd7a;
 }
 
+.modal-large {
+    max-width: 800px;
+    width: 95%;
+}
+
 .modal-header {
     margin-bottom: 25px;
     text-align: center;
@@ -683,6 +688,30 @@
     max-width: 300px;
     line-height: 1.4;
 }
+
+/* ========================================
+   ESTILOS PARA MODAL DE BÚSQUEDA
+   ======================================== */
+
+.search-results-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-top: 2px solid #e9ecef;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-results-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
 
 /* ========================================
    DISEÑO RESPONSIVE
@@ -1103,3 +1132,122 @@
     
 
 } 
+
+/* ========================================
+   ESTILOS PARA MODALES DE RESULTADOS AMPLIADOS
+   ======================================== */
+
+/* Modal extra grande para resultados de búsqueda */
+.modal-results {
+    max-width: 1600px !important;
+    width: 95% !important;
+    min-height: 600px;
+    max-height: 90vh;
+    position: relative;
+}
+
+
+
+.modal-results .modal-body {
+    padding: 30px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+.modal-results .data-table {
+    margin: 0;
+    padding: 0;
+}
+
+.modal-results .table {
+    width: 100%;
+    margin: 0;
+    font-size: 14px;
+}
+
+.modal-results .table th {
+    padding: 18px 15px;
+    font-size: 15px;
+    font-weight: 600;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.modal-results .table td {
+    padding: 18px 15px;
+    font-size: 14px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    word-wrap: break-word;
+    max-width: 200px;
+}
+
+.modal-results .table tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* Espaciado entre botones de opciones en las tablas */
+.modal-results .table .btn-small {
+    margin-right: 8px;
+}
+
+.modal-results .table .btn-small:last-child {
+    margin-right: 0;
+}
+
+/* Posicionamiento específico para botones en modales de resultados */
+.modal-results .modal-footer .btn-secondary {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-0%);
+    margin: 0;
+}
+
+/* Estilo para el título de beneficiarios del titular */
+.modal-results h4 {
+    text-align: center;
+    margin: 10px 0 10px 0 !important;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    padding-bottom: 0%
+}
+
+
+
+/* Responsive para modales de resultados */
+@media (max-width: 1200px) {
+    .modal-results {
+        max-width: 95% !important;
+        width: 98% !important;
+    }
+    
+    .modal-results .table th,
+    .modal-results .table td {
+        padding: 15px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-results {
+        max-width: 98% !important;
+        width: 100% !important;
+        margin: 10px;
+        min-height: 500px;
+    }
+    
+    .modal-results .modal-body {
+        padding: 20px;
+        max-height: calc(90vh - 120px);
+    }
+    
+    .modal-results .table th,
+    .modal-results .table td {
+        padding: 12px 8px;
+        font-size: 12px;
+    }
+}
