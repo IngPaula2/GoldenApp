@@ -7,6 +7,9 @@ GoldenApp-main/
 ├── assets/
 │   ├── css/
 │   │   ├── admin-ciudades.css
+│   │   ├── admin-titulares.css
+│   │   ├── admin-cargos.css
+│   │   ├── dashboard-base.css
 │   │   ├── login.css
 │   │   ├── main.css
 │   │   └── reset.css
@@ -15,10 +18,18 @@ GoldenApp-main/
 │   │   └── LOGO GOLDEN BRIDGE SIN FONDO OF.png
 │   └── js/
 │       ├── admin-ciudades.js
+│       ├── admin-titulares.js
+│       ├── admin-cargos.js
 │       └── login.js
 ├── pages/
 │   ├── admin-ciudades.html
+│   ├── admin-titulares.html
+│   ├── admin-cargos.html
 │   └── login.html
+├── docs/
+│   └── DOCUMENTACION.md
+├── templates/
+│   └── search-modal-template.html
 ├── index.html
 ├── README.md
 └── DOCUMENTACION.md (este archivo)
@@ -84,6 +95,87 @@ GoldenApp-main/
 
 ---
 
+###  `pages/admin-titulares.html` - Gestión de Titulares y Beneficiarios
+**Descripción:** Panel completo de administración para gestión de titulares y sus beneficiarios asociados.
+
+**Funcionalidades principales:**
+- Gestión completa de titulares (CRUD)
+- Gestión de beneficiarios por titular
+- Búsqueda avanzada de titulares
+- Modales superpuestos para creación/edición
+- Selectores de tipo de documento colombiano
+
+**Secciones principales:**
+1. **Gestión de Titulares:**
+   - Crear titular con formulario completo
+   - Buscar titular por ID
+   - Editar información de titular
+   - Eliminar titular
+
+2. **Gestión de Beneficiarios:**
+   - Añadir beneficiarios a titular existente
+   - Editar beneficiarios
+   - Eliminar beneficiarios
+   - Visualizar lista de beneficiarios por titular
+
+3. **Tipos de Documento Colombiano:**
+   - Cédula de Ciudadanía (CC)
+   - Cédula de Extranjería (CE)
+   - Pasaporte (PA)
+   - Tarjeta de Identidad (TI)
+   - Registro Civil (RC)
+   - NIT
+   - RUT
+   - Permiso Permanente (PPT)
+   - Permiso Especial de Permanencia (PEP)
+   - Documento de Extranjería (DE)
+
+**Características técnicas:**
+- Modales con z-index controlado para superposición
+- Gestión de estado con sessionStorage
+- Validación de formularios
+- Interfaz responsive
+- Botones de acción con iconos
+
+---
+
+###  `pages/admin-cargos.html` - Gestión de Cargos
+**Descripción:** Panel administrativo para la gestión de cargos y puestos dentro de la organización.
+
+**Funcionalidades principales:**
+- Gestión de cargos (CRUD básico)
+- Formulario de creación con validación
+- Búsqueda de cargos por múltiples criterios
+- Interfaz consistente con el resto del sistema
+
+**Secciones principales:**
+1. **Gestión de Cargos:**
+   - Crear cargo con formulario validado
+   - Buscar cargo por código, nombre o sección
+   - Tabla de cargos con estado "No existen registros"
+   - Modales para creación y búsqueda
+
+2. **Campos del Cargo:**
+   - Sección (dropdown con opciones predefinidas)
+   - Código (identificador único)
+   - Nombre (descripción del cargo)
+
+3. **Secciones Disponibles:**
+   - Administrativa
+   - Operativa
+   - Comercial
+   - Financiera
+   - Recursos Humanos
+   - Tecnología
+
+**Características técnicas:**
+- Modales responsivos y accesibles
+- Validación de formularios en frontend
+- Navegación integrada con otras secciones
+- Diseño responsive y moderno
+
+---
+
 ## ARCHIVOS CSS
 
 ###  `assets/css/reset.css` - Reset de Estilos
@@ -98,6 +190,56 @@ GoldenApp-main/
 ---
 
 ###  `assets/css/main.css` - Estilos Principales
+
+---
+
+###  `assets/css/admin-cargos.css` - Estilos para Gestión de Cargos
+**Descripción:** Estilos específicos para la página de administración de cargos.
+
+**Funcionalidades principales:**
+- Estilos para modales de creación y búsqueda
+- Formularios responsivos y accesibles
+- Tabla de cargos con mensaje de estado vacío
+- Sidebar y navegación consistente
+- Responsive design para dispositivos móviles
+
+**Características destacadas:**
+- **Modales centrados:** Animaciones suaves de entrada y salida
+- **Formularios validados:** Estilos para campos requeridos y opcionales
+- **Tabla responsiva:** Adaptación para pantallas pequeñas
+- **Colores corporativos:** Uso consistente del dorado Golden Bridge
+- **Tipografía Inter:** Mejor legibilidad y modernidad
+
+---
+
+###  `assets/css/admin-titulares.css` - Estilos para Gestión de Titulares
+**Descripción:** Estilos específicos para la página de administración de titulares y beneficiarios.
+
+**Funcionalidades principales:**
+- Estilos para modales superpuestos
+- Control de z-index para layering
+- Estilos para formularios de titular y beneficiario
+- Botones toggle para campos booleanos
+- Responsive design para tablas de datos
+- Animaciones y transiciones suaves
+
+**Características destacadas:**
+- **Z-index controlado:** Modales con valores específicos (9997-9999)
+- **Botones toggle:** Estilos para campos Si/No con animaciones
+- **Tablas responsivas:** Adaptación para dispositivos móviles
+- **Modales grandes:** Soporte para formularios complejos
+- **Estados visuales:** Loading, error, success states
+
+---
+
+###  `assets/css/dashboard-base.css` - Estilos Base del Dashboard
+**Descripción:** Estilos base compartidos entre diferentes páginas del dashboard.
+
+**Funcionalidades:**
+- Estilos base para sidebar
+- Navegación principal
+- Componentes comunes del dashboard
+- Variables CSS compartidas
 **Descripción:** Estilos base y componentes reutilizables de la aplicación.
 
 **Contenido:**
@@ -240,6 +382,118 @@ function deleteCity(codigo)
 #### 6. **Responsive Design**
 - Toggle de sidebar en móviles
 - Adaptación a diferentes pantallas
+
+---
+
+###  `assets/js/admin-cargos.js` - Gestión de Cargos
+**Descripción:** Lógica completa para la gestión de cargos y puestos organizacionales.
+
+**Funcionalidades principales:**
+- **Gestión de Cargos:**
+  - Crear cargo con validación de campos
+  - Buscar cargo por múltiples criterios
+  - Formularios con validación en tiempo real
+  - Gestión de estado de modales
+
+- **Gestión de Modales:**
+  - Modal de creación de cargo
+  - Modal de búsqueda de cargo
+  - Control de apertura y cierre
+  - Limpieza automática de formularios
+
+- **Validación y Formularios:**
+  - Validación de campos requeridos
+  - Sanitización de datos de entrada
+  - Manejo de errores de validación
+  - Confirmaciones de operaciones exitosas
+
+**Características técnicas:**
+- **Funciones globales:** Funciones expuestas a window para acceso desde HTML
+- **Event delegation:** Manejo eficiente de eventos del DOM
+- **Validación de formularios:** Validación HTML5 y JavaScript
+- **Gestión de modales:** Control de estado y animaciones
+- **Responsive design:** Adaptación para dispositivos móviles
+
+**Funciones principales:**
+```javascript
+// Gestión de modales
+showCreateCargoModal()
+closeCreateCargoModal()
+showSearchCargoModal()
+closeSearchCargoModal()
+
+// Operaciones CRUD
+createCargo(cargoData)
+searchCargos(searchData)
+
+// Utilidades
+formatDate(dateString)
+validateUniqueCode(codigo)
+sanitizeInput(input)
+```
+
+---
+
+###  `assets/js/admin-titulares.js` - Gestión de Titulares y Beneficiarios
+**Descripción:** Lógica completa para la gestión de titulares y beneficiarios.
+
+**Funcionalidades principales:**
+- **Gestión de Titulares:**
+  - Crear titular con validación completa
+  - Buscar titular por ID
+  - Editar información de titular
+  - Eliminar titular
+  - Renderizado de resultados de búsqueda
+
+- **Gestión de Beneficiarios:**
+  - Crear beneficiario asociado a titular
+  - Editar beneficiario existente
+  - Eliminar beneficiario
+  - Renderizado de lista de beneficiarios
+  - Botón "Añadir Beneficiario" en resultados de búsqueda
+
+- **Gestión de Modales:**
+  - Control de superposición de modales
+  - Gestión de z-index dinámico
+  - Limpieza de formularios
+  - Estados de modal (crear/editar)
+
+- **Gestión de Estado:**
+  - sessionStorage para datos temporales
+  - currentSearchedTitularId para contexto
+  - tempTitular para datos de edición
+
+**Características técnicas:**
+- **Funciones globales:** Todas las funciones expuestas a window para acceso desde HTML
+- **Event delegation:** Manejo eficiente de eventos
+- **Validación de formularios:** Validación en tiempo real
+- **Gestión de datos:** CRUD completo con arrays en memoria
+- **Logging extensivo:** Console.log para debugging
+
+**Funciones principales:**
+```javascript
+// Gestión de titulares
+createTitular()
+searchTitular()
+editTitular()
+deleteTitular()
+
+// Gestión de beneficiarios
+createBeneficiario()
+editBeneficiario()
+deleteBeneficiario()
+addBeneficiarioForCurrentTitular()
+
+// Gestión de modales
+showCreateTitularModal()
+hideCreateTitularModal()
+showCreateBeneficiarioModal()
+hideCreateBeneficiarioModal()
+
+// Renderizado
+renderSearchResults()
+renderBeneficiariosDeTitular()
+```
 
 ---
 
@@ -419,9 +673,16 @@ console.log('Ciudad seleccionada:', sessionStorage.getItem('selectedCity'));
 - [x] Sistema de modales
 - [x] Validación de formularios
 - [x] Gestión de ciudades
+- [x] Gestión completa de titulares y beneficiarios
+- [x] Búsqueda de titulares
+- [x] Modales superpuestos con z-index controlado
+- [x] Selectores de tipo de documento colombiano
+- [x] Botón "Añadir Beneficiario" en resultados de búsqueda
+- [x] Edición de titulares y beneficiarios
 - [x] Responsive design
 - [x] Navegación completa
 - [x] Gestión de sesión
+- [x] sessionStorage para datos temporales
 
 ###  En Desarrollo
 - [ ] Modal de edición
@@ -440,9 +701,10 @@ console.log('Ciudad seleccionada:', sessionStorage.getItem('selectedCity'));
 ##  AUTORES Y VERSIÓN
 
 **Proyecto:** Golden App  
-**Versión:** 1.0.0  
+**Versión:** 1.1.0  
 **Fecha:** 2024  
 **Desarrollado por:** Paula Pachon  
+**Última actualización:** Diciembre 2024  
 
 ---
 

@@ -133,7 +133,7 @@
                     <a href="admin-titulares.html" class="top-nav-link">Titulares</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Cargos</a>
+                    <a href="admin-cargos.html" class="top-nav-link">Cargos</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Empleados</a>
@@ -161,18 +161,20 @@
                  <div class="section-header">
                      <h2>Titulares</h2>
                      <div class="action-buttons">
-                         <button class="btn btn-primary">Buscar Titular</button>
-                         <button class="btn btn-primary">Crear Titular</button>
+                         <button class="btn btn-primary" onclick="showSearchTitularModal()">Buscar Titular</button>
+                         <button class="btn btn-primary" onclick="showCreateTitularModal()">Crear Titular</button>
                      </div>
                  </div>
 
                  <div class="data-table">
-                     <table class="table">
+                     <table class="table" id="gvTitulares">
                          <thead>
                              <tr>
+                                 <th>Tipo ID</th>
                                  <th>Identificación</th>
                                  <th>Nombre</th>
                                  <th>Dirección</th>
+                                 <th>Barrio</th>
                                  <th>Celular</th>
                                  <th>Correo</th>
                                  <th>Opciones</th>
@@ -180,7 +182,7 @@
                          </thead>
                          <tbody id="titularesTableBody">
                              <tr>
-                                 <td colspan="6" class="no-data-message">
+                                 <td colspan="8" class="no-data-message">
                                      <div class="no-data-content">
                                          <i class="fas fa-user"></i>
                                          <p>No existen registros de titulares</p>
@@ -198,8 +200,8 @@
                 <div class="section-header">
                     <h2>Beneficiarios</h2>
                     <div class="action-buttons">
-                        <button class="btn btn-primary">Buscar Beneficiario</button>
-                        <button class="btn btn-primary">Crear Beneficiario</button>
+                        <button class="btn btn-primary" onclick="showSearchBeneficiarioModal()">Buscar Beneficiario</button>
+                        <button class="btn btn-primary" onclick="showCreateBeneficiarioModal()">Crear Beneficiario</button>
                     </div>
                 </div>
 
@@ -208,7 +210,7 @@
                         <thead>
                             <tr>
                                 <th>Tipo ID</th>
-                                <th>Número ID</th>
+                                <th>Identificación</th>
                                 <th>Nombre</th>
                                 <th>Dirección</th>
                                 <th>Teléfono</th>
@@ -270,7 +272,7 @@
     <div class="modal-overlay" id="createTitularModal">
         <div class="modal modal-large">
             <div class="modal-header">
-                <h3 class="modal-title">CREAR TITULAR</h3>
+                <h3 class="modal-title" id="createTitularTitle">CREAR TITULAR</h3>
                 <button class="modal-close" onclick="hideCreateTitularModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -278,16 +280,28 @@
             <div class="modal-body">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tTipoId" class="form-label">Tipo ID *</label>
-                        <input type="text" id="tTipoId" class="form-input" placeholder="Digite el Tipo de ID">
+                        <label for="cTipo_Id" class="form-label">Tipo ID *</label>
+                        <select id="cTipo_Id" class="form-input">
+                            <option value="">Seleccione el tipo de documento</option>
+                            <option value="CC">CÉDULA DE CIUDADANÍA</option>
+                            <option value="CE">CÉDULA DE EXTRANJERÍA</option>
+                            <option value="PA">PASAPORTE</option>
+                            <option value="TI">TARJETA DE IDENTIDAD</option>
+                            <option value="RC">REGISTRO CIVIL</option>
+                            <option value="NIT">NIT</option>
+                            <option value="RUT">RUT</option>
+                            <option value="PPT">PERMISO PERMANENTE</option>
+                            <option value="PEP">PERMISO ESPECIAL DE PERMANENCIA</option>
+                            <option value="DE">DOCUMENTO DE EXTRANJERÍA</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="tNumeroId" class="form-label">Número ID *</label>
-                        <input type="text" id="tNumeroId" class="form-input" placeholder="Digite el Numero">
+                        <label for="tId" class="form-label">Número ID *</label>
+                        <input type="text" id="tId" class="form-input" placeholder="Digite el Numero">
                     </div>
                     <div class="form-group">
-                        <label for="tNombre" class="form-label">Nombre *</label>
-                        <input type="text" id="tNombre" class="form-input" placeholder="Digite el Nombre del Titular">
+                        <label for="tNombre1" class="form-label">Nombre *</label>
+                        <input type="text" id="tNombre1" class="form-input" placeholder="Digite el Nombre del Titular">
                     </div>
                 </div>
                 <div class="form-row">
@@ -296,33 +310,31 @@
                         <input type="text" id="tDireccion" class="form-input" placeholder="Digite la Direccion">
                     </div>
                     <div class="form-group">
-                        <label for="tTelefono" class="form-label">Telefono *</label>
-                        <input type="text" id="tTelefono" class="form-input" placeholder="Digite el Telefono">
+                        <label for="tBarrioT" class="form-label">Barrio *</label>
+                        <input type="text" id="tBarrioT" class="form-input" placeholder="Digite el Barrio">
                     </div>
                     <div class="form-group">
-                        <label for="tEmail" class="form-label">Email *</label>
-                        <input type="email" id="tEmail" class="form-input" placeholder="Digite el Email">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tFactura" class="form-label">Factura # *</label>
-                        <input type="text" id="tFactura" class="form-input" placeholder="Digite el # de Factura">
+                        <label for="tCelular" class="form-label">Celular *</label>
+                        <input type="text" id="tCelular" class="form-input" placeholder="Digite el Celular">
                     </div>
                     <div class="form-group">
-                        <label for="tFechaHoy" class="form-label">Fecha Hoy *</label>
-                        <input type="date" id="tFechaHoy" class="form-input" value="">
-                    </div>
-                    <div class="form-group">
-                        <label for="tActivoAsesoria" class="form-label">Activo Asesoria *</label>
-                        <input type="text" id="tActivoAsesoria" class="form-input" placeholder="Si / No">
+                        <label for="tCorreo" class="form-label">Email *</label>
+                        <input type="email" id="tCorreo" class="form-input" placeholder="Digite el Email">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tBeneficiario" class="form-label">Beneficiario *</label>
+                        <label for="tFecha_Ingreso" class="form-label">Fecha de Ingreso *</label>
+                        <input type="date" id="tFecha_Ingreso" class="form-input" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="cActivo" class="form-label">Activo *</label>
+                        <input type="text" id="cActivo" class="form-input" placeholder="Si / No">
+                    </div>
+                    <div class="form-group">
+                        <label for="cBeneficiario" class="form-label">Beneficiario *</label>
                         <div class="beneficiario-toggle">
-                            <input type="text" id="tBeneficiario" class="form-input" placeholder="Si / No" readonly>
+                            <input type="text" id="cBeneficiario" class="form-input" placeholder="Si / No" readonly>
                             <div class="toggle-buttons">
                                 <button type="button" class="btn-toggle btn-toggle-yes" onclick="setBeneficiario('SI')">SI</button>
                                 <button type="button" class="btn-toggle btn-toggle-no" onclick="setBeneficiario('NO')">NO</button>
@@ -333,14 +345,14 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideCreateTitularModal()">Cancelar</button>
-                <button class="btn btn-primary" id="bCrearTitular">Crear</button>
+                <button class="btn btn-primary" id="bCrear">Crear</button>
             </div>
         </div>
     </div>
 
          <!-- Modal de Buscar Titular -->
      <div class="modal-overlay" id="searchTitularModal">
-         <div class="modal modal-large">
+         <div class="modal">
              <div class="modal-header">
                  <h3 class="modal-title">BUSCAR TITULAR</h3>
                  <button class="modal-close" onclick="hideSearchTitularModal()">
@@ -350,43 +362,12 @@
              <div class="modal-body">
                  <div class="form-group">
                      <label for="searchTitularId" class="form-label">ID Titular *</label>
-                     <input type="text" id="searchTitularId" class="form-input" placeholder="Escriba ID Titular">
-                 </div>
-                 
-                 <!-- Sección de Resultados de Búsqueda (inicialmente oculta) -->
-                 <div class="search-results-container" id="searchResultsContainer" style="display: none;">
-                     <h4 class="search-results-title">RESULTADOS DE LA BUSQUEDA</h4>
-                     <div class="data-table">
-                         <table class="table">
-                             <thead>
-                                 <tr>
-                                     <th>Identificación</th>
-                                     <th>Nombre</th>
-                                     <th>Activo</th>
-                                     <th>Dirección</th>
-                                     <th>Celular</th>
-                                     <th>Correo</th>
-                                     <th>Opciones</th>
-                                 </tr>
-                             </thead>
-                             <tbody id="searchResultsTableBody">
-                                 <tr>
-                                     <td colspan="7" class="no-data-message">
-                                         <div class="no-data-content">
-                                             <i class="fas fa-search"></i>
-                                             <p>No se encontraron resultados</p>
-                                             <small>Intente con otro ID de titular</small>
-                                         </div>
-                                     </td>
-                                 </tr>
-                             </tbody>
-                         </table>
-                     </div>
+                     <input type="text" id="searchTitularId" class="form-input" placeholder="Ingrese el ID del titular">
                  </div>
              </div>
              <div class="modal-footer">
                  <button class="btn btn-secondary" onclick="hideSearchTitularModal()">Cancelar</button>
-                 <button class="btn btn-primary" id="bBuscarTitular">Buscar</button>
+                 <button class="btn btn-primary" id="bBuscar">Buscar</button>
              </div>
          </div>
      </div>
@@ -395,7 +376,7 @@
     <div class="modal-overlay" id="createBeneficiarioModal">
         <div class="modal modal-large">
             <div class="modal-header">
-                <h3 class="modal-title">CREAR BENEFICIARIO</h3>
+                <h3 class="modal-title" id="createBeneficiarioTitle">CREAR BENEFICIARIO</h3>
                 <button class="modal-close" onclick="hideCreateBeneficiarioModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -404,7 +385,19 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="bTipoId" class="form-label">Tipo ID *</label>
-                        <input type="text" id="bTipoId" class="form-input" placeholder="Digite el Tipo de ID">
+                        <select id="bTipoId" class="form-input">
+                            <option value="">Seleccione el tipo de documento</option>
+                            <option value="CC">CÉDULA DE CIUDADANÍA</option>
+                            <option value="CE">CÉDULA DE EXTRANJERÍA</option>
+                            <option value="PA">PASAPORTE</option>
+                            <option value="TI">TARJETA DE IDENTIDAD</option>
+                            <option value="RC">REGISTRO CIVIL</option>
+                            <option value="NIT">NIT</option>
+                            <option value="RUT">RUT</option>
+                            <option value="PPT">PERMISO PERMANENTE</option>
+                            <option value="PEP">PERMISO ESPECIAL DE PERMANENCIA</option>
+                            <option value="DE">DOCUMENTO DE EXTRANJERÍA</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="bNumeroId" class="form-label">Número ID *</label>
@@ -449,6 +442,145 @@
         </div>
     </div>
 
+    <!-- Modal de Búsqueda de Beneficiario -->
+    <div class="modal-overlay" id="searchBeneficiarioModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR BENEFICIARIO</h3>
+                <button class="modal-close" onclick="hideSearchBeneficiarioModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="searchBeneficiarioId" class="form-label">ID Beneficiario *</label>
+                    <input type="text" id="searchBeneficiarioId" class="form-input" placeholder="Ingrese el ID del beneficiario">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideSearchBeneficiarioModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarBeneficiario">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda de Titular -->
+    <div class="modal-overlay" id="titularResultsModal">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - TITULAR</h3>
+                <button class="modal-close" onclick="hideTitularResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Identificación</th>
+                                <th>Nombre</th>
+                                <th>Activo</th>
+                                <th>Dirección</th>
+                                <th>Celular</th>
+                                <th>Correo</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsTableBody">
+                            <tr>
+                                <td colspan="7" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otro ID de titular</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-table" style="margin-top: 20px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <h4>BENEFICIARIOS DEL TITULAR</h4>
+                        <button class="btn btn-primary" id="btnAddBeneficiario" onclick="addBeneficiarioForCurrentTitular()">Añadir Beneficiario</button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tipo ID</th>
+                                <th>Número ID</th>
+                                <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Activo</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="titularBeneficiariosResultsBody">
+                            <tr>
+                                <td colspan="8" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-user-friends"></i>
+                                        <p>Este titular no tiene beneficiarios</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideTitularResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda de Beneficiario -->
+    <div class="modal-overlay" id="beneficiarioResultsModal">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - BENEFICIARIO</h3>
+                <button class="modal-close" onclick="hideBeneficiarioResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tipo ID</th>
+                                <th>Número ID</th>
+                                <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Activo</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="beneficiarioSearchResultsBody">
+                            <tr>
+                                <td colspan="8" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otro ID de beneficiario</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideBeneficiarioResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========================================
          SCRIPTS
          ======================================== -->
@@ -457,3 +589,4 @@
     <script src="../assets/js/admin-titulares.js"></script>
 </body>
 </html>
+

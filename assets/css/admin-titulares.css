@@ -409,6 +409,23 @@
     overflow-y: auto;
 }
 
+/* Z-index para modales superpuestos */
+#createBeneficiarioModal {
+    z-index: 9999 !important;
+}
+
+#createTitularModal {
+    z-index: 9999 !important;
+}
+
+#titularResultsModal {
+    z-index: 9998 !important;
+}
+
+#searchTitularModal {
+    z-index: 9997 !important;
+}
+
 /* ========================================
    ANIMACIONES Y TRANSICIONES
    ======================================== */
@@ -528,48 +545,169 @@
     letter-spacing: 0.5px;
 }
 
-/* Modal de búsqueda más grande para acomodar resultados */
-#searchTitularModal .modal-large {
-    max-width: 900px;
-    width: 95%;
+/* ========================================
+   ESTILOS PARA MODALES DE RESULTADOS AMPLIADOS
+   ======================================== */
+
+/* Modal extra grande para resultados de búsqueda */
+.modal-results {
+    max-width: 1600px !important;
+    width: 95% !important;
+    min-height: 600px;
+    max-height: 90vh;
 }
 
-#searchTitularModal .modal-body {
-    max-height: 75vh;
+
+
+.modal-results .modal-body {
+    padding: 30px;
+    max-height: calc(90vh - 140px);
     overflow-y: auto;
 }
 
-/* Estilos específicos para la tabla de resultados en el modal */
-#searchTitularModal .data-table {
-    margin-top: 1rem;
+.modal-results .data-table {
+    margin: 0;
+    padding: 0;
 }
 
-#searchTitularModal .table {
-    font-size: 0.85rem;
+.modal-results .table {
+    width: 100%;
+    margin: 0;
+    font-size: 14px;
 }
 
-#searchTitularModal .table th,
-#searchTitularModal .table td {
-    padding: 0.75rem 0.5rem;
+.modal-results .table th {
+    padding: 18px 15px;
+    font-size: 15px;
+    font-weight: 600;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
 }
 
-/* Responsive para modal de búsqueda */
+.modal-results .table td {
+    padding: 18px 15px;
+    font-size: 14px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    word-wrap: break-word;
+    max-width: 200px;
+}
+
+.modal-results .table tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* Espaciado entre botones de opciones en las tablas */
+.modal-results .table .btn-small {
+    margin-right: 8px;
+}
+
+.modal-results .table .btn-small:last-child {
+    margin-right: 0;
+}
+
+/* Posicionamiento específico para botones en modales de resultados */
+.modal-results .modal-footer .btn-secondary {
+    position: relative;
+    top: 10px;
+    left: -0px;
+}
+
+
+
+/* Responsive para modales de resultados */
+@media (max-width: 1200px) {
+    .modal-results {
+        max-width: 95% !important;
+        width: 98% !important;
+    }
+    
+    .modal-results .table th,
+    .modal-results .table td {
+        padding: 15px 10px;
+        font-size: 13px;
+    }
+}
+
 @media (max-width: 768px) {
-    #searchTitularModal .modal-large {
-        max-width: 98%;
-        margin: 0.5rem;
+    .modal-results {
+        max-width: 98% !important;
+        width: 100% !important;
+        margin: 10px;
+        min-height: 500px;
     }
     
-    #searchTitularModal .table {
-        font-size: 0.75rem;
+    .modal-results .modal-body {
+        padding: 20px;
+        max-height: calc(90vh - 120px);
     }
     
-    #searchTitularModal .table th,
-    #searchTitularModal .table td {
-        padding: 0.5rem 0.25rem;
-    }
-    
-    .search-results-title {
-        font-size: 1rem;
+    .modal-results .table th,
+    .modal-results .table td {
+        padding: 12px 8px;
+        font-size: 12px;
     }
 }
+
+/* ========================================
+   ESTILOS ESPECÍFICOS PARA EL BOTÓN "AÑADIR BENEFICIARIO"
+   ======================================== */
+
+/* Botón más pequeño y centrado verticalmente */
+#btnAddBeneficiario {
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 120px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#btnAddBeneficiario:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+/* Posicionamiento independiente para h4 y botón */
+.modal-results .data-table > div[style*="display:flex"] {
+    position: relative !important;
+    height: 50px !important;
+    padding-bottom: 15px;
+    padding-top: 10px;
+}
+
+.modal-results .data-table > div[style*="display:flex"] h4 {
+    position: absolute !important;
+    left: 50% !important;
+    top: 70% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    padding-bottom: 15px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    text-align: center !important;
+}
+
+.modal-results .data-table > div[style*="display:flex"] #btnAddBeneficiario {
+    position: absolute !important;
+    right: 30px !important;
+    top: 60% !important;
+    transform: translateY(-50%) !important;
+}
+
+/* ========================================
+   ESTILO ROJO PARA CERRAR SESIÓN
+   ======================================== */
+
+.logout-item {
+    color: #dc3545 !important;
+}
+
+

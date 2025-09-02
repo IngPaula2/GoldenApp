@@ -133,7 +133,7 @@
                     <a href="admin-titulares.html" class="top-nav-link">Titulares</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Cargos</a>
+                    <a href="admin-cargos.html" class="top-nav-link">Cargos</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Empleados</a>
@@ -171,13 +171,15 @@
                             <tr>
                                 <th>Código</th>
                                 <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
                                 <th>Correo</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="ciudadesTableBody">
                             <tr>
-                                <td colspan="4" class="no-data-message">
+                                <td colspan="6" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-city"></i>
                                         <p>No existen registros de ciudades</p>
@@ -195,6 +197,7 @@
                 <div class="section-header">
                     <h2>Filiales</h2>
                     <div class="action-buttons">
+                        <button class="btn btn-primary">Buscar Filial</button>
                         <button class="btn btn-primary">Crear Filial</button>
                     </div>
                 </div>
@@ -206,12 +209,14 @@
                                 <th>Código</th>
                                 <th>Nombre</th>
                                 <th>Ciudad</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="filialesTableBody">
                             <tr>
-                                <td colspan="4" class="no-data-message">
+                                <td colspan="6" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-building"></i>
                                         <p>No existen registros de filiales</p>
@@ -232,12 +237,12 @@
          MODALES DE INTERACCIÓN
          ======================================== -->
     
-    <!-- Modal de Selección de Ciudad -->
-    <div class="modal-overlay" id="cityModal">
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
-                <button class="modal-close" onclick="hideModal()">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -247,32 +252,54 @@
                     <div class="select-container">
                         <select id="citySelect" class="form-select">
                             <option value="">Seleccione la ciudad</option>
-                            <option value="101" selected>101 - BOGOTA</option>
-                            <option value="201">201 - BUCARAMANGA</option>
                         </select>
                         <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary btn-large">Seleccionar</button>
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
             </div>
         </div>
     </div>
+
+    <!-- Modal de Búsqueda de Ciudad -->
+    <div class="modal-overlay" id="cityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="searchCityCodigo" class="form-label">Código de ciudad *</label>
+                    <input type="text" id="searchCityCodigo" class="form-input" placeholder="Ingrese el código de la ciudad">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarCiudad">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Modal de Crear Ciudad -->
     <div class="modal-overlay" id="createCityModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">CREAR CIUDAD</h3>
+                <h3 class="modal-title" id="createCityTitle">CREAR CIUDAD</h3>
                 <button class="modal-close" onclick="hideCreateCityModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="tldCodigo" class="form-label">Código *</label>
-                    <input type="text" id="tldCodigo" class="form-input" placeholder="Escribe Código de la ciudad">
+                    <label for="tCodigo" class="form-label">Código *</label>
+                    <input type="text" id="tCodigo" class="form-input" placeholder="Escribe Código de la ciudad">
                 </div>
                 <div class="form-group">
                     <label for="tNombre" class="form-label">Nombre *</label>
@@ -294,6 +321,157 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideCreateCityModal()">Cancelar</button>
                 <button class="btn btn-primary" id="bCrear">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Filial por Código de Ciudad -->
+    <div class="modal-overlay" id="branchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR FILIAL POR CIUDAD</h3>
+                <button class="modal-close" onclick="hideBranchModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="searchCityCode" class="form-label">Código de ciudad *</label>
+                    <input type="text" id="searchCityCode" class="form-input" placeholder="Ingrese el código de la ciudad">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideBranchModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarFilial">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda de Ciudad -->
+    <div class="modal-overlay" id="cityResultsModal">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - CIUDAD</h3>
+                <button class="modal-close" onclick="hideCityResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="citySearchResultsBody">
+                            <tr>
+                                <td colspan="6" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otro código</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideCityResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda de Filial -->
+    <div class="modal-overlay" id="branchResultsModal">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - FILIALES</h3>
+                <button class="modal-close" onclick="hideBranchResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchSearchResultsBody">
+                            <tr>
+                                <td colspan="6" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otro código de ciudad</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideBranchResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal Crear/Actualizar Filial -->
+    <div class="modal-overlay" id="upsertBranchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="upsertBranchTitle">CREAR FILIAL</h3>
+                <button class="modal-close" onclick="hideUpsertBranchModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="fCodigo" class="form-label">Código *</label>
+                    <input type="text" id="fCodigo" class="form-input" placeholder="Código de la filial">
+                </div>
+                <div class="form-group">
+                    <label for="fNombre" class="form-label">Nombre *</label>
+                    <input type="text" id="fNombre" class="form-input" placeholder="Nombre de la filial">
+                </div>
+                <div class="form-group">
+                    <label for="fCiudad" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="fCiudad" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="fDireccion" class="form-label">Dirección</label>
+                    <input type="text" id="fDireccion" class="form-input" placeholder="Dirección de la filial">
+                </div>
+                <div class="form-group">
+                    <label for="fTelefono" class="form-label">Teléfono</label>
+                    <input type="text" id="fTelefono" class="form-input" placeholder="Teléfono de la filial">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideUpsertBranchModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bGuardarFilial">Guardar</button>
             </div>
         </div>
     </div>

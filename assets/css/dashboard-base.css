@@ -100,95 +100,32 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    color: #6c757d;
 }
 
 .no-data-content i {
     font-size: 3rem;
-    color: #6c757d;
+    color: #dee2e6;
 }
 
 .no-data-content p {
-    font-size: 1.1rem;
-    color: #495057;
+    font-size: 1.125rem;
+    font-weight: 500;
     margin: 0;
 }
 
 .no-data-content small {
-    color: #6c757d;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    color: #adb5bd;
 }
 
 /* ========================================
-   BOTONES DE ACCIÓN
-   ======================================== */
-
-/* Botones de acción */
-.action-buttons {
-    display: flex;
-    gap: 1rem;
-}
-
-.action-buttons .btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.action-buttons .btn-primary {
-    background: #DEB448;
-    color: #1a1a1a;
-}
-
-.action-buttons .btn-primary:hover {
-    background: #c9a43a;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
-}
-
-/* ========================================
-   ENCABEZADOS DE SECCIÓN
-   ======================================== */
-
-/* Encabezados de sección */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.section-header h2 {
-    color: #1a1a1a;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-/* ========================================
-   ESTILOS RESPONSIVE BASE
+   RESPONSIVE DESIGN
    ======================================== */
 
 @media (max-width: 768px) {
-    .section-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
+    .data-table {
+        margin: 1rem 0;
     }
     
     .table {
@@ -204,6 +141,16 @@
         padding: 0.4rem;
         font-size: 0.7rem;
         margin-right: 0.25rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .action-buttons {
+        justify-content: center;
     }
 }
 
@@ -298,5 +245,387 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* ========================================
+   LAYOUT PRINCIPAL DEL DASHBOARD
+   ======================================== */
+
+/* Dashboard Styles */
+.dashboard-page {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ========================================
+   SIDEBAR DE NAVEGACIÓN
+   ======================================== */
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #4a4a4a 0%, #2c2c2c 100%);
+    color: rgb(0, 0, 0);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   PERFIL DE USUARIO
+   ======================================== */
+
+/* User Profile Section */
+.user-profile {
+    padding: 20px;
+    border-bottom: 1px solid rgba(229, 227, 227, 0.925);
+    background-color: rgb(252, 250, 250);
+    position: relative;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.user-icon {
+    font-size: 18px;
+    color: #000000;
+}
+
+.user-name {
+    font-weight: 500;
+    flex: 1;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    color: #ecdfdf;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+    transform: rotate(180deg);
+}
+
+/* ========================================
+   MENÚ DESPLEGABLE
+   ======================================== */
+
+/* Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(252, 250, 250, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-top: 10px;
+    border: 1px solid rgba(229, 227, 227, 0.5);
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    color: #000000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.dropdown-item:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.dropdown-item:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(229, 227, 227, 0.3);
+}
+
+.dropdown-icon {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.admin-users-item {
+    color: #495057;
+}
+
+.logout-item {
+    color: #dc3545;
+}
+
+/* Blur effect when dropdown is open */
+.sidebar-nav,
+.sidebar-logo {
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.sidebar.dropdown-open .sidebar-nav,
+.sidebar.dropdown-open .sidebar-logo {
+    opacity: 0.3;
+    filter: blur(2px);
+}
+
+/* ========================================
+   MENÚ DE NAVEGACIÓN PRINCIPAL
+   ======================================== */
+
+/* Navigation Menu */
+.sidebar-nav {
+    flex: 1;
+    padding: 20px 0;
+    background-color: rgb(252, 250, 250);
+}
+
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin-bottom: 12px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 20px;
+    color: #000000;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background-color: rgba(229, 227, 227, 0.3);
+    color: #000000;
+}
+
+.nav-item.active .nav-link {
+    background: #ECD381;
+    color: #000000;
+    border-left-color: #ECD381;
+    border-radius: 0 8px 8px 0;
+    margin-right: 10px;
+}
+
+.nav-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+/* ========================================
+   SECCIÓN DEL LOGO
+   ======================================== */
+
+/* Logo Section */
+.sidebar-logo {
+    padding: 40px;
+    margin-top: auto;
+    background-color: rgb(252, 250, 250);
+}
+
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    text-align: center;
+}
+
+.logo-image {
+    width: 400px;
+    height: 120px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-weight: 600;
+    color: #ffd700;
+    font-size: 1.5rem;
+}
+
+/* ========================================
+   CONTENIDO PRINCIPAL
+   ======================================== */
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========================================
+   NAVEGACIÓN SUPERIOR
+   ======================================== */
+
+/* Top Navigation */
+.top-nav {
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.top-nav-list {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto;
+}
+
+.top-nav-item {
+    margin: 0;
+}
+
+.top-nav-link {
+    display: block;
+    padding: 15px 20px;
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.top-nav-link:hover {
+    background-color: rgba(229, 227, 227, 0.3);
+    color: #000000;
+    border-radius: 8px 8px 0 0;
+}
+
+.top-nav-item.active .top-nav-link {
+    color: #000000;
+    background: #ECD381;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    margin: 5px 2px 0 2px;
+}
+
+/* ========================================
+   ÁREA DE CONTENIDO
+   ======================================== */
+
+/* Content Area */
+.content-area {
+    flex: 1;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+/* ========================================
+   BOTONES Y COMPONENTES
+   ======================================== */
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.btn-primary:hover {
+    background: #c5a03d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN DEL SIDEBAR
+   ======================================== */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .logo-image {
+        width: 300px;
+        height: 90px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar-nav,
+    .sidebar-logo {
+        padding: 20px;
+    }
+    
+    .logo-image {
+        width: 250px;
+        height: 75px;
+    }
 }
 
