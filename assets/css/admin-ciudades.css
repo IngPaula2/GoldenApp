@@ -10,6 +10,32 @@
  */
 
 /* ========================================
+   ESTILOS PARA ESCRITURA EN MAYÚSCULAS
+   ======================================== */
+
+/* Todos los inputs de texto se escriben en mayúsculas */
+input[type="text"], 
+input[type="email"], 
+input[type="tel"], 
+textarea {
+    text-transform: uppercase;
+}
+
+/* Todo el contenido de las tablas se muestra en mayúsculas */
+.table td,
+.table th {
+    text-transform: uppercase;
+}
+
+/* Asegurar que todas las tablas de ciudades y filiales muestren contenido en mayúsculas */
+#ciudadesTableBody .table td,
+#ciudadesTableBody .table th,
+#filialesTableBody .table td,
+#filialesTableBody .table th {
+    text-transform: uppercase !important;
+}
+
+/* ========================================
    LAYOUT PRINCIPAL DEL DASHBOARD
    ======================================== */
 
@@ -515,6 +541,10 @@
     backdrop-filter: blur(5px);
 }
 
+.modal-overlay.show {
+    display: flex;
+}
+
 .modal {
     background: rgba(229, 227, 227, 0.925);
     border-radius: 12px;
@@ -547,6 +577,7 @@
     text-transform: uppercase;
     flex: 1;
     text-align: center;
+    padding-right: 50px;
 }
 
 .modal-close {
@@ -563,6 +594,11 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    flex-shrink: 0;
 }
 
 .modal-close:hover {
@@ -1198,11 +1234,13 @@
 }
 
 /* Posicionamiento específico para botones en modales de resultados */
+.modal-results .modal-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .modal-results .modal-footer .btn-secondary {
-    position: absolute;
-    top: 15%;
-    left: 50%;
-    transform: translateX(-0%);
     margin: 0;
 }
 
@@ -1251,4 +1289,148 @@
         padding: 12px 8px;
         font-size: 12px;
     }
+}
+
+/* ========================================
+   ESTILOS PARA MODALES DE CONFIRMACIÓN
+   ======================================== */
+
+/* Modal de confirmación */
+.modal-confirm {
+    max-width: 400px;
+    width: 90%;
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    text-align: center;
+}
+
+.modal-confirm .modal-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-confirm .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.modal-confirm .modal-body {
+    margin-bottom: 25px;
+}
+
+.modal-confirm .modal-body p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.modal-confirm .modal-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-confirm .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.modal-confirm .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.modal-confirm .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+.modal-confirm .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.modal-confirm .btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Modal de éxito */
+.modal-success {
+    max-width: 350px;
+    width: 90%;
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    text-align: center;
+}
+
+.modal-success .modal-body {
+    margin: 0;
+}
+
+.modal-success .modal-body p {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.modal-success .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.modal-success .btn:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Z-index para modales de confirmación */
+#confirmCreateCityModal,
+#confirmCreateBranchModal,
+#confirmUpdateCityModal,
+#confirmUpdateBranchModal,
+#confirmDeleteCityModal,
+#confirmDeleteBranchModal {
+    z-index: 4000;
+}
+
+#successCreateCityModal,
+#successCreateBranchModal,
+#successUpdateCityModal,
+#successUpdateBranchModal,
+#successDeleteCityModal,
+#successDeleteBranchModal {
+    z-index: 5000;
 }

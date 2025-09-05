@@ -123,6 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.hideSelectCityModal = hideSelectCityModal;
     window.showSelectCityModal = showSelectCityModal;
     window.forceShowSelectCityModal = forceShowSelectCityModal;
+    window.showCitySearchModal = showCitySearchModal;
+    window.showCreateCityModal = showCreateCityModal;
     
     // ===== Filiales: funciones de modal =====
     function showBranchModal() {
@@ -185,6 +187,107 @@ document.addEventListener('DOMContentLoaded', function() {
     window.hideBranchModal = hideBranchModal;
     window.hideUpsertBranchModal = hideUpsertBranchModal;
     window.showUpsertBranchModal = showUpsertBranchModal;
+    window.showBranchModal = showBranchModal;
+    
+    // ========================================
+    // FUNCIONES DE CONFIRMACIÓN PARA CIUDADES
+    // ========================================
+    
+    /**
+     * Muestra el modal de confirmación para crear ciudad
+     */
+    function showConfirmCreateCityModal() {
+        const modal = document.getElementById('confirmCreateCityModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    /**
+     * Cancela la creación de la ciudad
+     */
+    function cancelCreateCity() {
+        const modal = document.getElementById('confirmCreateCityModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Limpiar datos temporales
+        window.tempCityData = null;
+    }
+    
+    /**
+     * Confirma la creación de la ciudad
+     */
+    function confirmCreateCity() {
+        // Cerrar modal de confirmación
+        const confirmModal = document.getElementById('confirmCreateCityModal');
+        if (confirmModal) {
+            confirmModal.classList.remove('show');
+        }
+        
+        // Obtener datos temporales
+        const cityData = window.tempCityData;
+        
+        if (!cityData) {
+            console.error('No se encontraron datos de la ciudad para crear');
+            return;
+        }
+        
+        console.log('Datos de la ciudad a crear:', cityData);
+        
+        // TODO: Aquí se enviarían los datos al backend
+        // Por ahora solo guardamos en memoria
+        
+        // Guardar datos
+        ciudadesData[cityData.codigo] = cityData;
+        
+        // Cerrar modal de creación y limpiar formulario
+        hideCreateCityModal();
+        
+        // Agregar la ciudad a la tabla
+        console.log('Llamando a addCityToTable con:', cityData);
+        addCityToTable(cityData);
+        console.log('addCityToTable ejecutado');
+        
+        // Refrescar selects dependientes
+        refreshCitySelects();
+        
+        // Mostrar modal de éxito
+        showSuccessCreateCityModal();
+        
+        // Limpiar datos temporales
+        window.tempCityData = null;
+    }
+    
+    /**
+     * Muestra el modal de éxito para crear ciudad
+     */
+    function showSuccessCreateCityModal() {
+        const modal = document.getElementById('successCreateCityModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    /**
+     * Cierra el modal de éxito de ciudad
+     */
+    function closeSuccessCityModal() {
+        const modal = document.getElementById('successCreateCityModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Exponer funciones globalmente
+    window.cancelCreateCity = cancelCreateCity;
+    window.confirmCreateCity = confirmCreateCity;
+    window.closeSuccessCityModal = closeSuccessCityModal;
     
     // Funciones para modales de resultados
     function showCityResultsModal() {
@@ -541,44 +644,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 correo: correo
             };
             
-            console.log('Nueva ciudad a crear:', nuevaCiudad);
-            
             // Determinar si es crear o actualizar basado en el texto del botón
             const isUpdate = document.getElementById('bCrear').textContent === 'Actualizar';
             
             if (isUpdate) {
-                // Es una actualización - verificar si el código cambió
-                const originalCode = document.getElementById('tCodigo').getAttribute('data-original-code');
-                if (originalCode && originalCode !== codigo) {
-                    // El código cambió - eliminar la ciudad anterior
-                    delete ciudadesData[originalCode];
-                    
-                    // Eliminar la fila anterior de la tabla
-                    const tableBody = document.getElementById('ciudadesTableBody');
-                    const rows = tableBody.querySelectorAll('tr');
-                    for (let row of rows) {
-                        const firstCell = row.querySelector('td');
-                        if (firstCell && firstCell.textContent === originalCode) {
-                            row.remove();
-                            break;
-                        }
-                    }
+                // Es una actualización - mostrar modal de confirmación
+                window.tempCityData = nuevaCiudad;
+                showConfirmUpdateCityModal();
+            } else {
+                // Es una creación - mostrar modal de confirmación
+                window.tempCityData = nuevaCiudad;
+                showConfirmCreateCityModal();
+            }
+        });
+    }
+    
+    /**
+     * Procesa la actualización de una ciudad
+     */
+    function processCityUpdate(nuevaCiudad) {
+        const codigo = nuevaCiudad.codigo;
+        
+        // Verificar si el código cambió
+        const originalCode = document.getElementById('tCodigo').getAttribute('data-original-code');
+        if (originalCode && originalCode !== codigo) {
+            // El código cambió - eliminar la ciudad anterior
+            delete ciudadesData[originalCode];
+            
+            // Eliminar la fila anterior de la tabla
+            const tableBody = document.getElementById('ciudadesTableBody');
+            const rows = tableBody.querySelectorAll('tr');
+            for (let row of rows) {
+                const firstCell = row.querySelector('td');
+                if (firstCell && firstCell.textContent === originalCode) {
+                    row.remove();
+                    break;
                 }
             }
-            
-            // Aquí normalmente enviarías los datos al backend
-            // Por ahora, persistimos en memoria, refrescamos selects y cerramos el modal
-            ciudadesData[codigo] = { codigo, nombre, direccion, telefono, correo };
-
-            alert(isUpdate ? 'Ciudad actualizada exitosamente!' : 'Ciudad creada exitosamente!');
-            hideCreateCityModal();
-            
-            // Agregar o actualizar la ciudad en la tabla
-            addCityToTable(nuevaCiudad, isUpdate);
-            
-            // Refrescar selects dependientes
-            refreshCitySelects();
-        });
+        }
+        
+        // Guardar datos
+        ciudadesData[codigo] = nuevaCiudad;
+        
+        // Cerrar modal y actualizar tabla
+        hideCreateCityModal();
+        addCityToTable(nuevaCiudad, true);
+        refreshCitySelects();
     }
     
     // ========================================
@@ -608,13 +719,205 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const filial = { codigo, nombre, ciudad, direccion, telefono };
-            filialData[codigo] = filial;
-            addBranchToTable(filial, true);
             
-            alert((title && title.textContent.includes('ACTUALIZAR')) ? 'Filial actualizada' : 'Filial creada');
-            hideUpsertBranchModal();
+            // Determinar si es crear o actualizar
+            const isUpdate = title && title.textContent.includes('ACTUALIZAR');
+            
+            if (isUpdate) {
+                // Es una actualización - procesar directamente
+                filialData[codigo] = filial;
+                addBranchToTable(filial, true);
+                hideUpsertBranchModal();
+            } else {
+                // Es una creación - mostrar modal de confirmación
+                window.tempBranchData = filial;
+                showConfirmCreateBranchModal();
+            }
         });
     }
+    
+    // ========================================
+    // FUNCIONES DE CONFIRMACIÓN PARA FILIALES
+    // ========================================
+    
+    /**
+     * Muestra el modal de confirmación para crear filial
+     */
+    function showConfirmCreateBranchModal() {
+        const modal = document.getElementById('confirmCreateBranchModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    /**
+     * Cancela la creación de la filial
+     */
+    function cancelCreateBranch() {
+        const modal = document.getElementById('confirmCreateBranchModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Limpiar datos temporales
+        window.tempBranchData = null;
+    }
+    
+    /**
+     * Confirma la creación de la filial
+     */
+    function confirmCreateBranch() {
+        // Cerrar modal de confirmación
+        const confirmModal = document.getElementById('confirmCreateBranchModal');
+        if (confirmModal) {
+            confirmModal.classList.remove('show');
+        }
+        
+        // Obtener datos temporales
+        const branchData = window.tempBranchData;
+        
+        if (!branchData) {
+            console.error('No se encontraron datos de la filial para crear');
+            return;
+        }
+        
+        console.log('Datos de la filial a crear:', branchData);
+        
+        // TODO: Aquí se enviarían los datos al backend
+        // Por ahora solo guardamos en memoria
+        
+        // Guardar datos
+        filialData[branchData.codigo] = branchData;
+        
+        // Cerrar modal de creación
+        hideUpsertBranchModal();
+        
+        // Agregar la filial a la tabla
+        addBranchToTable(branchData, true);
+        
+        // Mostrar modal de éxito
+        showSuccessCreateBranchModal();
+        
+        // Limpiar datos temporales
+        window.tempBranchData = null;
+    }
+    
+    /**
+     * Muestra el modal de éxito para crear filial
+     */
+    function showSuccessCreateBranchModal() {
+        const modal = document.getElementById('successCreateBranchModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    /**
+     * Cierra el modal de éxito de filial
+     */
+    function closeSuccessBranchModal() {
+        const modal = document.getElementById('successCreateBranchModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // ========================================
+    // FUNCIONES DE CONFIRMACIÓN PARA ACTUALIZAR CIUDADES
+    // ========================================
+    
+    /**
+     * Muestra el modal de confirmación para actualizar ciudad
+     */
+    function showConfirmUpdateCityModal() {
+        const modal = document.getElementById('confirmUpdateCityModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    /**
+     * Cancela la actualización de la ciudad
+     */
+    function cancelUpdateCity() {
+        const confirmModal = document.getElementById('confirmUpdateCityModal');
+        if (confirmModal) {
+            confirmModal.classList.remove('show');
+        }
+        
+        // Limpiar datos temporales
+        window.tempCityData = null;
+    }
+    
+    /**
+     * Confirma la actualización de la ciudad
+     */
+    function confirmUpdateCity() {
+        // Cerrar modal de confirmación
+        const confirmModal = document.getElementById('confirmUpdateCityModal');
+        if (confirmModal) {
+            confirmModal.classList.remove('show');
+        }
+        
+        // Obtener datos temporales
+        const ciudadData = window.tempCityData;
+        
+        if (!ciudadData) {
+            console.error('No se encontraron datos de la ciudad para actualizar');
+            return;
+        }
+        
+        console.log('Datos de la ciudad a actualizar:', ciudadData);
+        
+        // Procesar la actualización
+        processCityUpdate(ciudadData);
+        
+        // Cerrar modal de creación
+        hideCreateCityModal();
+        
+        // Mostrar modal de éxito
+        showSuccessUpdateCityModal();
+        
+        // Limpiar datos temporales
+        window.tempCityData = null;
+    }
+    
+    /**
+     * Muestra el modal de éxito para actualizar ciudad
+     */
+    function showSuccessUpdateCityModal() {
+        const modal = document.getElementById('successUpdateCityModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    /**
+     * Cierra el modal de éxito de actualizar ciudad
+     */
+    function closeSuccessUpdateCityModal() {
+        const modal = document.getElementById('successUpdateCityModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Exponer funciones globalmente
+    window.cancelCreateBranch = cancelCreateBranch;
+    window.confirmCreateBranch = confirmCreateBranch;
+    window.closeSuccessBranchModal = closeSuccessBranchModal;
+    window.showConfirmUpdateCityModal = showConfirmUpdateCityModal;
+    window.cancelUpdateCity = cancelUpdateCity;
+    window.confirmUpdateCity = confirmUpdateCity;
+    window.showSuccessUpdateCityModal = showSuccessUpdateCityModal;
+    window.closeSuccessUpdateCityModal = closeSuccessUpdateCityModal;
     
     // ========================================
     // TABLA DE FILIALES
@@ -881,67 +1184,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // FUNCIONES DE GESTIÓN DE CIUDADES
     // ========================================
     
-    /**
-     * Agrega una nueva ciudad a la tabla o actualiza una existente
-     * @param {Object} ciudad - Objeto con los datos de la ciudad
-     * @param {boolean} replaceIfExists - Si es true, actualiza la fila existente
-     */
-    function addCityToTable(ciudad, replaceIfExists = false) {
-        const tableBody = document.getElementById('ciudadesTableBody');
-        const noDataRow = tableBody.querySelector('.no-data-message');
-        
-        if (noDataRow) {
-            noDataRow.remove();
-        }
-        
-        // Si existe, y se solicita reemplazar, actualizar la fila
-        const allRows = Array.from(tableBody.querySelectorAll('tr'));
-        const existingRow = allRows.find(r => {
-            const firstCell = r.querySelector('td');
-            if (!firstCell) return false;
-            // Verificar que no sea una fila de "no-data-message"
-            if (firstCell.hasAttribute('colspan') || r.querySelector('.no-data-message')) return false;
-            return firstCell.textContent.trim() === ciudad.codigo.trim();
-        });
-        
-
-        
-        const rowHtml = `
-            <td>${ciudad.codigo}</td>
-            <td>${ciudad.nombre}</td>
-            <td>${ciudad.direccion || ''}</td>
-            <td>${ciudad.telefono || ''}</td>
-            <td>${ciudad.correo || ''}</td>
-            <td>
-                <button class="btn btn-small" onclick="editCity('${ciudad.codigo}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-small btn-danger" onclick="deleteCity('${ciudad.codigo}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        
-        if (existingRow && replaceIfExists) {
-            // Actualizar fila existente
-            existingRow.innerHTML = rowHtml;
-        } else if (!existingRow) {
-            // Crear nueva fila solo si no existe
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = rowHtml;
-            tableBody.appendChild(newRow);
-            
-            // Agregar efectos hover a la nueva fila
-            newRow.addEventListener('mouseenter', function() {
-                this.style.backgroundColor = '#f8f9fa';
-            });
-            
-            newRow.addEventListener('mouseleave', function() {
-                this.style.backgroundColor = '';
-            });
-        }
-        // Si existe pero no se debe reemplazar, no hacer nada
-    }
     
     // ========================================
     // FUNCIONES GLOBALES DE CIUDADES
@@ -1016,15 +1258,127 @@ document.addEventListener('DOMContentLoaded', function() {
 // FUNCIONES GLOBALES DE GESTIÓN DE CIUDADES
 // ========================================
 
-
+/**
+ * Agrega una nueva ciudad a la tabla o actualiza una existente
+ * @param {Object} ciudad - Objeto con los datos de la ciudad
+ * @param {boolean} replaceIfExists - Si es true, actualiza la fila existente
+ */
+function addCityToTable(ciudad, replaceIfExists = false) {
+    console.log('addCityToTable ejecutándose con:', ciudad);
+    const tableBody = document.getElementById('ciudadesTableBody');
+    console.log('tableBody encontrado:', tableBody);
+    
+    if (!tableBody) {
+        console.error('No se encontró el elemento ciudadesTableBody');
+        return;
+    }
+    
+    const noDataRow = tableBody.querySelector('.no-data-message');
+    
+    if (noDataRow) {
+        noDataRow.remove();
+    }
+    
+    // Si existe, y se solicita reemplazar, actualizar la fila
+    const allRows = Array.from(tableBody.querySelectorAll('tr'));
+    const existingRow = allRows.find(r => {
+        const firstCell = r.querySelector('td');
+        if (!firstCell) return false;
+        // Verificar que no sea una fila de "no-data-message"
+        if (firstCell.hasAttribute('colspan') || r.querySelector('.no-data-message')) return false;
+        return firstCell.textContent.trim() === ciudad.codigo.trim();
+    });
+    
+    const rowHtml = `
+        <td>${ciudad.codigo}</td>
+        <td>${ciudad.nombre}</td>
+        <td>${ciudad.direccion || ''}</td>
+        <td>${ciudad.telefono || ''}</td>
+        <td>${ciudad.correo || ''}</td>
+        <td>
+            <button class="btn btn-small" onclick="editCity('${ciudad.codigo}')">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-small btn-danger" onclick="deleteCity('${ciudad.codigo}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    if (existingRow && replaceIfExists) {
+        // Actualizar fila existente
+        console.log('Actualizando fila existente');
+        existingRow.innerHTML = rowHtml;
+    } else if (!existingRow) {
+        // Crear nueva fila solo si no existe
+        console.log('Creando nueva fila');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = rowHtml;
+        tableBody.appendChild(newRow);
+        console.log('Nueva fila agregada a la tabla');
+        
+        // Agregar efectos hover a la nueva fila
+        newRow.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+        });
+        
+        newRow.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    }
+    // Si existe pero no se debe reemplazar, no hacer nada
+}
 
 /**
  * Función para eliminar una ciudad
  * @param {string} codigo - Código de la ciudad a eliminar
  */
 function deleteCity(codigo) {
-    console.log('Eliminando ciudad con código:', codigo);
-    if (confirm('¿Está seguro de que desea eliminar la ciudad con código ' + codigo + '?')) {
+    // Guardar el código de la ciudad a eliminar
+    window.tempDeleteCityCode = codigo;
+    
+    // Mostrar modal de confirmación
+    showConfirmDeleteCityModal();
+}
+
+// ========================================
+// FUNCIONES PARA ELIMINAR CIUDAD
+// ========================================
+
+/**
+ * Muestra el modal de confirmación para eliminar ciudad
+ */
+function showConfirmDeleteCityModal() {
+    const modal = document.getElementById('confirmDeleteCityModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cancela la eliminación de la ciudad
+ */
+function cancelDeleteCity() {
+    const modal = document.getElementById('confirmDeleteCityModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Limpiar datos temporales
+    window.tempDeleteCityCode = null;
+}
+
+/**
+ * Confirma la eliminación de la ciudad
+ */
+function confirmDeleteCity() {
+    const codigo = window.tempDeleteCityCode;
+    
+    if (codigo) {
+        console.log('Eliminando ciudad con código:', codigo);
+        
         // Buscar y eliminar la fila de la tabla
         const tableBody = document.getElementById('ciudadesTableBody');
         const rows = tableBody.querySelectorAll('tr');
@@ -1033,7 +1387,6 @@ function deleteCity(codigo) {
             const firstCell = row.querySelector('td');
             if (firstCell && firstCell.textContent === codigo) {
                 row.remove();
-                alert('Ciudad eliminada exitosamente');
                 
                 // Si no quedan ciudades, mostrar mensaje de "sin datos"
                 if (tableBody.children.length === 0) {
@@ -1052,5 +1405,166 @@ function deleteCity(codigo) {
                 break;
             }
         }
+        
+        // Cerrar modal de confirmación
+        const confirmModal = document.getElementById('confirmDeleteCityModal');
+        if (confirmModal) {
+            confirmModal.classList.remove('show');
+        }
+        
+        // Mostrar modal de éxito
+        showSuccessDeleteCityModal();
+        
+        // Limpiar datos temporales
+        window.tempDeleteCityCode = null;
     }
 }
+
+/**
+ * Muestra el modal de éxito para eliminar ciudad
+ */
+function showSuccessDeleteCityModal() {
+    const modal = document.getElementById('successDeleteCityModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cierra el modal de éxito para eliminar ciudad
+ */
+function closeSuccessDeleteCityModal() {
+    const modal = document.getElementById('successDeleteCityModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// ========================================
+// FUNCIONES PARA ELIMINAR FILIAL
+// ========================================
+
+/**
+ * Función para eliminar una filial
+ * @param {string} codigo - Código de la filial a eliminar
+ */
+function deleteFilial(codigo) {
+    // Guardar el código de la filial a eliminar
+    window.tempDeleteFilialCode = codigo;
+    
+    // Mostrar modal de confirmación
+    showConfirmDeleteBranchModal();
+}
+
+/**
+ * Muestra el modal de confirmación para eliminar filial
+ */
+function showConfirmDeleteBranchModal() {
+    const modal = document.getElementById('confirmDeleteBranchModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cancela la eliminación de la filial
+ */
+function cancelDeleteBranch() {
+    const modal = document.getElementById('confirmDeleteBranchModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Limpiar datos temporales
+    window.tempDeleteFilialCode = null;
+}
+
+/**
+ * Confirma la eliminación de la filial
+ */
+function confirmDeleteBranch() {
+    const codigo = window.tempDeleteFilialCode;
+    
+    if (codigo) {
+        console.log('Eliminando filial con código:', codigo);
+        
+        // Buscar y eliminar la fila de la tabla
+        const tableBody = document.getElementById('filialesTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        
+        for (let row of rows) {
+            const firstCell = row.querySelector('td');
+            if (firstCell && firstCell.textContent === codigo) {
+                row.remove();
+                
+                // Si no quedan filiales, mostrar mensaje de "sin datos"
+                if (tableBody.children.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = `
+                        <td colspan="6" class="no-data-message">
+                            <div class="no-data-content">
+                                <i class="fas fa-building"></i>
+                                <p>No existen registros de filiales</p>
+                                <small>Haz clic en "Crear Filial" para crear el primer registro</small>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(noDataRow);
+                }
+                break;
+            }
+        }
+        
+        // Cerrar modal de confirmación
+        const confirmModal = document.getElementById('confirmDeleteBranchModal');
+        if (confirmModal) {
+            confirmModal.classList.remove('show');
+        }
+        
+        // Mostrar modal de éxito
+        showSuccessDeleteBranchModal();
+        
+        // Limpiar datos temporales
+        window.tempDeleteFilialCode = null;
+    }
+}
+
+/**
+ * Muestra el modal de éxito para eliminar filial
+ */
+function showSuccessDeleteBranchModal() {
+    const modal = document.getElementById('successDeleteBranchModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cierra el modal de éxito para eliminar filial
+ */
+function closeSuccessDeleteBranchModal() {
+    const modal = document.getElementById('successDeleteBranchModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Exponer funciones de eliminación globalmente
+window.showConfirmDeleteCityModal = showConfirmDeleteCityModal;
+window.cancelDeleteCity = cancelDeleteCity;
+window.confirmDeleteCity = confirmDeleteCity;
+window.showSuccessDeleteCityModal = showSuccessDeleteCityModal;
+window.closeSuccessDeleteCityModal = closeSuccessDeleteCityModal;
+
+window.deleteFilial = deleteFilial;
+window.showConfirmDeleteBranchModal = showConfirmDeleteBranchModal;
+window.cancelDeleteBranch = cancelDeleteBranch;
+window.confirmDeleteBranch = confirmDeleteBranch;
+window.showSuccessDeleteBranchModal = showSuccessDeleteBranchModal;
+window.closeSuccessDeleteBranchModal = closeSuccessDeleteBranchModal;

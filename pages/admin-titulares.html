@@ -172,7 +172,7 @@
                              <tr>
                                  <th>Tipo ID</th>
                                  <th>Identificación</th>
-                                 <th>Nombre</th>
+                                 <th>Nombre Completo</th>
                                  <th>Dirección</th>
                                  <th>Barrio</th>
                                  <th>Celular</th>
@@ -199,10 +199,10 @@
             <section class="beneficiarios-section">
                 <div class="section-header">
                     <h2>Beneficiarios</h2>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="showSearchBeneficiarioModal()">Buscar Beneficiario</button>
-                        <button class="btn btn-primary" onclick="showCreateBeneficiarioModal()">Crear Beneficiario</button>
-                    </div>
+                                    <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showSearchBeneficiarioModal()">Buscar Beneficiario</button>
+                    <button class="btn btn-primary" onclick="showCreateBeneficiarioModal()">Crear Beneficiario</button>
+                </div>
                 </div>
 
                 <div class="data-table">
@@ -211,7 +211,7 @@
                             <tr>
                                 <th>Tipo ID</th>
                                 <th>Identificación</th>
-                                <th>Nombre</th>
+                                <th>Nombre Completo</th>
                                 <th>Dirección</th>
                                 <th>Teléfono</th>
                                 <th>Email</th>
@@ -300,8 +300,20 @@
                         <input type="text" id="tId" class="form-input" placeholder="Digite el Numero">
                     </div>
                     <div class="form-group">
-                        <label for="tNombre1" class="form-label">Nombre *</label>
-                        <input type="text" id="tNombre1" class="form-input" placeholder="Digite el Nombre del Titular">
+                        <label for="tApellido1" class="form-label">Primer Apellido *</label>
+                        <input type="text" id="tApellido1" name="tApellido1" class="form-input" placeholder="Primer apellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tApellido2" class="form-label">Segundo Apellido</label>
+                        <input type="text" id="tApellido2" name="tApellido2" class="form-input" placeholder="Segundo apellido">
+                    </div>
+                    <div class="form-group">
+                        <label for="tNombre1" class="form-label">Primer Nombre *</label>
+                        <input type="text" id="tNombre1" name="tNombre1" class="form-input" placeholder="Primer nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tNombre2" class="form-label">Segundo Nombre</label>
+                        <input type="text" id="tNombre2" name="tNombre2" class="form-input" placeholder="Segundo nombre">
                     </div>
                 </div>
                 <div class="form-row">
@@ -350,6 +362,84 @@
         </div>
     </div>
 
+    <!-- Modal de Crear Beneficiario -->
+    <div class="modal-overlay" id="createBeneficiarioModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <button class="btn btn-back" onclick="goBackToTitularForm()" title="Volver al formulario de titular">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3 class="modal-title" id="createBeneficiarioTitle">CREAR BENEFICIARIO</h3>
+                <button class="modal-close" onclick="hideCreateBeneficiarioModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createBeneficiarioForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bTipoId" class="form-label">Tipo ID *</label>
+                            <select id="bTipoId" class="form-input">
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="RC">Registro Civil</option>
+                                <option value="PA">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bNumeroId" class="form-label">Número ID *</label>
+                            <input type="text" id="bNumeroId" class="form-input" placeholder="Digite el Número de ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="bApellido1" class="form-label">Primer Apellido *</label>
+                            <input type="text" id="bApellido1" class="form-input" placeholder="Digite el Primer Apellido">
+                        </div>
+                        <div class="form-group">
+                            <label for="bApellido2" class="form-label">Segundo Apellido</label>
+                            <input type="text" id="bApellido2" class="form-input" placeholder="Digite el Segundo Apellido">
+                        </div>
+                        <div class="form-group">
+                            <label for="bNombre1" class="form-label">Primer Nombre *</label>
+                            <input type="text" id="bNombre1" class="form-input" placeholder="Digite el Primer Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="bNombre2" class="form-label">Segundo Nombre</label>
+                            <input type="text" id="bNombre2" class="form-input" placeholder="Digite el Segundo Nombre">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bDireccion" class="form-label">Dirección *</label>
+                            <input type="text" id="bDireccion" class="form-input" placeholder="Digite la Dirección">
+                        </div>
+                        <div class="form-group">
+                            <label for="bTelefono" class="form-label">Teléfono *</label>
+                            <input type="text" id="bTelefono" class="form-input" placeholder="Digite el Teléfono">
+                        </div>
+                        <div class="form-group">
+                            <label for="bEmail" class="form-label">Email *</label>
+                            <input type="email" id="bEmail" class="form-input" placeholder="Digite el Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="bActivo" class="form-label">Activo *</label>
+                            <select id="bActivo" class="form-input">
+                                <option value="">Seleccione...</option>
+                                <option value="SI">Sí</option>
+                                <option value="NO">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideCreateBeneficiarioModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bCrearBeneficiario">Crear</button>
+            </div>
+        </div>
+    </div>
+
          <!-- Modal de Buscar Titular -->
      <div class="modal-overlay" id="searchTitularModal">
          <div class="modal">
@@ -372,79 +462,10 @@
          </div>
      </div>
 
-    <!-- Modal de Crear Beneficiario -->
-    <div class="modal-overlay" id="createBeneficiarioModal">
-        <div class="modal modal-large">
-            <div class="modal-header">
-                <h3 class="modal-title" id="createBeneficiarioTitle">CREAR BENEFICIARIO</h3>
-                <button class="modal-close" onclick="hideCreateBeneficiarioModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="bTipoId" class="form-label">Tipo ID *</label>
-                        <select id="bTipoId" class="form-input">
-                            <option value="">Seleccione el tipo de documento</option>
-                            <option value="CC">CÉDULA DE CIUDADANÍA</option>
-                            <option value="CE">CÉDULA DE EXTRANJERÍA</option>
-                            <option value="PA">PASAPORTE</option>
-                            <option value="TI">TARJETA DE IDENTIDAD</option>
-                            <option value="RC">REGISTRO CIVIL</option>
-                            <option value="NIT">NIT</option>
-                            <option value="RUT">RUT</option>
-                            <option value="PPT">PERMISO PERMANENTE</option>
-                            <option value="PEP">PERMISO ESPECIAL DE PERMANENCIA</option>
-                            <option value="DE">DOCUMENTO DE EXTRANJERÍA</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="bNumeroId" class="form-label">Número ID *</label>
-                        <input type="text" id="bNumeroId" class="form-input" placeholder="Digite el Número de ID">
-                    </div>
-                    <div class="form-group">
-                        <label for="bNombre" class="form-label">Nombre *</label>
-                        <input type="text" id="bNombre" class="form-input" placeholder="Digite el Nombre del Beneficiario">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="bDireccion" class="form-label">Dirección *</label>
-                        <input type="text" id="bDireccion" class="form-input" placeholder="Digite la Dirección">
-                    </div>
-                    <div class="form-group">
-                        <label for="bTelefono" class="form-label">Teléfono *</label>
-                        <input type="text" id="bTelefono" class="form-input" placeholder="Digite el Teléfono">
-                    </div>
-                    <div class="form-group">
-                        <label for="bEmail" class="form-label">Email *</label>
-                        <input type="email" id="bEmail" class="form-input" placeholder="Digite el Email">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="bActivo" class="form-label">¿Está Activo? *</label>
-                        <div class="beneficiario-toggle">
-                            <input type="text" id="bActivo" class="form-input" placeholder="Si / No" readonly>
-                            <div class="toggle-buttons">
-                                <button type="button" class="btn-toggle btn-toggle-yes" onclick="setBeneficiarioActivo('SI')">SI</button>
-                                <button type="button" class="btn-toggle btn-toggle-no" onclick="setBeneficiarioActivo('NO')">NO</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideCreateBeneficiarioModal()">Cancelar</button>
-                <button class="btn btn-primary" id="bCrearBeneficiario">Crear</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal de Búsqueda de Beneficiario -->
     <div class="modal-overlay" id="searchBeneficiarioModal">
-        <div class="modal">
+        <div class="modal modal-large">
             <div class="modal-header">
                 <h3 class="modal-title">BUSCAR BENEFICIARIO</h3>
                 <button class="modal-close" onclick="hideSearchBeneficiarioModal()">
@@ -520,7 +541,7 @@
                         </thead>
                         <tbody id="titularBeneficiariosResultsBody">
                             <tr>
-                                <td colspan="8" class="no-data-message">
+                                <td colspan="11" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-user-friends"></i>
                                         <p>Este titular no tiene beneficiarios</p>
@@ -563,7 +584,7 @@
                         </thead>
                         <tbody id="beneficiarioSearchResultsBody">
                             <tr>
-                                <td colspan="8" class="no-data-message">
+                                <td colspan="11" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-search"></i>
                                         <p>No se encontraron resultados</p>
@@ -582,9 +603,195 @@
     </div>
 
     <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+    
+    <!-- Modal de confirmación para crear titular -->
+    <div class="modal-overlay" id="confirmCreateTitularModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere crear este Titular?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateTitular()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateTitular()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear titular -->
+    <div class="modal-overlay" id="successCreateTitularModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito el Titular!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessTitularModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para crear beneficiario -->
+    <div class="modal-overlay" id="confirmCreateBeneficiarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere crear este Beneficiario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateBeneficiario()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateBeneficiario()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para crear titular y beneficiario -->
+    <div class="modal-overlay" id="confirmCreateTitularBeneficiarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere crear este Titular y Beneficiario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateTitularBeneficiario()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateTitularBeneficiario()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear beneficiario -->
+    <div class="modal-overlay" id="successCreateBeneficiarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito el Beneficiario!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessBeneficiarioModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear titular y beneficiario -->
+    <div class="modal-overlay" id="successCreateTitularBeneficiarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se han creado con éxito el Titular y el Beneficiario!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessTitularBeneficiarioModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar titular -->
+    <div class="modal-overlay" id="confirmUpdateTitularModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar este Titular?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateTitular()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateTitular()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar titular -->
+    <div class="modal-overlay" id="successUpdateTitularModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito el Titular!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateTitularModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar beneficiario -->
+    <div class="modal-overlay" id="confirmUpdateBeneficiarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar este Beneficiario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateBeneficiario()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateBeneficiario()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar beneficiario -->
+    <div class="modal-overlay" id="successUpdateBeneficiarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito el Beneficiario!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateBeneficiarioModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
          SCRIPTS
          ======================================== -->
     
+    <!-- Modal de confirmación para eliminar titular -->
+    <div class="modal-overlay" id="confirmDeleteTitularModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere eliminar este Titular?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteTitular()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDeleteTitular()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para eliminar titular -->
+    <div class="modal-overlay" id="successDeleteTitularModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha eliminado con éxito el Titular!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteTitularModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar beneficiario -->
+    <div class="modal-overlay" id="confirmDeleteBeneficiarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere eliminar este Beneficiario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteBeneficiario()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDeleteBeneficiario()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para eliminar beneficiario -->
+    <div class="modal-overlay" id="successDeleteBeneficiarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha eliminado con éxito el Beneficiario!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteBeneficiarioModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script src="../assets/js/admin-titulares.js"></script>
 </body>

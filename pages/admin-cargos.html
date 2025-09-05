@@ -3,7 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración de Cargos - Golden App</title>
+    <title>Golden Bridge - Cargos</title>
+    
+    <!-- 
+        ========================================
+        DOCUMENTACIÓN PARA BACKEND - OBJETOS Y CAMPOS
+        ========================================
+        
+                 RESUMEN DE OBJETOS BACKEND:
+         
+         BOTONES PRINCIPALES:
+         - bBuscar: Botón para abrir modal de búsqueda (ID del botón)
+         - bCrear: Botón para abrir modal de creación (ID del botón)
+         
+         CAMPOS DEL FORMULARIO DE CREAR CARGO:
+         - bSeccion: Campo select para seleccionar sección (requerido)
+         - tId: Campo input para código del cargo (requerido)
+         - tNombre: Campo input para nombre del cargo (requerido)
+         
+         CAMPOS DEL FORMULARIO DE BUSCAR CARGO:
+         - tId: Campo input para buscar por código (opcional)
+         - tNombre: Campo input para buscar por nombre (opcional)
+         - bSeccion: Campo select para filtrar por sección (opcional)
+         
+         BOTONES DE SUBMIT:
+         - bCrear: Botón submit del formulario de creación (ID del botón)
+         - bBuscar: Botón submit del formulario de búsqueda (ID del botón)
+         
+         NOTA: Los IDs de los botones y los atributos 'name' de los campos están 
+         configurados con los nombres de objetos requeridos por el backend.
+         El texto visible de los botones mantiene nombres amigables para el usuario.
+        ========================================
+    -->
     
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -143,40 +174,350 @@
                 <div class="section-header">
                     <h2>Cargos</h2>
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="showSearchCargoModal()">
-                            <i class="fas fa-search"></i>
-                            Buscar Cargo
-                        </button>
-                        <button class="btn btn-primary" onclick="showCreateCargoModal()">
-                            <i class="fas fa-plus"></i>
-                            Crear Cargo
-                        </button>
+                                                 <!-- 
+                             BOTÓN BUSCAR CARGO
+                             - ID: bBuscar
+                             - Función: showSearchCargoModal()
+                             - Objeto backend: bBuscar
+                         -->
+                         <button id="bBuscar" class="btn btn-primary" onclick="showSearchCargoModal()">
+                             Buscar
+                         </button>
+                         <!-- 
+                             BOTÓN CREAR CARGO
+                             - ID: bCrear
+                             - Función: showCreateCargoModal()
+                             - Objeto backend: bCrear
+                         -->
+                         <button id="bCrear" class="btn btn-primary" onclick="showCreateCargoModal()">
+                             Crear
+                         </button>
                     </div>
                 </div>
 
                 <div class="data-table">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Sección</th>
-                                <th>Estado</th>
-                                <th>Opciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cargosTableBody">
-                            <tr>
-                                <td colspan="5" class="no-data-message">
-                                    <div class="no-data-content">
-                                        <i class="fas fa-briefcase"></i>
-                                        <p>No existen registros de cargos</p>
-                                        <small>Haz clic en "Crear Cargo" para crear el primer registro</small>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <!-- SECCIÓN ADMINISTRATIVO -->
+                    <div class="cargo-section" data-section="administrativo">
+                        <div class="section-header-row" onclick="toggleSection('administrativo')">
+                            <div class="section-title">
+                                <i class="fas fa-chevron-right section-icon" id="icon-administrativo"></i>
+                                <span>Administrativo</span>
+                            </div>
+                        </div>
+                        <div class="section-content" id="content-administrativo">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Nombre</th>
+                                        <th>Sección</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-cargo-id="EC">
+                                    <td>EC</td>
+                                    <td>Ejecutivo de Cuenta</td>
+                                    <td>Administrativo</td>
+                                    <td>
+                                             <button class="btn btn-primary btn-sm" onclick="editCargo('EC')" title="Editar">
+                                                 <i class="fas fa-edit"></i>
+                                             </button>
+                                             <button class="btn btn-small btn-danger" onclick="deleteCargo('EC')" title="Eliminar">
+                                                 <i class="fas fa-trash"></i>
+                                             </button>
+                                         </td>
+                                     </tr>
+                                    <tr data-cargo-id="EA">
+<td>EA</td>
+<td>Ejecutivo Admon</td>
+<td>Administrativo</td>
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('EA')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('EA')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="EP">
+<td>EP</td>
+<td>Ejecutivo Prejuridico</td>
+<td>Administrativo</td>
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('EP')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('EP')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="EJ">
+<td>EJ</td>
+<td>Ejecutivo Juridico</td>
+<td>Administrativo</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('EJ')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('EJ')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="SP">
+<td>SP</td>
+<td>Supervisor de Cartera</td>
+<td>Administrativo</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('SP')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('SP')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="SN">
+<td>SN</td>
+<td>Supervisor Nacional de Cartera</td>
+<td>Administrativo</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('SN')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('SN')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="C">
+<td>C</td>
+<td>Castigo Cartera</td>
+<td>Administrativo</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('C')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('C')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="PV">
+<td>PV</td>
+<td>Proxima Vigencia</td>
+<td>Administrativo</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('PV')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('PV')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="V">
+<td>V</td>
+<td>Verificador</td>
+<td>Administrativo</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('V')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('V')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN PYF -->
+                    <div class="cargo-section" data-section="pyf">
+                        <div class="section-header-row" onclick="toggleSection('pyf')">
+                            <div class="section-title">
+                                <i class="fas fa-chevron-right section-icon" id="icon-pyf"></i>
+                                <span>PYF</span>
+                            </div>
+                            
+                        </div>
+                        <div class="section-content" id="content-pyf">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+<th>Código</th>
+<th>Nombre</th>
+<th>Sección</th>
+<th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-cargo-id="AS">
+<td>AS</td>
+<td>Asesor</td>
+<td>PYF</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('AS')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('AS')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="SU">
+<td>SU</td>
+<td>Supervisor</td>
+<td>PYF</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('SU')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('SU')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="SG">
+<td>SG</td>
+<td>Sub Gerente</td>
+<td>PYF</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('SG')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('SG')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="GT">
+<td>GT</td>
+<td>Gerente</td>
+<td>PYF</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('GT')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('GT')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="DR">
+<td>DR</td>
+<td>Director</td>
+<td>PYF</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('DR')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('DR')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="SN">
+<td>SN</td>
+<td>Director SubNacional</td>
+<td>PYF</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('SN')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('SN')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN SERVICIOS -->
+                    <div class="cargo-section" data-section="servicio">
+                        <div class="section-header-row" onclick="toggleSection('servicio')">
+                            <div class="section-title">
+                                <i class="fas fa-chevron-right section-icon" id="icon-servicio"></i>
+                                <span>Servicios</span>
+                            </div>
+                            
+                        </div>
+                        <div class="section-content" id="content-servicio">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+<th>Código</th>
+<th>Nombre</th>
+<th>Sección</th>
+<th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-cargo-id="TU">
+<td>TU</td>
+<td>Tutor</td>
+<td>Servicios</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('TU')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('TU')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="MO">
+<td>MO</td>
+<td>Monitor Tutorias</td>
+<td>Servicios</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('MO')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('MO')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                    <tr data-cargo-id="CN">
+<td>CN</td>
+<td>Coordinador Nacional de Tutorias</td>
+<td>Servicios</td>
+
+<td>
+    <button class="btn btn-primary btn-sm" onclick="editCargo('CN')" title="Editar">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-small btn-danger" onclick="deleteCargo('CN')" title="Eliminar">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -186,80 +527,228 @@
          MODALES DE INTERACCIÓN
          ======================================== -->
     
-    <!-- Modal de Crear Cargo -->
+    <!-- 
+        MODAL DE CREAR/ACTUALIZAR CARGO
+        ID: createCargoModal
+        Función: showCreateCargoModal() / showEditCargoModal() / closeCreateCargoModal()
+    -->
     <div class="modal-overlay" id="createCargoModal">
         <div class="modal">
             <div class="modal-header">
-                <h3>CREAR CARGO</h3>
+                <h3 id="modalTitle">CREAR CARGO</h3>
                 <button class="modal-close" onclick="closeCreateCargoModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="createCargoForm">
-                    <div class="form-group">
-                        <label for="cargoSeccion">Sección <span class="required">*</span></label>
-                        <select id="cargoSeccion" name="seccion" required>
-                            <option value="">Selecciona la Sección</option>
+                <!-- 
+                    FORMULARIO DE CREAR/ACTUALIZAR CARGO
+                    ID: createCargoForm
+                    Objetos backend configurados:
+                -->
+                <div class="form-group">
+                    <!-- 
+                        CAMPO SECCIÓN
+                        - Label visible: "Sección"
+                        - ID: cargoSeccion
+                        - Name (objeto backend): bSeccion
+                        - Tipo: select (dropdown)
+                        - Requerido: Sí
+                    -->
+                    <label for="cargoSeccion" class="form-label">Sección *</label>
+                    <div class="select-container">
+                        <select id="cargoSeccion" name="bSeccion" class="form-select" required>
+                            <option value="">Seleccione la sección</option>
                             <option value="administrativo">Administrativo</option>
                             <option value="pyf">PYF</option>
                             <option value="servicio">Servicio</option>
                         </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="cargoCodigo">Código <span class="required">*</span></label>
-                        <input type="text" id="cargoCodigo" name="codigo" placeholder="Escribe Código" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="cargoNombre">Nombre <span class="required">*</span></label>
-                        <input type="text" id="cargoNombre" name="nombre" placeholder="Escribe nombre del Cargo" required>
-                    </div>
-                </form>
+                </div>
+                
+                <div class="form-group">
+                    <!-- 
+                        CAMPO CÓDIGO
+                        - Label visible: "Código"
+                        - ID: cargoCodigo
+                        - Name (objeto backend): tId
+                        - Tipo: input text
+                        - Requerido: Sí
+                    -->
+                    <label for="cargoCodigo" class="form-label">Código *</label>
+                    <input type="text" id="cargoCodigo" name="tId" class="form-input" placeholder="Código del cargo" required>
+                </div>
+                
+                <div class="form-group">
+                    <!-- 
+                        CAMPO NOMBRE
+                        - Label visible: "Nombre"
+                        - ID: cargoNombre
+                        - Name (objeto backend): tNombre
+                        - Tipo: input text
+                        - Requerido: Sí
+                    -->
+                    <label for="cargoNombre" class="form-label">Nombre *</label>
+                    <input type="text" id="cargoNombre" name="tNombre" class="form-input" placeholder="Nombre del cargo" required>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeCreateCargoModal()">Cancelar</button>
-                <button type="submit" form="createCargoForm" class="btn btn-primary">Crear</button>
+                                 <!-- 
+                     BOTÓN CREAR/ACTUALIZAR (SUBMIT)
+                     - ID: bCrearSubmit
+                     - Función: handleCreateCargo() / handleUpdateCargo()
+                     - Objeto backend: bCrear
+                 -->
+                 <button id="bCrearSubmit" type="button" class="btn btn-primary" onclick="handleCreateCargo()">Crear</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Buscar Cargo -->
-    <div class="modal-overlay" id="searchCargoModal">
-        <div class="modal">
+        <!-- 
+         MODAL DE BUSCAR CARGO
+         ID: searchCargoModal
+         Función: showSearchCargoModal() / closeSearchCargoModal()
+     -->
+     <div class="modal-overlay" id="searchCargoModal">
+         <div class="modal modal-results">
+             <div class="modal-header">
+                 <h3 class="modal-title">BUSCAR CARGO</h3>
+                 <button class="modal-close" onclick="closeSearchCargoModal()">
+                     <i class="fas fa-times"></i>
+                 </button>
+             </div>
+             <div class="modal-body">
+                 <!-- 
+                     FORMULARIO DE BUSCAR CARGO
+                     ID: searchCargoForm
+                     Objetos backend configurados:
+                 -->
+                 <div class="form-group">
+                     <!-- 
+                         CAMPO NOMBRE (BÚSQUEDA)
+                         - Label visible: "Nombre"
+                         - ID: searchCargoNombre
+                         - Name (objeto backend): tNombre
+                         - Tipo: input text
+                         - Requerido: No
+                     -->
+                     <label for="searchCargoNombre" class="form-label">Nombre del Cargo</label>
+                     <input type="text" id="searchCargoNombre" name="tNombre" class="form-input" placeholder="Ingrese el nombre del cargo a buscar">
+                 </div>
+                 
+                                   <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
+                  <div id="searchResultsSection" style="display: none; margin-top: 30px;">
+                      <h4 class="search-results-title">RESULTADOS DE BÚSQUEDA</h4>
+                      <div class="data-table">
+                          <table class="table">
+                              <thead>
+                                  <tr>
+                                      <th>Código</th>
+                                      <th>Nombre</th>
+                                      <th>Sección</th>
+                                      <th>Opciones</th>
+                                  </tr>
+                              </thead>
+                              <tbody id="cargoSearchResultsBody">
+                                  <!-- Los resultados de búsqueda se mostrarán aquí dinámicamente -->
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+             </div>
+             <div class="modal-footer">
+                 <button type="button" class="btn btn-secondary" onclick="closeSearchCargoModal()">Cancelar</button>
+                 <!-- 
+                     BOTÓN BUSCAR (SUBMIT)
+                     - ID: bBuscar
+                     - Función: handleSearchCargo()
+                     - Objeto backend: bBuscar
+                 -->
+                 <button id="bBuscar" type="button" class="btn btn-primary" onclick="handleSearchCargo()">Buscar</button>
+             </div>
+         </div>
+     </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+    
+    <!-- Modal de confirmación para crear cargo -->
+    <div class="modal-overlay" id="confirmCreateCargoModal">
+        <div class="modal modal-confirm">
             <div class="modal-header">
-                <h3>BUSCAR CARGO</h3>
-                <button class="modal-close" onclick="closeSearchCargoModal()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h3>Confirmación</h3>
             </div>
             <div class="modal-body">
-                <form id="searchCargoForm">
-                    <div class="form-group">
-                        <label for="searchCargoCodigo">Código</label>
-                        <input type="text" id="searchCargoCodigo" name="codigo" placeholder="Buscar por código">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="searchCargoNombre">Nombre</label>
-                        <input type="text" id="searchCargoNombre" name="nombre" placeholder="Buscar por nombre">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="searchCargoSeccion">Sección</label>
-                        <select id="searchCargoSeccion" name="seccion">
-                            <option value="">Todas las secciones</option>
-                            <option value="administrativo">Administrativo</option>
-                            <option value="pyf">PYF</option>
-                            <option value="servicio">Servicio</option>
-                        </select>
-                    </div>
-                </form>
+                <p>¿Está segur@ que quiere crear este Cargo?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeSearchCargoModal()">Cancelar</button>
-                <button type="submit" form="searchCargoForm" class="btn btn-primary">Buscar</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateCargo()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateCargo()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear cargo -->
+    <div class="modal-overlay" id="successCreateCargoModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito el Cargo!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar cargo -->
+    <div class="modal-overlay" id="confirmUpdateCargoModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar este Cargo?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateCargo()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateCargo()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar cargo -->
+    <div class="modal-overlay" id="successUpdateCargoModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito el Cargo!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateCargoModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar cargo -->
+    <div class="modal-overlay" id="confirmDeleteCargoModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere eliminar este Cargo?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteCargo()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDeleteCargo()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para eliminar cargo -->
+    <div class="modal-overlay" id="successDeleteCargoModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha eliminado con éxito el Cargo!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteCargoModal()">Volver</button>
             </div>
         </div>
     </div>

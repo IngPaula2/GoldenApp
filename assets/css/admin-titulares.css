@@ -10,6 +10,34 @@
  */
 
 /* ========================================
+   ESTILOS PARA ESCRITURA EN MAYÚSCULAS
+   ======================================== */
+
+/* Todos los inputs de texto se escriben en mayúsculas */
+input[type="text"], 
+input[type="email"], 
+input[type="tel"], 
+textarea {
+    text-transform: uppercase;
+}
+
+/* Todo el contenido de las tablas se muestra en mayúsculas */
+.table td,
+.table th {
+    text-transform: uppercase;
+}
+
+/* Asegurar que todas las tablas de titulares y beneficiarios muestren contenido en mayúsculas */
+#titularesTableBody .table td,
+#titularesTableBody .table th,
+#beneficiariosTableBody .table td,
+#beneficiariosTableBody .table th,
+#titularBeneficiariosResultsBody .table td,
+#titularBeneficiariosResultsBody .table th {
+    text-transform: uppercase !important;
+}
+
+/* ========================================
    ESTILOS ESPECÍFICOS PARA TITULARES
    ======================================== */
 
@@ -708,6 +736,191 @@
 
 .logout-item {
     color: #dc3545 !important;
+}
+
+/* ========================================
+   ESTILOS PARA MODALES DE CONFIRMACIÓN
+   ======================================== */
+
+/* Modal de confirmación */
+.modal-confirm {
+    max-width: 400px;
+    width: 90%;
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    text-align: center;
+}
+
+.modal-confirm .modal-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-confirm .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.modal-confirm .modal-body {
+    margin-bottom: 25px;
+}
+
+.modal-confirm .modal-body p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.modal-confirm .modal-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-confirm .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.modal-confirm .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.modal-confirm .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+.modal-confirm .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.modal-confirm .btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Modal de éxito */
+.modal-success {
+    max-width: 350px;
+    width: 90%;
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    text-align: center;
+}
+
+.modal-success .modal-body {
+    margin: 0;
+}
+
+.modal-success .modal-body p {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.modal-success .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.modal-success .btn:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Z-index para modales de confirmación */        
+#confirmCreateTitularModal,
+#confirmCreateBeneficiarioModal,
+#confirmCreateTitularBeneficiarioModal,
+#confirmUpdateTitularModal,
+#confirmUpdateBeneficiarioModal,
+#confirmDeleteTitularModal,
+#confirmDeleteBeneficiarioModal {
+    z-index: 15000 !important;
+}
+
+#successCreateTitularModal,
+#successCreateBeneficiarioModal,
+#successCreateTitularBeneficiarioModal,
+#successUpdateTitularModal,
+#successUpdateBeneficiarioModal,
+#successDeleteTitularModal,
+#successDeleteBeneficiarioModal {
+    z-index: 16000 !important;
+}
+
+/* Reglas para mostrar modales */
+.modal-overlay {
+    display: none;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.show {
+    display: flex !important;
+}
+
+/* Estilos para el botón de flecha hacia atrás */
+.btn-back {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-header .modal-title {
+    flex: 1;
+    text-align: center;
+    margin: 0;
 }
 
 

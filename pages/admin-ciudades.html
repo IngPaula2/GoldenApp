@@ -13,7 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Bridge - Dashboard</title>
+    <title>Golden Bridge - Ciudades</title>
     
     <!-- ========================================
          RECURSOS EXTERNOS Y DEPENDENCIAS
@@ -160,8 +160,8 @@
                 <div class="section-header">
                     <h2>Ciudades</h2>
                     <div class="action-buttons">
-                        <button class="btn btn-primary">Buscar Ciudad</button>
-                        <button class="btn btn-primary">Crear Ciudad</button>
+                        <button id="bBuscarCiudad" class="btn btn-primary" onclick="showCitySearchModal()">Buscar Ciudad</button>
+                        <button id="bCrearCiudad" class="btn btn-primary" onclick="showCreateCityModal()">Crear Ciudad</button>
                     </div>
                 </div>
 
@@ -197,8 +197,8 @@
                 <div class="section-header">
                     <h2>Filiales</h2>
                     <div class="action-buttons">
-                        <button class="btn btn-primary">Buscar Filial</button>
-                        <button class="btn btn-primary">Crear Filial</button>
+                        <button id="bBuscarFilial" class="btn btn-primary" onclick="showBranchModal()">Buscar Filial</button>
+                        <button id="bCrearFilial" class="btn btn-primary" onclick="showUpsertBranchModal('create')">Crear Filial</button>
                     </div>
                 </div>
 
@@ -472,6 +472,166 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideUpsertBranchModal()">Cancelar</button>
                 <button class="btn btn-primary" id="bGuardarFilial">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+    
+    <!-- Modal de confirmación para crear ciudad -->
+    <div class="modal-overlay" id="confirmCreateCityModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere crear esta Ciudad?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateCity()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateCity()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear ciudad -->
+    <div class="modal-overlay" id="successCreateCityModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito la Ciudad!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCityModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para crear filial -->
+    <div class="modal-overlay" id="confirmCreateBranchModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere crear esta Filial?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateBranch()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateBranch()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear filial -->
+    <div class="modal-overlay" id="successCreateBranchModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito la Filial!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessBranchModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar ciudad -->
+    <div class="modal-overlay" id="confirmUpdateCityModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar esta Ciudad?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateCity()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateCity()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar ciudad -->
+    <div class="modal-overlay" id="successUpdateCityModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito la Ciudad!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateCityModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar filial -->
+    <div class="modal-overlay" id="confirmUpdateBranchModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar esta Filial?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateBranch()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateBranch()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar filial -->
+    <div class="modal-overlay" id="successUpdateBranchModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito la Filial!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateBranchModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar ciudad -->
+    <div class="modal-overlay" id="confirmDeleteCityModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere eliminar esta Ciudad?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteCity()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDeleteCity()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para eliminar ciudad -->
+    <div class="modal-overlay" id="successDeleteCityModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha eliminado con éxito la Ciudad!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteCityModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar filial -->
+    <div class="modal-overlay" id="confirmDeleteBranchModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere eliminar esta Filial?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteBranch()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDeleteBranch()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para eliminar filial -->
+    <div class="modal-overlay" id="successDeleteBranchModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha eliminado con éxito la Filial!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteBranchModal()">Volver</button>
             </div>
         </div>
     </div>
