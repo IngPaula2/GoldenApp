@@ -58,8 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
         loginButton.disabled = true;
         
         // Simular delay de autenticación (1.5 segundos)
-        setTimeout(() => {
-            // Aquí iría la lógica real de autenticación con backend
+        setTimeout(async () => {
+            // ========================================
+            // 🔗 CONEXIÓN BACKEND - AUTENTICACIÓN
+            // ========================================
+            // Endpoint: POST /api/auth/login
+            // Datos: { username, password }
+            
             console.log('Intentando iniciar sesión:', { username, password });
             
             // Marcar usuario como autenticado en sessionStorage

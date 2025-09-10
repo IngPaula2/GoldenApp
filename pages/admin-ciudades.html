@@ -174,12 +174,13 @@
                                 <th>Dirección</th>
                                 <th>Teléfono</th>
                                 <th>Correo</th>
+                                <th>Estado</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="ciudadesTableBody">
                             <tr>
-                                <td colspan="6" class="no-data-message">
+                                <td colspan="7" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-city"></i>
                                         <p>No existen registros de ciudades</p>
@@ -211,12 +212,13 @@
                                 <th>Ciudad</th>
                                 <th>Dirección</th>
                                 <th>Teléfono</th>
+                                <th>Estado</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="filialesTableBody">
                             <tr>
-                                <td colspan="6" class="no-data-message">
+                                <td colspan="7" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-building"></i>
                                         <p>No existen registros de filiales</p>
@@ -366,12 +368,13 @@
                                 <th>Dirección</th>
                                 <th>Teléfono</th>
                                 <th>Correo</th>
+                                <th>Estado</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="citySearchResultsBody">
                             <tr>
-                                <td colspan="6" class="no-data-message">
+                                <td colspan="7" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-search"></i>
                                         <p>No se encontraron resultados</p>
@@ -584,28 +587,56 @@
         </div>
     </div>
 
-    <!-- Modal de confirmación para eliminar ciudad -->
-    <div class="modal-overlay" id="confirmDeleteCityModal">
+    <!-- Modal de confirmación para activar/desactivar ciudad -->
+    <div class="modal-overlay" id="confirmToggleCityModal">
         <div class="modal modal-confirm">
             <div class="modal-header">
-                <h3>Confirmación</h3>
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
             </div>
             <div class="modal-body">
-                <p>¿Está segur@ que quiere eliminar esta Ciudad?</p>
+                <p class="modal-message">¿Está segur@ que quiere cambiar el estado de esta Ciudad?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="cancelDeleteCity()">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="confirmDeleteCity()">Eliminar</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelToggleCity()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmToggleCity()">Aceptar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de éxito para eliminar ciudad -->
-    <div class="modal-overlay" id="successDeleteCityModal">
+    <!-- Modal de éxito para cambiar estado de ciudad -->
+    <div class="modal-overlay" id="successToggleCityModal">
         <div class="modal modal-success">
             <div class="modal-body">
-                <p>Se ha eliminado con éxito la Ciudad!</p>
-                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteCityModal()">Volver</button>
+                <p>Se ha cambiado el estado de la Ciudad con éxito!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessToggleCityModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para activar/desactivar filial -->
+    <div class="modal-overlay" id="confirmToggleBranchModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que quiere cambiar el estado de esta Filial?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelToggleBranch()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmToggleBranch()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para cambiar estado de filial -->
+    <div class="modal-overlay" id="successToggleBranchModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p class="modal-message">Se ha cambiado el estado de la Filial con éxito!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessToggleBranchModal()">Volver</button>
             </div>
         </div>
     </div>

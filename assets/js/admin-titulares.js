@@ -13,6 +13,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     // ========================================
+    // FUNCIONES DE UTILIDAD PARA BACKEND
+    // ========================================
+    
+    /**
+     * Obtiene el token de autenticación del sessionStorage
+     * @returns {string|null} Token de autenticación o null si no existe
+     */
+    function getAuthToken() {
+        return sessionStorage.getItem('authToken');
+    }
+    
+    /**
+     * Verifica si el usuario está autenticado
+     * @returns {boolean} true si está autenticado, false si no
+     */
+    function isAuthenticated() {
+        return sessionStorage.getItem('isAuthenticated') === 'true' && getAuthToken() !== null;
+    }
+    
+    // ========================================
     // GESTIÓN DE MODALES
     // ========================================
     
@@ -234,6 +254,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Datos del titular a crear:', titularData);
         
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - CREAR TITULAR
+        // ========================================
+        // Endpoint: POST /api/titulares
+        // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, beneficiario }
+        
         // TODO: Aquí se enviarían los datos al backend
         // Por ahora solo guardamos en memoria
         
@@ -358,6 +384,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Datos del beneficiario a crear:', beneficiarioData);
+        
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - CREAR BENEFICIARIO
+        // ========================================
+        // Endpoint: POST /api/beneficiarios
+        // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, titularId, parentesco }
         
         // Verificar si viene del modal de titular
         const tempTitular = sessionStorage.getItem('tempTitular');
@@ -529,6 +561,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Datos del beneficiario a crear:', beneficiarioData);
         
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - CREAR BENEFICIARIO
+        // ========================================
+        // Endpoint: POST /api/beneficiarios
+        // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, titularId, parentesco }
+        
         // Verificar si viene del modal de titular
         const tempTitular = sessionStorage.getItem('tempTitular');
         
@@ -609,6 +647,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Datos del titular a actualizar:', titularData);
+        
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - ACTUALIZAR TITULAR
+        // ========================================
+        // Endpoint: PUT /api/titulares/{numeroId}
+        // Datos: { tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, beneficiario }
         
         // Procesar la actualización
         processTitularUpdate(titularData);
@@ -699,6 +743,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Datos del beneficiario a actualizar:', beneficiarioData);
+        
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - ACTUALIZAR BENEFICIARIO
+        // ========================================
+        // Endpoint: PUT /api/beneficiarios/{id}
+        // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, titularId, parentesco }
         
         // Procesar la actualización del beneficiario
         processBeneficiarioUpdate(beneficiarioData);

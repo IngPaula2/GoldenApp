@@ -10,6 +10,26 @@
  */
 
 // ========================================
+// FUNCIONES DE UTILIDAD PARA BACKEND
+// ========================================
+
+/**
+ * Obtiene el token de autenticación del sessionStorage
+ * @returns {string|null} Token de autenticación o null si no existe
+ */
+function getAuthToken() {
+    return sessionStorage.getItem('authToken');
+}
+
+/**
+ * Verifica si el usuario está autenticado
+ * @returns {boolean} true si está autenticado, false si no
+ */
+function isAuthenticated() {
+    return sessionStorage.getItem('isAuthenticated') === 'true' && getAuthToken() !== null;
+}
+
+// ========================================
 // VARIABLES GLOBALES
 // ========================================
 
@@ -447,8 +467,11 @@ function confirmCreateCargo() {
     
     console.log('Datos del cargo a crear:', cargoData);
     
-    // TODO: Aquí se enviarían los datos al backend
-    // Por ahora solo agregamos el cargo a la interfaz
+    // ========================================
+    // 🔗 CONEXIÓN BACKEND - CREAR CARGO
+    // ========================================
+    // Endpoint: POST /api/cargos
+    // Datos: { bSeccion, tId, tNombre }
     
     // Agregar el nuevo cargo a la sección correspondiente
     addCargoToSection(cargoData);
@@ -721,6 +744,12 @@ function clearSearchCargoForm() {
  * @returns {Array} - Array de cargos encontrados
  */
 function performSearch(searchData) {
+    // ========================================
+    // 🔗 CONEXIÓN BACKEND - BUSCAR CARGOS
+    // ========================================
+    // Endpoint: GET /api/cargos/search?nombre=valor
+    // Parámetros: nombre
+    
     // TODO: Aquí se conectaría con el backend para buscar cargos reales
     // Por ahora simulamos resultados basados solo en el nombre
     
@@ -868,8 +897,11 @@ function confirmUpdateCargo() {
     
     console.log('Datos del cargo a actualizar:', cargoData);
     
-    // TODO: Aquí se enviarían los datos al backend
-    // Por ahora solo mostramos una notificación de éxito
+    // ========================================
+    // 🔗 CONEXIÓN BACKEND - ACTUALIZAR CARGO
+    // ========================================
+    // Endpoint: PUT /api/cargos/{codigo}
+    // Datos: { bSeccion, tId, tNombre }
     
     // Actualizar el cargo en la interfaz
     updateCargoInUI(cargoId, cargoData);
@@ -943,6 +975,12 @@ function confirmDeleteCargo() {
     const cargoId = window.tempDeleteCargoId;
     
     if (cargoId) {
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - ELIMINAR CARGO
+        // ========================================
+        // Endpoint: DELETE /api/cargos/{codigo}
+        // Parámetro: codigo
+        
         // TODO: Aquí se enviaría la petición al backend
         // Por ahora simulamos la eliminación
         
