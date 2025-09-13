@@ -212,45 +212,255 @@ textarea {
 }
 
 /* ========================================
-   ESTILOS RESPONSIVE PARA TITULARES
+   RESPONSIVE DESIGN MEJORADO PARA TITULARES
    ======================================== */
 
-@media (max-width: 768px) {
-    .titulares-section .section-header,
-    .beneficiarios-section .section-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
+/* Laptops pequeñas (1280px - 1366px) */
+@media (max-width: 1366px) and (min-width: 1200px) {
+    .main-content {
+        padding: 20px;
+    }
+    
+    .page-header {
+        flex-direction: row;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        text-align: left;
     }
     
     .action-buttons {
-        flex-direction: column;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+    
+    .action-buttons .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .titulares-section,
+    .beneficiarios-section {
+        margin-bottom: 25px;
+    }
+    
+    .section-header {
+        padding: 20px;
+    }
+    
+    .titulares-section h2,
+    .beneficiarios-section h2 {
+        font-size: 1.4rem;
     }
     
     .table {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
     
     .table th,
     .table td {
-        padding: 0.75rem 0.5rem;
+        padding: 8px 6px;
     }
     
     .btn-small {
-        padding: 0.4rem;
-        font-size: 0.7rem;
-        margin-right: 0.25rem;
-    }
-    
-    /* Responsive para formularios */
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
     }
     
     .modal-large {
-        max-width: 95%;
-        margin: 1rem;
+        max-width: 900px;
+        width: 90%;
+    }
+    
+    .form-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+}
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 15px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .page-title {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .titulares-section,
+    .beneficiarios-section {
+        margin-bottom: 20px;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 10px 8px;
+    }
+}
+
+/* Móviles grandes */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 10px;
+    }
+    
+    .page-header {
+        padding: 15px 0;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    .titulares-section .section-header,
+    .beneficiarios-section .section-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+        padding: 15px;
+    }
+    
+    .titulares-section h2,
+    .beneficiarios-section h2 {
+        font-size: 1.3rem;
+        text-align: center;
+        margin: 0;
+    }
+    
+    .section-header .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 15px;
+    }
+    
+    /* Tabla responsiva con scroll horizontal */
+    .table {
+        font-size: 0.85rem;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+    }
+    
+    .table table {
+        min-width: 600px;
+        width: 100%;
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px 6px;
+        min-width: 80px;
+    }
+    
+    /* Ocultar columnas menos importantes en móvil */
+    .table th:nth-child(3),
+    .table td:nth-child(3),
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        display: none;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+    }
+    
+    .btn-small {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+        margin: 0 0.15rem;
+        min-width: 35px;
+    }
+    
+    .modal {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-large {
+        width: 98%;
+        max-width: none;
+        margin: 5px;
+        padding: 15px;
+    }
+    
+    .modal-header {
+        padding: 15px 0;
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 15px 0;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-input,
+    .form-select {
+        font-size: 16px; /* Previene zoom en iOS */
+        padding: 12px;
+    }
+    
+    .modal-footer {
+        padding: 15px 0;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    /* Form rows responsivos */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
     
     .beneficiario-toggle {
@@ -260,22 +470,82 @@ textarea {
     
     .toggle-buttons {
         justify-content: center;
+        margin-top: 10px;
     }
 }
 
+/* Móviles pequeños */
 @media (max-width: 480px) {
+    .main-content {
+        padding: 8px;
+    }
+    
+    .page-title {
+        font-size: 1.3rem;
+    }
+    
     .titulares-section h2,
     .beneficiarios-section h2 {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
+    }
+    
+    .section-header {
+        padding: 12px;
     }
     
     .table {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
     
     .table th,
     .table td {
-        padding: 0.5rem 0.25rem;
+        padding: 6px 4px;
+        min-width: 70px;
+    }
+    
+    /* Ocultar más columnas en pantallas muy pequeñas */
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        display: none;
+    }
+    
+    .btn-small {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+        margin: 0 0.1rem;
+        min-width: 30px;
+    }
+    
+    .modal {
+        margin: 5px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .modal-large {
+        margin: 3px;
+        padding: 12px;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 10px 0;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .form-input,
+    .form-select {
+        padding: 10px;
+        font-size: 16px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
     }
     
     .no-data-content i {
@@ -284,6 +554,111 @@ textarea {
     
     .no-data-content p {
         font-size: 1rem;
+    }
+    
+    /* Toggle buttons responsivos */
+    .toggle-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .btn-toggle {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+    .main-content {
+        padding: 5px;
+    }
+    
+    .page-title {
+        font-size: 1.2rem;
+    }
+    
+    .titulares-section h2,
+    .beneficiarios-section h2 {
+        font-size: 1.1rem;
+    }
+    
+    .section-header {
+        padding: 10px;
+    }
+    
+    .table {
+        font-size: 0.75rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 5px 3px;
+        min-width: 60px;
+    }
+    
+    .btn-small {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+        margin: 0 0.05rem;
+        min-width: 25px;
+    }
+    
+    .modal {
+        margin: 3px;
+        padding: 12px;
+    }
+    
+    .modal-large {
+        margin: 2px;
+        padding: 10px;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .form-input,
+    .form-select {
+        padding: 8px;
+    }
+    
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-toggle {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+/* Modo landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal {
+        max-height: 95vh;
+        padding: 15px;
+    }
+    
+    .modal-large {
+        max-height: 98vh;
+        padding: 10px;
+    }
+    
+    .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .table {
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+    
+    .form-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
     }
 }
 

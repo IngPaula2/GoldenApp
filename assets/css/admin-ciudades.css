@@ -133,6 +133,27 @@ textarea {
 }
 
 /* ========================================
+   ESTILOS ESPECÍFICOS PARA SECCIONES DE CIUDADES Y FILIALES
+   ======================================== */
+
+/* Asegurar que las secciones de ciudades tengan estilos específicos */
+.cities-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.branches-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+/* ========================================
    LAYOUT PRINCIPAL DEL DASHBOARD
    ======================================== */
 
@@ -848,10 +869,106 @@ textarea {
 
 
 /* ========================================
-   DISEÑO RESPONSIVE
+   RESPONSIVE DESIGN MEJORADO PARA CIUDADES
    ======================================== */
 
-/* Responsive Design */
+/* Laptops pequeñas (1280px - 1366px) */
+@media (max-width: 1366px) and (min-width: 1200px) {
+    .main-content {
+        padding: 20px;
+        margin-left: 250px;
+    }
+    
+    .page-header {
+        flex-direction: row;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        text-align: left;
+    }
+    
+    .action-buttons {
+        justify-content: flex-end;
+        gap: 15px;
+    }
+    
+    .action-buttons .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .section-content {
+        padding: 25px;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px 6px;
+    }
+    
+    .section-header {
+        padding: 20px;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+    }
+    
+    .btn-sm {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .top-nav-list .nav-link {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 15px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .page-title {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .section-content {
+        padding: 20px;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 10px 8px;
+    }
+}
+
+/* Móviles grandes */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -864,20 +981,300 @@ textarea {
     
     .main-content {
         margin-left: 0;
+        padding: 10px;
+    }
+    
+    .page-header {
+        padding: 15px 0;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 1rem;
     }
     
     .top-nav-list {
         flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .top-nav-list .nav-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
     }
     
     .section-header {
         flex-direction: column;
         gap: 15px;
         align-items: stretch;
+        padding: 15px;
     }
     
-    .action-buttons {
+    .section-title {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
+    .section-header .btn {
+        width: 100%;
         justify-content: center;
+        padding: 10px 15px;
+    }
+    
+    .section-content {
+        padding: 15px;
+    }
+    
+    /* Tabla responsiva con scroll horizontal */
+    .table {
+        font-size: 0.85rem;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+    }
+    
+    .table table {
+        min-width: 500px;
+        width: 100%;
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px 6px;
+        min-width: 80px;
+    }
+    
+    /* Ocultar columnas menos importantes en móvil */
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        display: none;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+    }
+    
+    .btn-sm {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+        margin: 0 0.15rem;
+        min-width: 35px;
+    }
+    
+    .modal {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 15px 0;
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 15px 0;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-input,
+    .form-select {
+        font-size: 16px; /* Previene zoom en iOS */
+        padding: 12px;
+    }
+    
+    .modal-footer {
+        padding: 15px 0;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 8px;
+    }
+    
+    .page-title {
+        font-size: 1.3rem;
+    }
+    
+    .section-header {
+        padding: 12px;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+    }
+    
+    .section-content {
+        padding: 12px;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 6px 4px;
+        min-width: 70px;
+    }
+    
+    /* Ocultar más columnas en pantallas muy pequeñas */
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        display: none;
+    }
+    
+    .btn-sm {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+        margin: 0 0.1rem;
+        min-width: 30px;
+    }
+    
+    .modal {
+        margin: 5px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 10px 0;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .form-input,
+    .form-select {
+        padding: 10px;
+        font-size: 16px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .top-nav-list .nav-link {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+    .main-content {
+        padding: 5px;
+    }
+    
+    .page-title {
+        font-size: 1.2rem;
+    }
+    
+    .section-header {
+        padding: 10px;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+    }
+    
+    .section-content {
+        padding: 10px;
+    }
+    
+    .table {
+        font-size: 0.75rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 5px 3px;
+        min-width: 60px;
+    }
+    
+    .btn-sm {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+        margin: 0 0.05rem;
+        min-width: 25px;
+    }
+    
+    .modal {
+        margin: 3px;
+        padding: 12px;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .form-input,
+    .form-select {
+        padding: 8px;
+    }
+    
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .top-nav-list .nav-link {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Modo landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal {
+        max-height: 95vh;
+        padding: 15px;
+    }
+    
+    .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .table {
+        max-height: 50vh;
+        overflow-y: auto;
     }
 }
 

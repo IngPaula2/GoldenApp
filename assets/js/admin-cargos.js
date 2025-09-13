@@ -1049,6 +1049,61 @@ window.confirmDeleteCargo = confirmDeleteCargo;
 window.showSuccessDeleteCargoModal = showSuccessDeleteCargoModal;
 window.closeSuccessDeleteCargoModal = closeSuccessDeleteCargoModal;
 
+// ========================================
+// FUNCIONALIDAD DE CERRAR SESIÓN
+// ========================================
+
+// Inicializar funcionalidad de cerrar sesión cuando se carga el DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a elementos del dropdown de usuario
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    const dropdownArrow = document.querySelector('.dropdown-arrow');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (userInfo && dropdown) {
+        // Toggle del dropdown al hacer clic en el perfil
+        userInfo.addEventListener('click', function() {
+            dropdown.classList.toggle('show');
+            dropdownArrow.classList.toggle('open');
+            sidebar.classList.toggle('dropdown-open');
+        });
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userInfo.contains(e.target)) {
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            }
+        });
+        
+        // Manejar clics en elementos del dropdown
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (this.classList.contains('logout-item')) {
+                    // Funcionalidad de cerrar sesión
+                    sessionStorage.removeItem('isAuthenticated');
+                    sessionStorage.removeItem('username');
+                    window.location.href = '../index.html';
+                } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
+                    // Navegar a administración de usuarios
+                    console.log('Navegando a administrar usuarios');
+                    // Agregar navegación a página de administración de usuarios aquí
+                }
+                
+                // Cerrar dropdown después del clic
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            });
+        });
+    }
+});
+
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', initializePage);
 

@@ -1,0 +1,1164 @@
+/**
+ * 👥 ESTILOS PARA DASHBOARD DE EMPLEADOS - GOLDEN APP
+ * 
+ * Este archivo contiene los estilos específicos para la página de empleados.
+ * Estilos completamente independientes de otras páginas.
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2024
+ */
+
+/* ========================================
+   ESTILOS ESPECÍFICOS PARA EMPLEADOS
+   ======================================== */
+
+/* Sección de Empleados */
+.empleados-section {
+    margin-bottom: 2rem;
+}
+
+.empleados-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.empleados-section h2 {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.action-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.action-buttons .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+}
+
+.action-buttons .btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+/* Tablas de datos */
+.data-table {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Contenedor de sección de empleado */
+.empleado-section {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.empleado-section:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+/* Fila del encabezado de sección */
+.empleado-section .section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.empleado-section .section-header-row:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    transform: translateY(-1px);
+}
+
+.empleado-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1.2rem;;
+}
+
+.empleado-section .section-icon {
+    font-size: 1rem;
+    color: #DEB448;
+    transition: transform 0.3s ease;
+    font-weight: 600;
+}
+
+.empleado-section .section-icon.rotated {
+    transform: rotate(90deg);
+    color: #DEB448;
+}
+
+/* Contenido de la sección */
+.empleado-section .section-content {
+    display: none;
+    animation: slideDown 0.3s ease;
+}
+
+.empleado-section .section-content.expanded {
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para las tablas dentro de las secciones de empleados */
+.empleado-section .section-content .table {
+    margin: 0;
+    border: none;
+    width: 100%;
+}
+
+.empleado-section .section-content .table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.empleado-section .section-content .table tbody td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    color: #495057;
+}
+
+.empleado-section .section-content .table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+    transform: translateX(2px);
+    transition: all 0.2s ease;
+}
+
+
+
+/* ========================================
+   ESTILOS PARA BOTONES DE ACCIÓN EN TABLAS
+   ======================================== */
+
+/* Botones pequeños para acciones en tablas */
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    margin: 0 0.25rem;
+    transition: all 0.2s ease;
+    min-width: auto;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Botón de editar */
+.btn-sm.btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+}
+
+.btn-sm.btn-primary:hover {
+    background: #c9a43a;
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+/* Botón de eliminar */
+.btn-sm.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-sm.btn-danger:hover {
+    background: #c82333;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Grupo de botones en la columna de opciones */
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ========================================
+   ESTILOS DE FORMULARIO
+   ======================================== */
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+/* Form Rows */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Form Inputs */
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+    background-color: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+/* Form Selects */
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+/* Select Container */
+.select-container {
+    position: relative;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+
+/* ========================================
+   ESTILOS MEJORADOS PARA BOTONES TOGGLE
+   ======================================== */
+
+.toggle-buttons {
+    display: inline-flex;
+    gap: 0.5rem;
+    background: #f8f9fa;
+    padding: 0.25rem;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    width: fit-content;
+    max-width: fit-content;
+}
+
+.toggle-buttons:hover {
+    border-color: #DEB448;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.2);
+}
+
+.btn-toggle {
+    padding: 0.75rem 0.8rem;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-toggle:hover::before {
+    left: 100%;
+}
+
+.btn-toggle:hover {
+    background: #e9ecef;
+    color: #495057;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-toggle.active {
+    background: #DEB448;
+    color: #1a1a1a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+.btn-toggle-yes.active {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.btn-toggle-no.active {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* ========================================
+   ESTILOS PARA TABLA DE RESULTADOS DE BÚSQUEDA
+   ======================================== */
+
+/* Estilos para la sección de resultados dentro del modal de búsqueda */
+#searchResultsSection {
+    margin-top: 30px;
+    border-top: 2px solid #e9ecef;
+    padding-top: 20px;
+}
+
+/* Título de resultados de búsqueda */
+.search-results-title {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+#searchResultsSection .data-table {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+#searchResultsSection .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+#searchResultsSection .table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+#searchResultsSection .table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    color: #495057;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+#searchResultsSection .table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+    transition: all 0.2s ease;
+}
+
+/* Asegurar que el modal de búsqueda tenga suficiente ancho */
+.modal-results {
+    max-width: 1400px !important;
+    width: 95% !important;
+    min-height: 600px;
+    max-height: 90vh;
+    z-index: 10000 !important;
+}
+
+.modal-results .modal-body {
+    padding: 30px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+/* ========================================
+   ESTILOS PARA MODALES
+   ======================================== */
+
+/* Modal de crear empleado */
+#createEmpleadoModal {
+    z-index: 10001 !important;
+}
+
+#createEmpleadoModal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Modales de confirmación y éxito de actualización */
+#confirmUpdateEmpleadoModal,
+#successUpdateEmpleadoModal {
+    z-index: 10002 !important;
+}
+
+/* Modales de confirmación y éxito de crear empleado */
+#confirmCreateEmpleadoModal,
+#successCreateEmpleadoModal {
+    z-index: 10002 !important;
+}
+
+/* Modal grande para formularios complejos */
+.modal-large {
+    max-width: 1000px;
+    width: 95%;
+}
+
+/* Modal de resultados (más ancho que el modal normal) */
+.modal-results {
+    max-width: 1000px;
+    width: 95%;
+    max-height: 80vh;
+}
+
+.modal-results .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+    transition: all 0.2s ease;
+}
+
+/* Modal de confirmación */
+.modal-confirm {
+    max-width: 400px !important;
+    width: 90% !important;
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    text-align: center;
+}
+
+.modal-confirm .modal-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-confirm .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.modal-confirm .modal-body {
+    margin-bottom: 25px;
+}
+
+.modal-confirm .modal-body p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.modal-confirm .modal-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-confirm .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.modal-confirm .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.modal-confirm .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+.modal-confirm .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.modal-confirm .btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Modal de éxito */
+.modal-success {
+    max-width: 350px !important;
+    width: 90% !important;
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    text-align: center;
+}
+
+.modal-success .modal-body {
+    margin: 0;
+}
+
+.modal-success .modal-body p {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.modal-success .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.modal-success .btn:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+    margin: 0;
+    padding: 0;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 800px;
+    width: 95%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    margin: 0 auto;
+    position: relative;
+    left: 0;
+    right: 0;
+}
+
+.modal-header {
+    margin-bottom: 25px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    flex: 1;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.modal-body {
+    margin-bottom: 25px;
+}
+
+.modal-footer {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Quitar dobles flechas de los select */
+.form-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+}
+
+.form-select::-ms-expand {
+    display: none;
+}
+
+
+/* ========================================
+   ESTILOS RESPONSIVOS PARA EMPLEADOS
+   ======================================== */
+
+/* Reducir espaciado general para pantallas grandes */
+@media (min-width: 1200px) {
+    .empleados-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .empleado-section {
+        margin-bottom: 1rem;
+    }
+    
+    .empleado-section .section-header-row {
+        padding: 1rem 1.5rem;
+    }
+    
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        padding: 0.8rem 0.75rem;
+    }
+}
+
+/* Pantallas medianas - reducir más el espaciado */
+@media (max-width: 1199px) and (min-width: 992px) {
+    .empleados-section {
+        margin-bottom: 1.25rem;
+    }
+    
+    .empleado-section {
+        margin-bottom: 0.8rem;
+    }
+    
+    .empleado-section .section-header-row {
+        padding: 0.9rem 1.25rem;
+    }
+    
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        padding: 0.7rem 0.6rem;
+        font-size: 0.9rem;
+    }
+    
+    .empleado-section .section-title {
+        font-size: 1rem;
+    }
+}
+
+/* Tablets - optimizar para pantallas más pequeñas */
+@media (max-width: 991px) and (min-width: 768px) {
+    .empleados-section {
+        margin-bottom: 1rem;
+    }
+    
+    .empleado-section {
+        margin-bottom: 0.6rem;
+    }
+    
+    .empleado-section .section-header-row {
+        padding: 0.8rem 1rem;
+    }
+    
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .empleado-section .section-title {
+        font-size: 0.95rem;
+    }
+    
+    .action-buttons {
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Móviles grandes - hacer más compacto */
+@media (max-width: 767px) {
+    .empleados-section {
+        margin-bottom: 0.8rem;
+    }
+    
+    .empleado-section {
+        margin-bottom: 0.5rem;
+    }
+    
+    .empleado-section .section-header-row {
+        padding: 0.7rem 0.8rem;
+    }
+    
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        padding: 0.5rem 0.4rem;
+        font-size: 0.8rem;
+    }
+    
+    .empleado-section .section-title {
+        font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        width: 100%;
+    }
+    
+    /* Hacer las tablas más compactas en móviles */
+    .empleado-section .section-content .table {
+        font-size: 0.75rem;
+    }
+    
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        padding: 0.4rem 0.3rem;
+    }
+}
+
+/* Móviles pequeños - máxima compactación */
+@media (max-width: 575px) {
+    .empleados-section {
+        margin-bottom: 0.6rem;
+    }
+    
+    .empleado-section {
+        margin-bottom: 0.4rem;
+    }
+    
+    .empleado-section .section-header-row {
+        padding: 0.6rem 0.6rem;
+    }
+    
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        padding: 0.3rem 0.2rem;
+        font-size: 0.7rem;
+    }
+    
+    .empleado-section .section-title {
+        font-size: 0.85rem;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Ocultar columnas menos importantes en móviles muy pequeños */
+    .empleado-section .section-content .table th:nth-child(3),
+    .empleado-section .section-content .table td:nth-child(3),
+    .empleado-section .section-content .table th:nth-child(4),
+    .empleado-section .section-content .table td:nth-child(4) {
+        display: none;
+    }
+}
+
+/* ========================================
+   ESTILOS RESPONSIVOS PARA BOTONES DE ACCIÓN
+   ======================================== */
+
+/* Tablets */
+@media (max-width: 1024px) {
+    .btn-sm {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Móviles grandes */
+@media (max-width: 768px) {
+    .btn-sm {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+        margin: 0 0.1rem;
+        min-width: 30px;
+    }
+    
+    .btn-group {
+        gap: 0.25rem;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .btn-sm {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+        margin: 0 0.05rem;
+        min-width: 25px;
+    }
+    
+    .btn-group {
+        gap: 0.2rem;
+    }
+}
+
+/* ========================================
+   ESTILOS RESPONSIVOS PARA MODALES
+   ======================================== */
+
+/* Móviles grandes */
+@media (max-width: 768px) {
+    .modal {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-large {
+        width: 98%;
+        max-width: none;
+        margin: 5px;
+        padding: 12px;
+        max-height: 95vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-header {
+        padding: 10px 0;
+        flex-shrink: 0;
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 10px 0;
+        flex: 1;
+        overflow-y: auto;
+        max-height: none;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-input,
+    .form-select {
+        font-size: 16px; /* Previene zoom en iOS */
+        padding: 10px;
+    }
+    
+    .modal-footer {
+        padding: 10px 0 0 0;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    /* Form rows responsivos */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .toggle-buttons {
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .btn-toggle {
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .modal {
+        margin: 5px;
+        padding: 12px;
+        border-radius: 8px;
+        max-height: 95vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-large {
+        margin: 3px;
+        padding: 10px;
+        max-height: 98vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-header {
+        padding: 8px 0;
+        flex-shrink: 0;
+    }
+    
+    .modal-body {
+        padding: 8px 0;
+        flex: 1;
+        overflow-y: auto;
+    }
+    
+    .modal-footer {
+        padding: 8px 0 0 0;
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .form-input,
+    .form-select {
+        padding: 8px;
+        font-size: 16px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-toggle {
+        padding: 4px 8px;
+        font-size: 11px;
+        min-width: 35px;
+    }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+    .modal {
+        margin: 3px;
+        padding: 12px;
+    }
+    
+    .modal-large {
+        margin: 2px;
+        padding: 10px;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .form-input,
+    .form-select {
+        padding: 8px;
+    }
+    
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-toggle {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+/* Modo landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal {
+        max-height: 95vh;
+        padding: 15px;
+    }
+    
+    .modal-large {
+        max-height: 98vh;
+        padding: 10px;
+    }
+    
+    .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .form-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+/* ========================================
+   ESTILOS PARA MAYÚSCULAS
+   ======================================== */
+
+/* Todos los inputs de texto se escriben en mayúsculas */
+input[type="text"], 
+input[type="email"], 
+input[type="tel"], 
+textarea {
+    text-transform: uppercase;
+}
+
+/* Todo el contenido de las tablas se muestra en mayúsculas */
+.empleado-section .section-content .table td,
+.empleado-section .section-content .table th {
+    text-transform: uppercase;
+}
+
+/* Asegurar que todas las tablas de empleados muestren contenido en mayúsculas */
+#content-administrativo .table td,
+#content-administrativo .table th,
+#content-pyf .table td,
+#content-pyf .table th,
+#content-servicio .table td,
+#content-servicio .table th {
+    text-transform: uppercase !important;
+}
