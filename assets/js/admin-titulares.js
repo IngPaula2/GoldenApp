@@ -11,6 +11,10 @@
 
 // Dashboard JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar titulares de la ciudad seleccionada si existe
+    loadTitularesForSelectedCity();
+    // Mostrar SIEMPRE el modal de seleccionar ciudad al entrar (forzar sin chequear sesión)
+    try { setTimeout(() => forceShowModal(), 300); } catch (e) {}
     
     // ========================================
     // FUNCIONES DE UTILIDAD PARA BACKEND
@@ -164,8 +168,15 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteTitularFromData(originalId);
         }
         
-        // Guardar datos
-        titularesData[numeroId] = nuevoTitular;
+        // Guardar por ciudad y persistir
+        const city = getSelectedCityCode();
+        if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
+        if (!titularesByCity[city]) titularesByCity[city] = {};
+        const toSave = { ...nuevoTitular, ciudad: city };
+        titularesByCity[city][numeroId] = toSave;
+        persistTitularesByCity();
+        // También reflejar en memoria y UI actual
+        titularesData[numeroId] = toSave;
         
         // Actualizar tabla principal
         addTitularToTable(nuevoTitular, true);
@@ -271,8 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
             showCreateBeneficiarioModal();
         } else {
             // Si no tiene beneficiario, crear el titular directamente
-            // Guardar datos
-            titularesData[titularData.numeroId] = titularData;
+            // Guardar por ciudad y persistir
+            const city = getSelectedCityCode();
+            if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
+            if (!titularesByCity[city]) titularesByCity[city] = {};
+            const toSave = { ...titularData, ciudad: city };
+            titularesByCity[city][titularData.numeroId] = toSave;
+            persistTitularesByCity();
+            // También reflejar en memoria y UI actual
+            titularesData[titularData.numeroId] = toSave;
             
             // Cerrar modal de creación y limpiar formulario
             hideCreateTitularModal();
@@ -1173,10 +1191,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('Ciudad seleccionada:', selectedCity);
                         // Guardar la ciudad seleccionada en sessionStorage
                         sessionStorage.setItem('selectedCity', selectedCity);
-                        alert('Ciudad seleccionada: ' + selectedCity);
+                        try { showNotification('Ciudad seleccionada: ' + selectedCity, 'success'); } catch(e) {}
                         hideModal();
+                        // Cargar titulares de la ciudad seleccionada
+                        loadTitularesForSelectedCity();
                     } else {
-                        alert('Por favor, seleccione una ciudad');
+                        try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch(e) { alert('Por favor, seleccione una ciudad'); }
                     }
                     break;
                 case 'Editar':
@@ -1213,12 +1233,111 @@ document.addEventListener('DOMContentLoaded', function() {
     // FUNCIONALIDAD DE FORMULARIOS
     // ========================================
     
-    // Funcionalidad del select de ciudades
+    // Funcionalidad del select de ciudades y carga dinámica desde ciudades
     const citySelect = document.getElementById('citySelect');
+    function populateCitySelectFromCiudades() {
+        if (!citySelect) return;
+        let ciudades = {};
+        if (typeof window.getCiudadesData === 'function') {
+            ciudades = window.getCiudadesData();
+        } else {
+            const allowLocal = sessionStorage.getItem('ciudadesAllowLocal') === 'true';
+            if (allowLocal) {
+                try { ciudades = JSON.parse(localStorage.getItem('ciudadesData') || '{}'); } catch (e) { ciudades = {}; }
+            }
+        }
+        const currentValue = citySelect.value;
+        citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
+        Object.values(ciudades)
+            .filter(c => c.activo !== false) // Solo ciudades activas
+            .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+            .forEach(c => {
+                const opt = document.createElement('option');
+                const code = String(c.codigo || '').toUpperCase();
+                const name = String(c.nombre || '').toUpperCase();
+                opt.value = c.codigo;
+                opt.textContent = `${code} - ${name}`;
+                citySelect.appendChild(opt);
+            });
+        if (currentValue && ciudades[currentValue] && ciudades[currentValue].activo !== false) citySelect.value = currentValue;
+    }
     if (citySelect) {
         citySelect.addEventListener('change', function() {
             console.log('Ciudad seleccionada:', this.value);
         });
+        // Poblar al cargar
+        populateCitySelectFromCiudades();
+        // Actualizar cuando ciudades cambie
+        window.addEventListener('ciudades:updated', populateCitySelectFromCiudades);
+    }
+
+    // Fallback: crear modal de selección si no existe y exponer funciones
+    if (typeof window.showSelectCityModal !== 'function') {
+        const existing = document.getElementById('selectCityModal');
+        if (!existing) {
+            const container = document.createElement('div');
+            container.id = 'selectCityModal';
+            container.className = 'modal-overlay';
+            container.style.display = 'none';
+            container.innerHTML = `
+                <div class="modal" style="max-width: 420px; width: 90%;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                        <button class="modal-close" onclick="hideSelectCityModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="citySelect" class="form-label">Ciudad *</nlabel>
+                            <div class="select-container">
+                                <select id="citySelect" class="form-select">
+                                    <option value="">Seleccione la ciudad</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(container);
+            container.addEventListener('click', (e) => {
+                if (e.target === container) {
+                    container.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
+            bSeleccionar.addEventListener('click', () => {
+                const sel = container.querySelector('#citySelect');
+                const value = sel.value;
+                if (!value) { try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch(e) { alert('Por favor, seleccione una ciudad'); } return; }
+                sessionStorage.setItem('selectedCity', value);
+                container.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                try { showNotification('Ciudad seleccionada: ' + value, 'success'); } catch(e) {}
+                // Cargar titulares de la ciudad seleccionada
+                loadTitularesForSelectedCity();
+            });
+        }
+        window.showSelectCityModal = function() {
+            // repoblar usando el método existente
+            populateCitySelectFromCiudades();
+            const container = document.getElementById('selectCityModal');
+            if (container) {
+                container.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        };
+        window.hideSelectCityModal = function() {
+            const container = document.getElementById('selectCityModal');
+            if (container) {
+                container.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        };
     }
     
     // ========================================
@@ -1584,6 +1703,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar modal de selección de ciudad al cargar la página (simulando login)
     // Esto mostrará el modal automáticamente cuando se cargue la página
     setTimeout(showModal, 500);
+
+    // ========================================
+    // UTILIDADES: NOTIFICACIONES
+    // ========================================
+    if (typeof window.showNotification !== 'function') {
+        window.showNotification = function(message, type = 'info') {
+            try {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.add('show'), 100);
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => { try { document.body.removeChild(notification); } catch(e) {} }, 300);
+                }, 3000);
+            } catch (e) { console.log(message); }
+        };
+    }
     
     // ========================================
     // FUNCIONES DE GESTIÓN DE TITULARES
@@ -2593,12 +2731,95 @@ function setFechaActual() {
 // ========================================
 // DATOS EN MEMORIA
 // ========================================
-const titularesData = {};
-const beneficiariosData = {};
+const titularesData = {}; // Solo bucket activo en la UI
+const beneficiariosData = {}; // Solo bucket activo en la UI
 // Mapa de relación: titularId -> array de beneficiarios
 const titularIdToBeneficiarios = {};
 // Último titular buscado (para "Añadir Beneficiario")
 let currentSearchedTitularId = null;
+
+/**
+ * Almacén persistente por ciudad para titulares
+ * Estructura: { [codigoCiudad]: { [numeroId]: { datosDelTitular, ciudad } } }
+ */
+const titularesByCity = (function(){
+    try {
+        const raw = localStorage.getItem('titularesByCity');
+        return raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) { return {}; }
+})();
+
+/**
+ * Almacén persistente por ciudad para beneficiarios
+ * Estructura: { [codigoCiudad]: { [numeroId]: { datosDelBeneficiario, ciudad } } }
+ */
+const beneficiariosByCity = (function(){
+    try {
+        const raw = localStorage.getItem('beneficiariosByCity');
+        return raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) { return {}; }
+})();
+
+function persistTitularesByCity() {
+    try { localStorage.setItem('titularesByCity', JSON.stringify(titularesByCity)); } catch (e) {}
+}
+
+function persistBeneficiariosByCity() {
+    try { localStorage.setItem('beneficiariosByCity', JSON.stringify(beneficiariosByCity)); } catch (e) {}
+}
+
+function getSelectedCityCode() {
+    try { return sessionStorage.getItem('selectedCity') || ''; } catch (e) { return ''; }
+}
+
+function loadTitularesForSelectedCity() {
+    // Volcar buckets de la ciudad actual a memoria (vista)
+    const city = getSelectedCityCode();
+    const titularesBucket = (titularesByCity && titularesByCity[city]) ? titularesByCity[city] : {};
+    const beneficiariosBucket = (beneficiariosByCity && beneficiariosByCity[city]) ? beneficiariosByCity[city] : {};
+    
+    // Limpiar estructuras en memoria
+    try {
+        Object.keys(titularesData).forEach(k => delete titularesData[k]);
+        Object.keys(beneficiariosData).forEach(k => delete beneficiariosData[k]);
+        Object.keys(titularIdToBeneficiarios).forEach(k => delete titularIdToBeneficiarios[k]);
+    } catch (e) {}
+    
+    // Rellenar en memoria
+    Object.keys(titularesBucket).forEach(id => { titularesData[id] = titularesBucket[id]; });
+    Object.keys(beneficiariosBucket).forEach(id => { beneficiariosData[id] = beneficiariosBucket[id]; });
+    
+    // Reconstruir relaciones titular-beneficiario
+    Object.values(beneficiariosData).forEach(benef => {
+        if (benef.titularId) {
+            if (!titularIdToBeneficiarios[benef.titularId]) {
+                titularIdToBeneficiarios[benef.titularId] = [];
+            }
+            titularIdToBeneficiarios[benef.titularId].push(benef);
+        }
+    });
+    
+    // Reconstruir tabla
+    try {
+        const tableBody = document.getElementById('titularesTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="no-data-message">
+                        <div class="no-data-content">
+                            <i class="fas fa-user-tie"></i>
+                            <p>No existen registros de titulares</p>
+                            <small>Haz clic en "Crear Titular" para crear el primer registro</small>
+                        </div>
+                    </td>
+                </tr>`;
+            
+            Object.values(titularesData)
+                .sort((a,b)=>String(a.numeroId).localeCompare(String(b.numeroId)))
+                .forEach(t => addTitularToTable(t, true));
+        }
+    } catch (e) {}
+}
 
 // Datos de ejemplo para probar la búsqueda
 const titularEjemplo = {

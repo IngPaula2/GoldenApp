@@ -15,6 +15,16 @@
 // VARIABLES GLOBALES
 // ========================================
 const ciudadesData = {};
+// Cargar ciudades persistidas desde localStorage (si existen)
+try {
+    const storedCiudades = localStorage.getItem('ciudadesData');
+    if (storedCiudades) {
+        const parsed = JSON.parse(storedCiudades);
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(k => { ciudadesData[k] = parsed[k]; });
+        }
+    }
+} catch (e) { /* noop */ }
 const filialData = {};
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -285,6 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Refrescar selects dependientes
         refreshCitySelects();
         
+        // Flag de sesión para permitir fallback a localStorage en otras interfaces
+        try { sessionStorage.setItem('ciudadesAllowLocal', 'true'); } catch (e) {}
+
         // Mostrar modal de éxito
         showSuccessCreateCityModal();
         
@@ -629,10 +642,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedCity) {
                 console.log('Ciudad seleccionada:', selectedCity);
                 sessionStorage.setItem('selectedCity', selectedCity);
-                alert('Ciudad seleccionada: ' + selectedCity);
+                try { showNotification('Ciudad seleccionada: ' + selectedCity, 'success'); } catch (e) {}
                 hideSelectCityModal();
             } else {
-                alert('Por favor, seleccione una ciudad');
+                try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch (e) { alert('Por favor, seleccione una ciudad'); }
             }
         });
     }
@@ -1121,15 +1134,27 @@ function resultsByCity(code) {
             const currentValue = sel.value;
             sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
             Object.values(ciudadesData)
+                .filter(c => c.activo !== false) // Solo ciudades activas
                 .sort((a, b) => a.codigo.localeCompare(b.codigo))
                 .forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.codigo;
-                    opt.textContent = `${c.codigo} - ${c.nombre}`;
+                    try {
+                        const code = String(c.codigo || '').toUpperCase();
+                        const name = String(c.nombre || '').toUpperCase();
+                        opt.textContent = `${code} - ${name}`;
+                    } catch (e) {
+                        opt.textContent = `${c.codigo} - ${c.nombre}`;
+                    }
                     sel.appendChild(opt);
                 });
-            if (currentValue && ciudadesData[currentValue]) sel.value = currentValue;
+            if (currentValue && ciudadesData[currentValue] && ciudadesData[currentValue].activo !== false) {
+                sel.value = currentValue;
+            }
         });
+        // Persistir y notificar globalmente que la lista de ciudades ha cambiado
+        try { localStorage.setItem('ciudadesData', JSON.stringify(ciudadesData)); } catch (e) {}
+        try { window.dispatchEvent(new CustomEvent('ciudades:updated')); } catch (e) {}
     }
     
 
@@ -1250,6 +1275,36 @@ function resultsByCity(code) {
     // Mostrar modal de selección de ciudad al cargar la página (simulando login)
     // Esto mostrará el modal automáticamente cuando se cargue la página
     setTimeout(showSelectCityModal, 500);
+
+    // ========================================
+    // UTILIDADES: NOTIFICACIONES
+    // ========================================
+    if (typeof window.showNotification !== 'function') {
+        window.showNotification = function(message, type = 'info') {
+            try {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.add('show'), 100);
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => { try { document.body.removeChild(notification); } catch(e) {} }, 300);
+                }, 3000);
+            } catch (e) { console.log(message); }
+        };
+    }
+    
+    // Reconstruir la tabla y selects desde los datos cargados (p. ej., al volver a esta página)
+    try {
+        const ciudadesList = Object.values(ciudadesData || {});
+        if (Array.isArray(ciudadesList) && ciudadesList.length > 0) {
+            ciudadesList
+                .sort((a, b) => a.codigo.localeCompare(b.codigo))
+                .forEach(c => addCityToTable(c, true));
+            refreshCitySelects();
+        }
+    } catch (e) {}
     
     // ========================================
     // FUNCIONES DE GESTIÓN DE CIUDADES
@@ -1284,6 +1339,12 @@ function resultsByCity(code) {
         hideModal();
         showCreateCityModal();
     };
+
+    // Exponer utilidades de ciudades para otras interfaces
+    try {
+        window.refreshCitySelects = refreshCitySelects;
+        window.getCiudadesData = function() { return ciudadesData; };
+    } catch (e) {}
     
     // ========================================
     // FUNCIONES GLOBALES DE FILIALES
@@ -1637,6 +1698,17 @@ function confirmToggleCity() {
             
             // Por ahora solo mostramos el modal de éxito
             console.log('Estado de ciudad confirmado:', ciudad.activo ? 'ACTIVA' : 'INACTIVA');
+            
+            // Actualizar localStorage y notificar a otras interfaces
+            try { 
+                localStorage.setItem('ciudadesData', JSON.stringify(ciudadesData)); 
+            } catch (e) {}
+            try { 
+                window.dispatchEvent(new CustomEvent('ciudades:updated')); 
+            } catch (e) {}
+            
+            // Refrescar selects locales
+            refreshCitySelects();
             
             // Cerrar modal de confirmación
             const confirmModal = document.getElementById('confirmToggleCityModal');

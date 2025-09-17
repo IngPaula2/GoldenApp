@@ -29,11 +29,65 @@
 // ========================================
 
 /**
- * Objeto que almacena todos los empleados creados por el usuario
+ * Objeto que almacena todos los empleados creados por el usuario (solo bucket activo en la UI)
  * Estructura: { identificacion: { datosDelEmpleado } }
  * @type {Object}
  */
 let userCreatedEmpleados = {};
+
+/**
+ * Almacén persistente por ciudad para empleados
+ * Estructura: { [codigoCiudad]: { [identificacion]: { datosDelEmpleado, ciudad } } }
+ */
+const empleadosByCity = (function(){
+    try {
+        const raw = localStorage.getItem('empleadosByCity');
+        return raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) { return {}; }
+})();
+
+function persistEmpleadosByCity() {
+    try { localStorage.setItem('empleadosByCity', JSON.stringify(empleadosByCity)); } catch (e) {}
+}
+
+function getSelectedCityCode() {
+    try { return sessionStorage.getItem('selectedCity') || ''; } catch (e) { return ''; }
+}
+
+function loadEmpleadosForSelectedCity() {
+    // Volcar bucket de la ciudad actual a memoria (vista)
+    const city = getSelectedCityCode();
+    const bucket = (empleadosByCity && empleadosByCity[city]) ? empleadosByCity[city] : {};
+    
+    // Limpiar estructura en memoria
+    try {
+        Object.keys(userCreatedEmpleados).forEach(k => delete userCreatedEmpleados[k]);
+    } catch (e) {}
+    
+    // Rellenar en memoria
+    Object.keys(bucket).forEach(id => { userCreatedEmpleados[id] = bucket[id]; });
+    
+    // Reconstruir tabla
+    try {
+        const tableBody = document.getElementById('empleadosTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="no-data-message">
+                        <div class="no-data-content">
+                            <i class="fas fa-users"></i>
+                            <p>No existen registros de empleados</p>
+                            <small>Haz clic en "Crear Empleado" para crear el primer registro</small>
+                        </div>
+                    </td>
+                </tr>`;
+            
+            Object.values(userCreatedEmpleados)
+                .sort((a,b)=>String(a.identificacion).localeCompare(String(b.identificacion)))
+                .forEach(e => addEmpleadoToTable(e, true));
+        }
+    } catch (e) {}
+}
 
 /**
  * Array que contiene todos los cargos disponibles
@@ -74,8 +128,124 @@ let cargosPorArea = {
     ]
 };
 
-// Ciudad actual (se establecerá desde la página de ciudades)
-let ciudadActual = 'BOGOTÁ'; // Por defecto
+// Ciudad actual (tomada de sessionStorage; sin valor por defecto)
+let ciudadActual = sessionStorage.getItem('selectedCity') || '';
+
+// Utilidad: obtener ciudad seleccionada de la sesión de forma segura
+function getSelectedCity() {
+    return sessionStorage.getItem('selectedCity') || '';
+}
+
+// Fallback: modal local de selección de ciudad si el global no existe
+function promptForCitySelection() {
+    if (typeof window.showSelectCityModal === 'function') {
+        window.showSelectCityModal();
+        return;
+    }
+    // Inyectar un modal con misma estructura/ids para heredar estilos de ciudades
+    let container = document.getElementById('selectCityModal');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'selectCityModal';
+        container.className = 'modal-overlay';
+        container.style.display = 'none';
+        container.innerHTML = `
+            <div class="modal" style="max-width: 420px; width: 90%;">
+                <div class="modal-header">
+                    <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                    <button class="modal-close" onclick="hideSelectCityModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="citySelect" class="form-label">Ciudad *</label>
+                        <div class="select-container">
+                            <select id="citySelect" class="form-select">
+                                <option value="">Seleccione la ciudad</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+                </div>
+            </div>`;
+        document.body.appendChild(container);
+        // Cerrar al hacer clic fuera
+        container.addEventListener('click', (e) => { if (e.target === container) { container.style.display = 'none'; document.body.style.overflow = 'auto'; } });
+        // Botones
+        const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
+        bSeleccionar.addEventListener('click', () => {
+            const sel = container.querySelector('#citySelect');
+            const value = sel.value;
+            if (!value) { try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch(e) { alert('Por favor, seleccione una ciudad'); } return; }
+            sessionStorage.setItem('selectedCity', value);
+            ciudadActual = value;
+            container.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Cargar empleados de la ciudad seleccionada
+            loadEmpleadosForSelectedCity();
+            try { showNotification('Ciudad seleccionada: ' + value, 'success'); } catch(e) {}
+        });
+        // Exponer funciones si no existen
+        if (typeof window.showSelectCityModal !== 'function') {
+            window.showSelectCityModal = function() {
+                populateCitySelectOptions();
+                container.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+        }
+        if (typeof window.hideSelectCityModal !== 'function') {
+            window.hideSelectCityModal = function() {
+                container.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            };
+        }
+    }
+    function populateCitySelectOptions() {
+        const sel = document.getElementById('citySelect');
+        if (!sel) return;
+        // Preferir origen vivo; si no existe en esta página, caer a localStorage validado
+        let ciudades = {};
+        if (typeof window.getCiudadesData === 'function') {
+            ciudades = window.getCiudadesData();
+        } else {
+            // Solo habilitar fallback a localStorage si en esta sesión se crearon ciudades
+            const allowLocal = sessionStorage.getItem('ciudadesAllowLocal') === 'true';
+            if (allowLocal) {
+                try {
+                    const raw = localStorage.getItem('ciudadesData');
+                    const parsed = raw ? JSON.parse(raw) : {};
+                    if (parsed && typeof parsed === 'object') {
+                        ciudades = Object.fromEntries(
+                            Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                        );
+                    }
+                } catch (e) { ciudades = {}; }
+            }
+        }
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
+        Object.values(ciudades)
+            .filter(c => c.activo !== false) // Solo ciudades activas
+            .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo)))
+            .forEach(c => {
+                const opt = document.createElement('option');
+                const code = String(c.codigo || '').toUpperCase();
+                const name = String(c.nombre || '').toUpperCase();
+                opt.value = c.codigo;
+                opt.textContent = `${code} - ${name}`;
+                sel.appendChild(opt);
+            });
+        if (current && ciudades[current] && ciudades[current].activo !== false) sel.value = current;
+    }
+    // Suscribirse a cambios desde Ciudades para reflejar nuevas ciudades inmediatamente
+    try { window.addEventListener('ciudades:updated', populateCitySelectOptions); } catch (e) {}
+    populateCitySelectOptions();
+    window.showSelectCityModal();
+}
 
 // ========================================
 // FUNCIONES DE MODALES
@@ -85,6 +255,13 @@ let ciudadActual = 'BOGOTÁ'; // Por defecto
  * Muestra el modal de crear empleado
  */
 function showCreateEmpleadoModal() {
+    // Validar ciudad seleccionada antes de permitir crear empleados
+    ciudadActual = getSelectedCity();
+    if (!ciudadActual) {
+        promptForCitySelection();
+        showNotification('Por favor, seleccione una ciudad antes de crear empleados', 'warning');
+        return;
+    }
     const modal = document.getElementById('createEmpleadoModal');
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -318,6 +495,13 @@ function resetModalToCreate() {
  * @returns {void}
  */
 function handleCreateEmpleado() {
+    // Asegurar que exista ciudad seleccionada antes de crear
+    ciudadActual = getSelectedCity();
+    if (!ciudadActual) {
+        promptForCitySelection();
+        showNotification('Por favor, seleccione una ciudad antes de crear el empleado', 'warning');
+        return;
+    }
     // Obtener valores de los campos del formulario
     const tipoIdentificacion = document.getElementById('tipoIdentificacion').value;
     const identificacion = document.getElementById('identificacion').value;
@@ -385,6 +569,13 @@ function handleCreateEmpleado() {
  * Maneja la actualización de un empleado existente
  */
 function handleUpdateEmpleado(empleadoId) {
+    // Asegurar que exista ciudad seleccionada antes de actualizar
+    ciudadActual = getSelectedCity();
+    if (!ciudadActual) {
+        promptForCitySelection();
+        showNotification('Por favor, seleccione una ciudad antes de actualizar el empleado', 'warning');
+        return;
+    }
     // Obtener valores de los campos
     const tipoIdentificacion = document.getElementById('tipoIdentificacion').value;
     const identificacion = document.getElementById('identificacion').value;
@@ -853,8 +1044,15 @@ function displaySearchResults(searchResults) {
 function addEmpleadoToSection(empleadoData, replaceIfExists = false) {
     const { area, identificacion } = empleadoData;
     
-    // Guardar el empleado en la estructura de datos
-    userCreatedEmpleados[identificacion] = empleadoData;
+    // Guardar por ciudad y persistir
+    const city = getSelectedCityCode();
+    if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
+    if (!empleadosByCity[city]) empleadosByCity[city] = {};
+    const toSave = { ...empleadoData, ciudad: city };
+    empleadosByCity[city][identificacion] = toSave;
+    persistEmpleadosByCity();
+    // También reflejar en memoria y UI actual
+    userCreatedEmpleados[identificacion] = toSave;
     
     // Mapear el área a la sección correspondiente
     let sectionId;
@@ -1141,8 +1339,14 @@ function processEmpleadoUpdate(nuevoEmpleado) {
         removeEmpleadoFromSection(identificacion, empleadoAnterior.area);
     }
     
-    // Guardar datos
-    userCreatedEmpleados[identificacion] = nuevoEmpleado;
+    // Guardar por ciudad y persistir
+    const city = getSelectedCityCode();
+    if (!empleadosByCity[city]) empleadosByCity[city] = {};
+    const toSave = { ...nuevoEmpleado, ciudad: city };
+    empleadosByCity[city][identificacion] = toSave;
+    persistEmpleadosByCity();
+    // También reflejar en memoria
+    userCreatedEmpleados[identificacion] = toSave;
     
     // Actualizar tabla principal (esto agregará en la nueva área si cambió)
     addEmpleadoToSection(nuevoEmpleado, true);
@@ -1413,9 +1617,14 @@ function confirmDeleteEmpleado() {
         // });
         
         // Por ahora solo eliminamos de memoria local
-        // Eliminar el empleado de la estructura de datos
+        // Eliminar el empleado de la estructura de datos y del bucket por ciudad
+        const city = getSelectedCityCode();
         if (userCreatedEmpleados[empleadoId]) {
             delete userCreatedEmpleados[empleadoId];
+            if (empleadosByCity[city]) {
+                delete empleadosByCity[city][empleadoId];
+                persistEmpleadosByCity();
+            }
         }
         
         // Eliminar el empleado de la interfaz
@@ -1483,6 +1692,14 @@ function closeSuccessDeleteEmpleadoModal() {
  */
 function initializePage() {
     console.log('Inicializando página de empleados...');
+    // Cargar empleados de la ciudad seleccionada si existe
+    loadEmpleadosForSelectedCity();
+    // SIEMPRE solicitar selección al cargar esta interfaz
+    setTimeout(() => promptForCitySelection(), 300);
+    // Escuchar actualizaciones de ciudades
+    window.addEventListener('ciudades:updated', () => {
+        ciudadActual = getSelectedCity();
+    });
     
     // CONFIGURACIÓN DE MODALES: Cerrar al hacer clic fuera
     const modals = document.querySelectorAll('.modal-overlay');
@@ -1625,8 +1842,14 @@ function testUpdateEmpleado() {
     
     console.log('Empleado modificado:', empleadoModificado);
     
-    // Actualizar en la estructura de datos
-    userCreatedEmpleados[empleadoId] = empleadoModificado;
+    // Actualizar en la estructura de datos y bucket por ciudad
+    const city = getSelectedCityCode();
+    if (!empleadosByCity[city]) empleadosByCity[city] = {};
+    const toSave = { ...empleadoModificado, ciudad: city };
+    empleadosByCity[city][empleadoId] = toSave;
+    persistEmpleadosByCity();
+    // También reflejar en memoria
+    userCreatedEmpleados[empleadoId] = toSave;
     
     // Actualizar en la UI usando el nuevo sistema
     addEmpleadoToSection(empleadoModificado, true);

@@ -11,6 +11,8 @@ Este documento describe la estructura y funcionalidad de todos los archivos Java
 - `assets/js/admin-ciudades.js` - Dashboard de ciudades y filiales
 - `assets/js/admin-titulares.js` - Dashboard de titulares y beneficiarios
 - `assets/js/admin-cargos.js` - Dashboard de cargos
+- `assets/js/admin-empleados.js` - Dashboard de empleados
+- `assets/js/admin-organizaciones.js` - Dashboard de organizaciones
 
 ## ARCHIVO: LOGIN.JS
 
@@ -218,6 +220,50 @@ function hideCreateCargoModal()
 const cargosData = {}; // Almacena datos de cargos
 ```
 
+## ARCHIVO: ADMIN-EMPLEADOS.JS
+
+### Proposito
+Dashboard administrativo para gestionar empleados y su información básica, con selección obligatoria de ciudad, validaciones y notificaciones.
+
+### Funcionalidades Principales
+- CRUD de empleados
+- Gestión de beneficiarios
+- Modal de selección de ciudad y sincronización con ciudades
+- Notificaciones estilizadas de acciones
+
+### Puntos de Integracion Backend
+- `POST /api/empleados` (crear)
+- `PUT /api/empleados/{id}` (actualizar)
+- `GET /api/empleados/{id}` (buscar)
+- `DELETE /api/empleados/{id}` (eliminar)
+
+## ARCHIVO: ADMIN-ORGANIZACIONES.JS
+
+### Proposito
+Dashboard administrativo para gestionar organizaciones. Formulario simplificado (código y nombre), modal de selección de ciudad, sincronización con ciudades y notificaciones.
+
+### Estructura de Datos
+```javascript
+const organizacionesData = {
+  [codigo]: { codigo, nombre, activo }
+}
+```
+
+### Funcionalidades Principales
+- Crear organización
+- Actualizar organización
+- Eliminar organización
+- Buscar por código
+- Selección de ciudad obligatoria y sincronizada
+
+### Puntos de Integracion Backend (ubicación en el código)
+- `POST /api/organizaciones` → función `confirmCreateOrg()` (sección CONEXIÓN BACKEND)
+- `PUT /api/organizaciones/{codigo}` → función `confirmUpdateOrg()` (sección CONEXIÓN BACKEND)
+- `GET /api/organizaciones/{codigo}` → función `resultOrgByCode(code)` (sección CONEXIÓN BACKEND)
+- `DELETE /api/organizaciones/{codigo}` → función `confirmDeleteOrg()` (sección CONEXIÓN BACKEND)
+
+Cada punto incluye comentarios con headers requeridos y estructura de body. El equipo backend debe reemplazar los bloques comentados por las llamadas reales.
+
 ## FUNCIONES DE UTILIDAD COMUNES
 
 ### Autenticacion
@@ -248,6 +294,32 @@ function updateRowInTable(tableId, rowId, newData)
 function removeRowFromTable(tableId, rowId)
 function clearTable(tableId)
 ```
+
+## SINCRONIZACIÓN ENTRE MÓDULOS (CIUDADES)
+
+### Evento Global
+- `window.dispatchEvent(new CustomEvent('ciudades:updated'))` al crear/actualizar ciudades.
+
+### Funciones Globales
+- `window.getCiudadesData()` retorna el mapa de ciudades vigente.
+- `window.refreshCitySelects()` repuebla selects locales y persiste en localStorage.
+
+### Fallback de Datos
+- Si `getCiudadesData` aún no está disponible, se permite fallback a `localStorage` únicamente si existe el flag de sesión `ciudadesAllowLocal`.
+
+### Reglas de Selectores de Ciudad
+- Solo listar ciudades activas (`activo !== false`).
+- Convertir a mayúsculas el código y nombre al poblar selects.
+
+## SISTEMA DE NOTIFICACIONES
+
+### Implementación
+- Función `showNotification(message, type)` disponible en todos los módulos.
+- Tipos soportados: `success`, `error`, `warning`, `info`.
+- Estilos CSS compartidos en `admin-cargos.css`, `admin-ciudades.css` y `admin-empleados.css`.
+
+### Reemplazos
+- Todos los `alert()` relacionados con selección de ciudad fueron reemplazados por `showNotification`.
 
 ## ESTRUCTURA DE DATOS COMUN
 
@@ -449,5 +521,5 @@ function validateDataIntegrity()
 ---
 
 **Fecha de creacion**: 2024  
-**Desarrollado por**: Equipo Golden Bridge  
+**Desarrollado por**: Paula Pachon  
 **Version**: 1.0.0

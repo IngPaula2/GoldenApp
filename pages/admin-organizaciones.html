@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<!--
+    DASHBOARD ADMINISTRATIVO - GOLDEN APP
+    
+    Este archivo contiene la página principal del panel administrativo de organizaciones.
+    Incluye sidebar de navegación, barra superior, tablas de datos y modales.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2024
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Organizaciones</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/reset.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/admin-ciudades.css">
+    <link rel="stylesheet" href="../assets/css/admin-organizaciones.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page organizaciones-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cogs nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item">
+                    <a href="admin-ciudades.html" class="top-nav-link">Ciudades</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-titulares.html" class="top-nav-link">Titulares</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-cargos.html" class="top-nav-link">Cargos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-empleados.html" class="top-nav-link">Empleados</a>
+                </li>
+                <li class="top-nav-item active">
+                    <a href="#" class="top-nav-link">Organizaciones</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link">Planes</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link">Consecutivos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link">Control de Consecutivos</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Organizaciones -->
+            <section class="organizations-section">
+                <div class="section-header">
+                    <h2>Organizaciones</h2>
+                    <div class="action-buttons">
+                        <button id="bBuscarOrg" class="btn btn-primary" onclick="showOrgSearchModal()">Buscar Organización</button>
+                        <button id="bCrearOrg" class="btn btn-primary" onclick="showCreateOrgModal()">Crear Organización</button>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="organizacionesTableBody">
+                            <tr>
+                                <td colspan="3" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-building"></i>
+                                        <p>No existen registros de organizaciones</p>
+                                        <small>Haz clic en "Crear Organización" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES
+         ======================================== -->
+
+    <!-- Modal de Selección de Ciudad -->
+    <div id="selectOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Seleccionar Ciudad</h3>
+                <button class="modal-close" onclick="hideSelectOrgModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="orgSelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="orgSelect" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSelectOrgModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bSeleccionarOrg">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Organización -->
+    <div id="orgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Buscar Organización</h3>
+                <button class="modal-close" onclick="hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="searchOrgCodigo">Código de Organización:</label>
+                    <input type="text" id="searchOrgCodigo" class="form-control" placeholder="Ingrese el código">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bBuscar">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear/Actualizar Organización -->
+    <div id="createOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="createOrgTitle">CREAR ORGANIZACIÓN</h3>
+                <button class="modal-close" onclick="hideCreateOrgModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createOrgForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tCodigo">Código *</label>
+                            <input type="text" id="tCodigo" class="form-control" placeholder="CÓDIGO DE LA ORGANIZACIÓN" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tNombre">Nombre *</label>
+                            <input type="text" id="tNombre" class="form-control" placeholder="NOMBRE DE LA ORGANIZACIÓN" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreateOrgModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrear">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda -->
+    <div id="orgResultsModal" class="modal-overlay">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">Resultados de Búsqueda</h3>
+                <button class="modal-close" onclick="hideOrgResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orgSearchResultsBody">
+                            <!-- Los resultados se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideOrgResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+
+    <!-- Modal de Confirmación para Crear Organización -->
+    <div id="confirmCreateOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Creación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea crear esta organización?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateOrg()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateOrg()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Actualizar Organización -->
+    <div id="confirmUpdateOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Actualización</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea actualizar esta organización?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateOrg()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateOrg()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar Organización -->
+    <div id="confirmDeleteOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea eliminar esta organización?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteOrg()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDeleteOrg()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE ÉXITO
+         ======================================== -->
+
+    <!-- Modal de Éxito para Crear Organización -->
+    <div id="successCreateOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">¡Éxito!</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">La organización ha sido creada exitosamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessOrgModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar Organización -->
+    <div id="successUpdateOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">¡Éxito!</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">La organización ha sido actualizada exitosamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateOrgModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Eliminar Organización -->
+    <div id="successDeleteOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">¡Éxito!</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">La organización ha sido eliminada exitosamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteOrgModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- JavaScript -->
+    <script src="../assets/js/admin-organizaciones.js"></script>
+</body>
+</html>
+

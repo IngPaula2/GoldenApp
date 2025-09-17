@@ -733,6 +733,42 @@ textarea {
     margin-bottom: 20px;
 }
 
+.form-group label,
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-control,
+.form-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.form-group input::placeholder,
+.form-control::placeholder {
+    color: #adb5bd;
+}
+
 .form-label {
     display: block;
     margin-bottom: 8px;
@@ -867,6 +903,46 @@ textarea {
 }
 
 
+
+/* ========================================
+   NOTIFICACIONES
+   ======================================== */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 3000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    background: #28a745;
+}
+
+.notification-error {
+    background: #dc3545;
+}
+
+.notification-warning {
+    background: #ffc107;
+    color: #1a1a1a;
+}
+
+.notification-info {
+    background: #17a2b8;
+}
 
 /* ========================================
    RESPONSIVE DESIGN MEJORADO PARA CIUDADES
