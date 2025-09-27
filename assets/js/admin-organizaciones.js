@@ -68,7 +68,7 @@ function loadOrgsForSelectedCity() {
         if (tableBody) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="3" class="no-data-message">
+                    <td colspan="4" class="no-data-message">
                         <div class="no-data-content">
                             <i class="fas fa-building"></i>
                             <p>No existen registros de organizaciones</p>
@@ -189,15 +189,24 @@ document.addEventListener('DOMContentLoaded', function() {
      * Limpia todos los campos del formulario de crear organización y restaura el modo "crear"
      */
     function clearCreateOrgForm() {
-        document.getElementById('tCodigo').value = '';
+        document.getElementById('tId').value = '';
         document.getElementById('tNombre').value = '';
         
         // Limpiar atributo de código original
-        document.getElementById('tCodigo').removeAttribute('data-original-code');
+        document.getElementById('tId').removeAttribute('data-original-code');
         
-        // Restaurar modo "crear" (título y botón)
+        // Solo habilitar el campo código si no estamos en modo edición
+        const isEditing = document.getElementById('tId').hasAttribute('data-original-code');
+        if (!isEditing) {
+            document.getElementById('tId').disabled = false;
+        }
+        
+        // Restaurar modo "crear" (título y botones)
         document.getElementById('createOrgTitle').textContent = 'CREAR ORGANIZACIÓN';
-        document.getElementById('bCrear').textContent = 'Crear';
+        const bCrearBtn = document.getElementById('bCrear');
+        const bActualizarBtn = document.getElementById('bActualizar');
+        if (bCrearBtn) bCrearBtn.style.display = '';
+        if (bActualizarBtn) bActualizarBtn.style.display = 'none';
     }
     
     // ========================================
@@ -292,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Mostrar modal de éxito
         showSuccessCreateOrgModal();
+        try { showNotification('Organización creada exitosamente', 'success'); } catch (e) {}
         
         // Limpiar datos temporales
         window.tempOrgData = null;
@@ -344,6 +354,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // EVENTOS DE MODALES
     // ========================================
+
+    // Handler explícito del botón bBuscar (requerido)
+    const bBuscar = document.getElementById('bBuscar');
+    if (bBuscar) {
+        bBuscar.addEventListener('click', function(e) {
+            e.preventDefault();
+            const code = (document.getElementById('searchOrgCodigo') || {}).value || '';
+            const trimmed = String(code).trim();
+            if (!trimmed) {
+                alert('Ingrese el código de organización');
+                return;
+            }
+            const result = resultOrgByCode(trimmed);
+            renderOrgSearchResults(result);
+            hideModal();
+            showOrgResultsModal();
+        });
+    }
     
     // Cerrar modal de selección de ciudad al hacer clic fuera
     selectOrgModalOverlay.addEventListener('click', function(e) {
@@ -559,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     
     // Funcionalidad del select de ciudades en Organizaciones
-    const orgSelect = document.getElementById('orgSelect');
+    const orgSelect = document.getElementById('cId_Ciudad');
     
     /**
      * Pobla el select de ciudades con datos actualizados
@@ -567,23 +595,20 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function populateOrgCitySelect() {
         if (!orgSelect) return;
-        // Preferir origen vivo, con fallback validado cuando haya ciudades en esta sesión
+        // Preferir origen vivo, con fallback a localStorage siempre que exista
         let ciudades = {};
         if (typeof window.getCiudadesData === 'function') {
             try { ciudades = window.getCiudadesData(); } catch (e) { ciudades = {}; }
         } else {
-            const allowLocal = sessionStorage.getItem('ciudadesAllowLocal') === 'true';
-            if (allowLocal) {
-                try {
-                    const raw = localStorage.getItem('ciudadesData');
-                    const parsed = raw ? JSON.parse(raw) : {};
-                    if (parsed && typeof parsed === 'object') {
-                        ciudades = Object.fromEntries(
-                            Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
-                        );
-                    }
-                } catch (e) { ciudades = {}; }
-            }
+            try {
+                const raw = localStorage.getItem('ciudadesData');
+                const parsed = raw ? JSON.parse(raw) : {};
+                if (parsed && typeof parsed === 'object') {
+                    ciudades = Object.fromEntries(
+                        Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                    );
+                }
+            } catch (e) { ciudades = {}; }
         }
         const current = orgSelect.value;
         orgSelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
@@ -611,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bSeleccionarOrg = document.getElementById('bSeleccionarOrg');
     if (bSeleccionarOrg) {
         bSeleccionarOrg.addEventListener('click', function() {
-            const selectedCity = document.getElementById('orgSelect').value;
+            const selectedCity = document.getElementById('cId_Ciudad').value;
             if (selectedCity) {
                 console.log('Ciudad seleccionada:', selectedCity);
                 try { sessionStorage.setItem('selectedCity', selectedCity); } catch (e) {}
@@ -634,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (bCrear) {
         bCrear.addEventListener('click', function() {
             // Obtener valores del formulario
-            const codigo = document.getElementById('tCodigo').value.trim();
+            const codigo = document.getElementById('tId').value.trim();
             const nombre = document.getElementById('tNombre').value.trim();
             
             // Validar campos obligatorios
@@ -651,18 +676,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 activo: true
             };
             
-            // Determinar si es crear o actualizar basado en el texto del botón
-            const isUpdate = document.getElementById('bCrear').textContent === 'Actualizar';
-            
-            if (isUpdate) {
-                // Es una actualización - mostrar modal de confirmación
-                window.tempOrgData = nuevaOrganizacion;
-                showConfirmUpdateOrgModal();
-            } else {
-                // Es una creación - mostrar modal de confirmación
-                window.tempOrgData = nuevaOrganizacion;
-                showConfirmCreateOrgModal();
+            // Es una creación - mostrar modal de confirmación
+            window.tempOrgData = nuevaOrganizacion;
+            showConfirmCreateOrgModal();
+        });
+    }
+
+    // Funcionalidad del botón actualizar organización
+    const bActualizar = document.getElementById('bActualizar');
+    if (bActualizar) {
+        bActualizar.addEventListener('click', function() {
+            const codigo = document.getElementById('tId').value.trim();
+            const nombre = document.getElementById('tNombre').value.trim();
+            if (!codigo || !nombre) {
+                alert('Por favor, complete todos los campos obligatorios.');
+                return;
             }
+            const nuevaOrganizacion = {
+                codigo: codigo,
+                nombre: nombre,
+                activo: true
+            };
+            window.tempOrgData = nuevaOrganizacion;
+            showConfirmUpdateOrgModal();
         });
     }
     
@@ -674,7 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const codigo = nuevaOrganizacion.codigo;
         
         // Verificar si el código cambió
-        const originalCode = document.getElementById('tCodigo').getAttribute('data-original-code');
+        const originalCode = document.getElementById('tId').getAttribute('data-original-code');
         if (originalCode && originalCode !== codigo) {
             // El código cambió - eliminar la organización anterior
             delete organizacionesData[originalCode];
@@ -736,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!organizacion) {
             body.innerHTML = `
                 <tr>
-                    <td colspan="3" class="no-data-message">
+                    <td colspan="4" class="no-data-message">
                         <div class="no-data-content">
                             <i class="fas fa-search"></i>
                             <p>No se encontraron resultados</p>
@@ -746,17 +782,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>`;
             return;
         }
+        
+        const isActive = organizacion.activo !== false;
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${organizacion.codigo}</td>
             <td>${organizacion.nombre}</td>
             <td>
+                <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVA' : 'INACTIVA'}</span>
+            </td>
+            <td>
                 <button class="btn btn-small" onclick="editOrg('${organizacion.codigo}')" title="Editar">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-small btn-danger" onclick="deleteOrg('${organizacion.codigo}')" title="Eliminar">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <label class="animated-toggle" data-codigo="${organizacion.codigo}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                    <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleOrgState('${organizacion.codigo}')">
+                    <span class="toggle-slider"></span>
+                </label>
             </td>`;
         
         body.appendChild(row);
@@ -775,20 +817,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!organizacion) return;
         
         // Llenar los campos con los datos de la organización
-        document.getElementById('tCodigo').value = organizacion.codigo;
+        document.getElementById('tId').value = organizacion.codigo;
         document.getElementById('tNombre').value = organizacion.nombre;
         
-        // Cambiar el título y texto del botón
+        // Cambiar el título y botones visibles
         document.getElementById('createOrgTitle').textContent = 'ACTUALIZAR ORGANIZACIÓN';
-        document.getElementById('bCrear').textContent = 'Actualizar';
+        const bCrearBtn2 = document.getElementById('bCrear');
+        const bActualizarBtn2 = document.getElementById('bActualizar');
+        if (bCrearBtn2) bCrearBtn2.style.display = 'none';
+        if (bActualizarBtn2) bActualizarBtn2.style.display = '';
         
         // Guardar el código original para poder eliminarlo después si cambia
-        document.getElementById('tCodigo').setAttribute('data-original-code', codigo);
+        document.getElementById('tId').setAttribute('data-original-code', codigo);
         
         // Cerrar cualquier modal abierto y abrir modal de crear/actualizar
         try { hideModal(); } catch(e) {}
         try { hideOrgResultsModal(); } catch(e) {}
         showCreateOrgModal();
+        
+        // Deshabilitar el campo código para evitar cambios (con delay para asegurar que se aplique)
+        setTimeout(() => {
+            document.getElementById('tId').disabled = true;
+        }, 100);
     }
     
     // ========================================
@@ -862,6 +912,55 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) {}
 
     // ========================================
+    // MODALES DE TOGGLE (crear si no existen)
+    // ========================================
+    (function ensureOrgToggleModals(){
+        try {
+            let confirm = document.getElementById('confirmToggleOrgModal');
+            if (!confirm) {
+                confirm = document.createElement('div');
+                confirm.id = 'confirmToggleOrgModal';
+                confirm.className = 'modal-overlay';
+                confirm.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title"></h3>
+                            <button class="modal-close" onclick="cancelToggleOrg()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="cancelToggleOrg()">Cancelar</button>
+                            <button class="btn btn-primary" onclick="confirmToggleOrg()">Confirmar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(confirm);
+            }
+            let success = document.getElementById('successToggleOrgModal');
+            if (!success) {
+                success = document.createElement('div');
+                success.id = 'successToggleOrgModal';
+                success.className = 'modal-overlay';
+                success.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                            <button class="modal-close" onclick="closeSuccessToggleOrgModal()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="closeSuccessToggleOrgModal()">Aceptar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(success);
+            }
+        } catch (e) {}
+    })();
+
+    // ========================================
     // UTILIDADES: NOTIFICACIONES
     // ========================================
     if (typeof window.showNotification !== 'function') {
@@ -891,20 +990,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Llenar los campos con los datos de la organización
-        document.getElementById('tCodigo').value = organizacion.codigo;
+        document.getElementById('tId').value = organizacion.codigo;
         document.getElementById('tNombre').value = organizacion.nombre;
         
-        // Cambiar el título y texto del botón
+        // Cambiar el título y botones visibles
         document.getElementById('createOrgTitle').textContent = 'ACTUALIZAR ORGANIZACIÓN';
-        document.getElementById('bCrear').textContent = 'Actualizar';
+        const bCrearBtn = document.getElementById('bCrear');
+        const bActualizarBtn = document.getElementById('bActualizar');
+        if (bCrearBtn) bCrearBtn.style.display = 'none';
+        if (bActualizarBtn) bActualizarBtn.style.display = '';
         
         // Guardar el código original para poder eliminarlo después si cambia
-        document.getElementById('tCodigo').setAttribute('data-original-code', codigo);
+        document.getElementById('tId').setAttribute('data-original-code', codigo);
         
         // Cerrar cualquier modal abierto y abrir modal de crear/actualizar
         try { hideModal(); } catch(e) {}
         try { hideOrgResultsModal(); } catch(e) {}
         showCreateOrgModal();
+        
+        // Deshabilitar el campo código para evitar cambios (con delay para asegurar que se aplique)
+        setTimeout(() => {
+            document.getElementById('tId').disabled = true;
+        }, 100);
     };
 
     // Exponer utilidades de organizaciones para otras interfaces
@@ -978,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Mostrar modal de éxito
         showSuccessUpdateOrgModal();
+        try { showNotification('Organización actualizada exitosamente', 'success'); } catch (e) {}
         
         // Limpiar datos temporales
         window.tempOrgData = null;
@@ -1048,16 +1156,21 @@ function addOrgToTable(organizacion, replaceIfExists = false) {
         return firstCell.textContent.trim() === organizacion.codigo.trim();
     });
     
+    const isActive = organizacion.activo !== false;
     const rowHtml = `
         <td>${organizacion.codigo}</td>
         <td>${organizacion.nombre}</td>
         <td>
+            <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVA' : 'INACTIVA'}</span>
+        </td>
+        <td>
             <button class="btn btn-small" onclick="editOrg('${organizacion.codigo}')" title="Editar">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-small btn-danger" onclick="deleteOrg('${organizacion.codigo}')" title="Eliminar">
-                <i class="fas fa-trash"></i>
-            </button>
+            <label class="animated-toggle" data-codigo="${organizacion.codigo}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleOrgState('${organizacion.codigo}')">
+                <span class="toggle-slider"></span>
+            </label>
         </td>
     `;
     
@@ -1089,12 +1202,171 @@ function addOrgToTable(organizacion, replaceIfExists = false) {
  * Función para eliminar una organización
  * @param {string} codigo - Código de la organización a eliminar
  */
-function deleteOrg(codigo) {
-    // Guardar el código de la organización a eliminar
-    window.tempDeleteOrgCode = codigo;
+// Eliminar ya no se usa para organizaciones; se mantiene reservado sin UI
+
+// ========================================
+// FUNCIONES PARA ACTIVAR/DESACTIVAR ORGANIZACIÓN
+// ========================================
+
+/**
+ * Cambia inmediatamente el estado visual del toggle y muestra modal de confirmación
+ */
+function toggleOrgState(codigo) {
+    const org = organizacionesData[codigo];
+    if (!org) return;
+    const estadoOriginal = org.activo !== false;
+    // Cambiar estado en memoria
+    org.activo = !estadoOriginal;
     
-    // Mostrar modal de confirmación
-    showConfirmDeleteOrgModal();
+    // Función auxiliar para actualizar UI en una tabla específica
+    function updateTableUI(tableSelector) {
+        const tableRows = document.querySelectorAll(`${tableSelector} tr`);
+        let toggleElement = null;
+        let toggleInput = null;
+        let badgeElement = null;
+        for (let row of tableRows) {
+            const firstCell = row.querySelector('td');
+            if (firstCell && firstCell.textContent.trim() === codigo) {
+                toggleElement = row.querySelector('.animated-toggle');
+                toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                badgeElement = row.querySelector('span.badge');
+                break;
+            }
+        }
+        if (toggleElement && toggleInput) {
+            toggleInput.checked = org.activo !== false;
+            toggleElement.title = (org.activo !== false) ? 'Desactivar' : 'Activar';
+            if (badgeElement) {
+                if (org.activo !== false) {
+                    badgeElement.className = 'badge badge-success';
+                    badgeElement.textContent = 'ACTIVA';
+                } else {
+                    badgeElement.className = 'badge badge-secondary';
+                    badgeElement.textContent = 'INACTIVA';
+                }
+            }
+        }
+    }
+    
+    // Actualizar UI en ambas tablas (principal y resultados de búsqueda)
+    updateTableUI('#organizacionesTableBody');
+    updateTableUI('#orgSearchResultsBody');
+    
+    // Mostrar confirmación
+    showConfirmToggleOrgModal(codigo, estadoOriginal);
+}
+
+function showConfirmToggleOrgModal(codigo, estadoOriginal) {
+    const org = organizacionesData[codigo];
+    if (!org) return;
+    window.tempToggleOrgCode = codigo;
+    window.tempToggleOrgPrev = estadoOriginal;
+    const modal = document.getElementById('confirmToggleOrgModal');
+    if (modal) {
+        const actionText = estadoOriginal ? 'desactivar' : 'activar';
+        const titleElement = modal.querySelector('.modal-title');
+        const messageElement = modal.querySelector('.modal-message');
+        if (titleElement) titleElement.textContent = `${actionText.toUpperCase()} ORGANIZACIÓN`;
+        if (messageElement) messageElement.textContent = `¿Está seguro de que desea ${actionText} la organización ${org.nombre}?`;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function cancelToggleOrg() {
+    const codigo = window.tempToggleOrgCode;
+    const prev = window.tempToggleOrgPrev;
+    if (codigo != null) {
+        const org = organizacionesData[codigo];
+        if (org) {
+            // Revertir en memoria
+            org.activo = prev;
+            
+            // Función auxiliar para revertir UI en una tabla específica
+            function revertTableUI(tableSelector) {
+                const tableRows = document.querySelectorAll(`${tableSelector} tr`);
+                let toggleElement = null;
+                let toggleInput = null;
+                let badgeElement = null;
+                for (let row of tableRows) {
+                    const firstCell = row.querySelector('td');
+                    if (firstCell && firstCell.textContent.trim() === codigo) {
+                        toggleElement = row.querySelector('.animated-toggle');
+                        toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                        badgeElement = row.querySelector('span.badge');
+                        break;
+                    }
+                }
+                if (toggleElement && toggleInput) {
+                    toggleInput.checked = org.activo !== false;
+                    toggleElement.title = (org.activo !== false) ? 'Desactivar' : 'Activar';
+                    if (badgeElement) {
+                        if (org.activo !== false) {
+                            badgeElement.className = 'badge badge-success';
+                            badgeElement.textContent = 'ACTIVA';
+                        } else {
+                            badgeElement.className = 'badge badge-secondary';
+                            badgeElement.textContent = 'INACTIVA';
+                        }
+                    }
+                }
+            }
+            
+            // Revertir UI en ambas tablas (principal y resultados de búsqueda)
+            revertTableUI('#organizacionesTableBody');
+            revertTableUI('#orgSearchResultsBody');
+        }
+    }
+    const modal = document.getElementById('confirmToggleOrgModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    window.tempToggleOrgCode = null;
+    window.tempToggleOrgPrev = null;
+}
+
+function confirmToggleOrg() {
+    const codigo = window.tempToggleOrgCode;
+    if (codigo != null) {
+        const org = organizacionesData[codigo];
+        if (org) {
+            // Persistir por ciudad
+            const city = getSelectedCityCode();
+            if (!organizacionesByCity[city]) organizacionesByCity[city] = {};
+            const toSave = { ...org, ciudad: city };
+            organizacionesByCity[city][codigo] = toSave;
+            persistOrgsByCity();
+            // Cerrar confirmación y mostrar éxito
+            const confirmModal = document.getElementById('confirmToggleOrgModal');
+            if (confirmModal) confirmModal.classList.remove('show');
+            showSuccessToggleOrgModal(codigo);
+        }
+    }
+    window.tempToggleOrgCode = null;
+    window.tempToggleOrgPrev = null;
+}
+
+function showSuccessToggleOrgModal(codigo) {
+    const org = organizacionesData[codigo];
+    const modal = document.getElementById('successToggleOrgModal');
+    if (modal && org) {
+        const messageElement = modal.querySelector('.modal-message');
+        if (messageElement) {
+            const estado = (org.activo !== false) ? 'activada' : 'desactivada';
+            messageElement.textContent = `La organización ${org.nombre} ha sido ${estado} exitosamente.`;
+        }
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeSuccessToggleOrgModal() {
+    const modal = document.getElementById('successToggleOrgModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
 }
 
 /**
@@ -1153,7 +1425,7 @@ function confirmDeleteOrg() {
                 if (tableBody.children.length === 0) {
                     const noDataRow = document.createElement('tr');
                     noDataRow.innerHTML = `
-                        <td colspan="3" class="no-data-message">
+                        <td colspan="4" class="no-data-message">
                             <div class="no-data-content">
                                 <i class="fas fa-building"></i>
                                 <p>No existen registros de organizaciones</p>
@@ -1218,3 +1490,8 @@ window.cancelDeleteOrg = cancelDeleteOrg;
 window.confirmDeleteOrg = confirmDeleteOrg;
 window.showSuccessDeleteOrgModal = showSuccessDeleteOrgModal;
 window.closeSuccessDeleteOrgModal = closeSuccessDeleteOrgModal;
+// Exponer funciones de toggle globalmente
+window.toggleOrgState = toggleOrgState;
+window.cancelToggleOrg = cancelToggleOrg;
+window.confirmToggleOrg = confirmToggleOrg;
+window.closeSuccessToggleOrgModal = closeSuccessToggleOrgModal;

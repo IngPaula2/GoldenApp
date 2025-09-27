@@ -211,6 +211,7 @@
                                         <th>Código</th>
                                         <th>Nombre</th>
                                         <th>Sección</th>
+                                        <th>Estado</th>
                                         <th>Opciones</th>
                                     </tr>
                                 </thead>
@@ -220,25 +221,33 @@
                                     <td>Ejecutivo de Cuenta</td>
                                     <td>Administrativo</td>
                                     <td>
-                                             <button class="btn btn-primary btn-sm" onclick="editCargo('EC')" title="Editar">
-                                                 <i class="fas fa-edit"></i>
-                                             </button>
-                                             <button class="btn btn-small btn-danger" onclick="deleteCargo('EC')" title="Eliminar">
-                                                 <i class="fas fa-trash"></i>
-                                             </button>
-                                         </td>
-                                     </tr>
+                                        <span class="badge badge-success">ACTIVO</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" onclick="editCargo('EC')" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <label class="animated-toggle" data-codigo="EC" title="Desactivar">
+                                            <input type="checkbox" checked onchange="toggleCargoState('EC')">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </td>
+                                    </tr>
                                     <tr data-cargo-id="EA">
 <td>EA</td>
 <td>Ejecutivo Admon</td>
 <td>Administrativo</td>
 <td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
+<td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('EA')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('EA')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="EA" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('EA')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="EP">
@@ -246,96 +255,118 @@
 <td>Ejecutivo Prejuridico</td>
 <td>Administrativo</td>
 <td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
+<td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('EP')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('EP')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="EP" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('EP')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="EJ">
 <td>EJ</td>
 <td>Ejecutivo Juridico</td>
 <td>Administrativo</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('EJ')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('EJ')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="EJ" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('EJ')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="SP">
 <td>SP</td>
 <td>Supervisor de Cartera</td>
 <td>Administrativo</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('SP')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('SP')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="SP" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('SP')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="SN">
 <td>SN</td>
 <td>Supervisor Nacional de Cartera</td>
 <td>Administrativo</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('SN')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('SN')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="SN" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('SN')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="C">
 <td>C</td>
 <td>Castigo Cartera</td>
 <td>Administrativo</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('C')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('C')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="C" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('C')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="PV">
 <td>PV</td>
 <td>Proxima Vigencia</td>
 <td>Administrativo</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('PV')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('PV')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="PV" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('PV')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="V">
 <td>V</td>
 <td>Verificador</td>
 <td>Administrativo</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('V')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('V')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="V" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('V')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                 </tbody>
@@ -359,6 +390,7 @@
 <th>Código</th>
 <th>Nombre</th>
 <th>Sección</th>
+<th>Estado</th>
 <th>Opciones</th>
                                     </tr>
                                 </thead>
@@ -367,84 +399,102 @@
 <td>AS</td>
 <td>Asesor</td>
 <td>PYF</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('AS')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('AS')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="AS" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('AS')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="SU">
 <td>SU</td>
 <td>Supervisor</td>
 <td>PYF</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('SU')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('SU')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="SU" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('SU')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="SG">
 <td>SG</td>
 <td>Sub Gerente</td>
 <td>PYF</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('SG')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('SG')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="SG" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('SG')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="GT">
 <td>GT</td>
 <td>Gerente</td>
 <td>PYF</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('GT')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('GT')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="GT" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('GT')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="DR">
 <td>DR</td>
 <td>Director</td>
 <td>PYF</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('DR')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('DR')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="DR" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('DR')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="SN">
 <td>SN</td>
 <td>Director SubNacional</td>
 <td>PYF</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('SN')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('SN')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="SN" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('SN')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                 </tbody>
@@ -468,6 +518,7 @@
 <th>Código</th>
 <th>Nombre</th>
 <th>Sección</th>
+<th>Estado</th>
 <th>Opciones</th>
                                     </tr>
                                 </thead>
@@ -476,42 +527,51 @@
 <td>TU</td>
 <td>Tutor</td>
 <td>Servicios</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('TU')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('TU')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="TU" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('TU')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="MO">
 <td>MO</td>
 <td>Monitor Tutorias</td>
 <td>Servicios</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('MO')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('MO')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="MO" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('MO')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                     <tr data-cargo-id="CN">
 <td>CN</td>
 <td>Coordinador Nacional de Tutorias</td>
 <td>Servicios</td>
-
+<td>
+    <span class="badge badge-success">ACTIVO</span>
+</td>
 <td>
     <button class="btn btn-primary btn-sm" onclick="editCargo('CN')" title="Editar">
         <i class="fas fa-edit"></i>
     </button>
-    <button class="btn btn-small btn-danger" onclick="deleteCargo('CN')" title="Eliminar">
-        <i class="fas fa-trash"></i>
-    </button>
+    <label class="animated-toggle" data-codigo="CN" title="Desactivar">
+        <input type="checkbox" checked onchange="toggleCargoState('CN')">
+        <span class="toggle-slider"></span>
+    </label>
 </td>
                                     </tr>
                                 </tbody>

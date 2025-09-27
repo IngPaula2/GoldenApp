@@ -10,6 +10,103 @@
  */
 
 /* ========================================
+   TOGGLE BUTTON ON/OFF - ESTILO DE LA IMAGEN
+   ======================================== */
+
+.animated-toggle {
+    position: relative;
+    display: inline-block;
+    width: 70px;
+    height: 30px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.animated-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 
+        0 4px 8px rgba(255, 71, 87, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.toggle-slider:after {
+    content: "OFF";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Estado ON (Activo) */
+.animated-toggle input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #2ed573, #1dd1a1);
+    box-shadow: 
+        0 4px 8px rgba(46, 213, 115, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.animated-toggle input:checked + .toggle-slider:before {
+    transform: translateX(40px);
+}
+
+.animated-toggle input:checked + .toggle-slider:after {
+    content: "ON";
+    left: 8px;
+    right: auto;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Efectos hover suaves */
+.animated-toggle:hover .toggle-slider {
+    opacity: 0.9;
+}
+
+.animated-toggle:hover .toggle-slider:before {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
    ESTILOS PARA ESCRITURA EN MAYÚSCULAS
    ======================================== */
 
@@ -35,6 +132,162 @@ textarea {
 #content-servicio .table td,
 #content-servicio .table th {
     text-transform: uppercase !important;
+}
+
+/* ========================================
+   CONTROL DE ANCHO DE COLUMNAS EN TABLAS DE CARGOS
+   ======================================== */
+
+/* Ancho específico para las columnas de la tabla de cargos */
+#content-administrativo .table th:nth-child(1),
+#content-administrativo .table td:nth-child(1),
+#content-pyf .table th:nth-child(1),
+#content-pyf .table td:nth-child(1),
+#content-servicio .table th:nth-child(1),
+#content-servicio .table td:nth-child(1) {
+    width: 15%; /* Código */
+}
+
+#content-administrativo .table th:nth-child(2),
+#content-administrativo .table td:nth-child(2),
+#content-pyf .table th:nth-child(2),
+#content-pyf .table td:nth-child(2),
+#content-servicio .table th:nth-child(2),
+#content-servicio .table td:nth-child(2) {
+    width: 35%; /* Nombre */
+}
+
+#content-administrativo .table th:nth-child(3),
+#content-administrativo .table td:nth-child(3),
+#content-pyf .table th:nth-child(3),
+#content-pyf .table td:nth-child(3),
+#content-servicio .table th:nth-child(3),
+#content-servicio .table td:nth-child(3) {
+    width: 20%; /* Sección */
+}
+
+#content-administrativo .table th:nth-child(4),
+#content-administrativo .table td:nth-child(4),
+#content-pyf .table th:nth-child(4),
+#content-pyf .table td:nth-child(4),
+#content-servicio .table th:nth-child(4),
+#content-servicio .table td:nth-child(4) {
+    width: 15%; /* Estado */
+}
+
+#content-administrativo .table th:nth-child(5),
+#content-administrativo .table td:nth-child(5),
+#content-pyf .table th:nth-child(5),
+#content-pyf .table td:nth-child(5),
+#content-servicio .table th:nth-child(5),
+#content-servicio .table td:nth-child(5) {
+    width: 15%; /* Opciones */
+}
+
+/* Asegurar que la tabla use el ancho completo y no se desborde */
+#content-administrativo .table,
+#content-pyf .table,
+#content-servicio .table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 800px;
+}
+
+/* Ajustar el contenido de las celdas para que no se desborde */
+#content-administrativo .table td,
+#content-pyf .table td,
+#content-servicio .table td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 0.75rem 0.5rem;
+}
+
+/* Ajustar el tamaño de los badges de estado */
+#content-administrativo .table .badge,
+#content-pyf .table .badge,
+#content-servicio .table .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+}
+
+/* Ajustar el tamaño de los botones en la columna de opciones */
+#content-administrativo .table .btn,
+#content-pyf .table .btn,
+#content-servicio .table .btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+/* Ajustar el tamaño del toggle */
+#content-administrativo .table .animated-toggle,
+#content-pyf .table .animated-toggle,
+#content-servicio .table .animated-toggle {
+    width: 60px;
+    height: 25px;
+    margin-left: 0.25rem;
+}
+
+#content-administrativo .table .toggle-slider,
+#content-pyf .table .toggle-slider,
+#content-servicio .table .toggle-slider {
+    border-radius: 12px;
+}
+
+#content-administrativo .table .toggle-slider:before,
+#content-pyf .table .toggle-slider:before,
+#content-servicio .table .toggle-slider:before {
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+}
+
+#content-administrativo .table .animated-toggle input:checked + .toggle-slider:before,
+#content-pyf .table .animated-toggle input:checked + .toggle-slider:before,
+#content-servicio .table .animated-toggle input:checked + .toggle-slider:before {
+    transform: translateX(35px);
+}
+
+/* ========================================
+   NOTIFICACIONES
+   ======================================== */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 20000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    background: #28a745;
+}
+
+.notification-error {
+    background: #dc3545;
+}
+
+.notification-warning {
+    background: #ffc107;
+    color: #1a1a1a;
+}
+
+.notification-info {
+    background: #17a2b8;
 }
 
 /* ========================================
@@ -1044,6 +1297,32 @@ textarea {
     text-align: center;
 }
 
+/* Modal de confirmación de toggle - más pequeño */
+#confirmToggleCargoModal .modal {
+    max-width: 320px !important;
+    width: 90% !important;
+    padding: 25px !important;
+}
+
+#confirmToggleCargoModal .modal-body p {
+    text-align: center !important;
+    font-size: 15px !important;
+    line-height: 1.3 !important;
+}
+
+/* Modal de éxito de toggle - más pequeño */
+#successToggleCargoModal .modal {
+    max-width: 320px !important;
+    width: 90% !important;
+    padding: 25px !important;
+}
+
+#successToggleCargoModal .modal-body p {
+    text-align: center !important;
+    font-size: 15px !important;
+    line-height: 1.3 !important;
+}
+
 .modal-confirm .modal-header {
     margin-bottom: 20px;
     text-align: center;
@@ -1055,6 +1334,18 @@ textarea {
     font-weight: 700;
     color: #333;
     text-transform: uppercase;
+}
+
+/* ==============================
+   ESTILOS PARA CAMPOS DESHABILITADOS
+   ============================== */
+
+/* Campo código deshabilitado - fondo gris claro */
+#cargoCodigo:disabled {
+    background-color: #f5f5f5 !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.8 !important;
 }
 
 .modal-confirm .modal-body {

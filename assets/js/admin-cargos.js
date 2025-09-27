@@ -208,19 +208,16 @@ function promptForCitySelection() {
         if (typeof window.getCiudadesData === 'function') {
             try { ciudades = window.getCiudadesData(); } catch (e) { ciudades = {}; }
         } else {
-            // Fallback solo si en esta sesión se crearon ciudades
-            const allowLocal = sessionStorage.getItem('ciudadesAllowLocal') === 'true';
-            if (allowLocal) {
-                try {
-                    const raw = localStorage.getItem('ciudadesData');
-                    const parsed = raw ? JSON.parse(raw) : {};
-                    if (parsed && typeof parsed === 'object') {
-                        ciudades = Object.fromEntries(
-                            Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
-                        );
-                    }
-                } catch (e) { ciudades = {}; }
-            }
+            // Fallback SIEMPRE a localStorage si existe data válida
+            try {
+                const raw = localStorage.getItem('ciudadesData');
+                const parsed = raw ? JSON.parse(raw) : {};
+                if (parsed && typeof parsed === 'object') {
+                    ciudades = Object.fromEntries(
+                        Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                    );
+                }
+            } catch (e) { ciudades = {}; }
         }
         const current = sel.value;
         sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
@@ -382,7 +379,13 @@ function editCargo(cargoId) {
             console.log('Editando cargo:', cargo.codigo, 'Sección original:', cargo.seccion, 'Valor del select:', seccionValue);
             cargoSeccion.value = seccionValue;
         }
-        if (cargoCodigo) cargoCodigo.value = cargo.codigo;
+        if (cargoCodigo) {
+            cargoCodigo.value = cargo.codigo;
+            // Deshabilitar el campo código para evitar cambios
+            cargoCodigo.disabled = true;
+            // Guardar el código original para control de estado
+            cargoCodigo.setAttribute('data-original-code', cargoId);
+        }
         if (cargoNombre) cargoNombre.value = cargo.nombre;
         
         // Cambiar el botón y su función
@@ -829,6 +832,55 @@ function initializePage() {
     console.log('Secciones iniciadas cerradas');
     
     console.log('Página de cargos inicializada correctamente');
+
+    // ========================================
+    // MODALES DE TOGGLE (crear si no existen)
+    // ========================================
+    (function ensureCargoToggleModals(){
+        try {
+            let confirm = document.getElementById('confirmToggleCargoModal');
+            if (!confirm) {
+                confirm = document.createElement('div');
+                confirm.id = 'confirmToggleCargoModal';
+                confirm.className = 'modal-overlay';
+                confirm.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title"></h3>
+                            <button class="modal-close" onclick="cancelToggleCargo()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="cancelToggleCargo()">Cancelar</button>
+                            <button class="btn btn-primary" onclick="confirmToggleCargo()">Confirmar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(confirm);
+            }
+            let success = document.getElementById('successToggleCargoModal');
+            if (!success) {
+                success = document.createElement('div');
+                success.id = 'successToggleCargoModal';
+                success.className = 'modal-overlay';
+                success.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                            <button class="modal-close" onclick="closeSuccessToggleCargoModal()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="closeSuccessToggleCargoModal()">Aceptar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(success);
+            }
+        } catch (e) {}
+    })();
 }
 
 // ========================================
@@ -942,17 +994,22 @@ function addCargoToSection(cargoData) {
     // Crear nueva fila
     const newRow = document.createElement('tr');
     newRow.setAttribute('data-cargo-id', tId);
+    const isActive = toSave.activo !== false;
     newRow.innerHTML = `
         <td>${tId}</td>
         <td>${tNombre}</td>
         <td>${sectionName}</td>
         <td>
+            <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+        </td>
+        <td>
             <button class="btn btn-primary btn-sm" onclick="editCargo('${tId}')" title="Editar">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-small btn-danger" onclick="deleteCargo('${tId}')" title="Eliminar">
-                <i class="fas fa-trash"></i>
-            </button>
+            <label class="animated-toggle" data-codigo="${tId}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleCargoState('${tId}')">
+                <span class="toggle-slider"></span>
+            </label>
         </td>
     `;
     
@@ -987,6 +1044,12 @@ function clearCreateCargoForm() {
     document.getElementById('cargoSeccion').value = '';
     document.getElementById('cargoCodigo').value = '';
     document.getElementById('cargoNombre').value = '';
+    
+    // Solo habilitar el campo código si no estamos en modo edición
+    const isEditing = document.getElementById('cargoCodigo').hasAttribute('data-original-code');
+    if (!isEditing) {
+        document.getElementById('cargoCodigo').disabled = false;
+    }
 }
 
 /**
@@ -1078,17 +1141,20 @@ function displaySearchResults(searchResults) {
         // Mostrar resultados encontrados
         searchResults.forEach(cargo => {
             const row = document.createElement('tr');
+            const isActive = true; // sin fuente de estado, por defecto activo
             row.innerHTML = `
                 <td>${cargo.codigo}</td>
                 <td>${cargo.nombre}</td>
                 <td>${cargo.seccion}</td>
+                <td><span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span></td>
                 <td>
                     <button class="btn btn-primary btn-sm" onclick="editCargo('${cargo.codigo}')" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-small btn-danger" onclick="deleteCargo('${cargo.codigo}')" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <label class="animated-toggle" data-codigo="${cargo.codigo}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleCargoState('${cargo.codigo}')">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </td>
             `;
             searchResultsBody.appendChild(row);
@@ -1315,6 +1381,129 @@ window.cancelDeleteCargo = cancelDeleteCargo;
 window.confirmDeleteCargo = confirmDeleteCargo;
 window.showSuccessDeleteCargoModal = showSuccessDeleteCargoModal;
 window.closeSuccessDeleteCargoModal = closeSuccessDeleteCargoModal;
+
+// ========================================
+// TOGGLE ACTIVAR/DESACTIVAR CARGO
+// ========================================
+
+function toggleCargoState(codigo) {
+    // Buscar cargo en memoria (usuario o modificado)
+    let cargo = userCreatedCargos[codigo] || modifiedPredeterminedCargos[codigo];
+    if (!cargo) {
+        // Si no está en memoria local (caso de resultados simulados), crear sombra temporal
+        cargo = { codigo, nombre: codigo, seccion: 'Administrativo', activo: true };
+        userCreatedCargos[codigo] = cargo;
+    }
+    const estadoOriginal = cargo.activo !== false;
+    cargo.activo = !estadoOriginal;
+    // Actualizar UI en cualquier tabla donde aparezca
+    const rows = document.querySelectorAll(`tr[data-cargo-id="${codigo}"]`);
+    rows.forEach(row => {
+        const badge = row.querySelector('span.badge');
+        const toggleEl = row.querySelector('.animated-toggle');
+        const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+        const isActive = cargo.activo !== false;
+        if (badge) {
+            badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+            badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+        }
+        if (toggleEl && toggleInput) {
+            toggleInput.checked = isActive;
+            toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+        }
+    });
+    showConfirmToggleCargoModal(codigo, estadoOriginal);
+}
+
+function showConfirmToggleCargoModal(codigo, estadoOriginal) {
+    window.tempToggleCargoCode = codigo;
+    window.tempToggleCargoPrev = estadoOriginal;
+    const modal = document.getElementById('confirmToggleCargoModal');
+    const cargo = userCreatedCargos[codigo] || modifiedPredeterminedCargos[codigo];
+    if (modal && cargo) {
+        const actionText = estadoOriginal ? 'desactivar' : 'activar';
+        const titleElement = modal.querySelector('.modal-title');
+        const messageElement = modal.querySelector('.modal-message');
+        if (titleElement) titleElement.textContent = `${actionText.toUpperCase()} CARGO`;
+        if (messageElement) messageElement.textContent = `¿Está seguro de que desea ${actionText} el cargo ${cargo.nombre}?`;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function cancelToggleCargo() {
+    const codigo = window.tempToggleCargoCode;
+    const prev = window.tempToggleCargoPrev;
+    if (codigo != null) {
+        const cargo = userCreatedCargos[codigo] || modifiedPredeterminedCargos[codigo];
+        if (cargo) {
+            cargo.activo = prev;
+            const rows = document.querySelectorAll(`tr[data-cargo-id="${codigo}"]`);
+            rows.forEach(row => {
+                const badge = row.querySelector('span.badge');
+                const toggleEl = row.querySelector('.animated-toggle');
+                const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                const isActive = cargo.activo !== false;
+                if (badge) {
+                    badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                    badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                }
+                if (toggleEl && toggleInput) {
+                    toggleInput.checked = isActive;
+                    toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                }
+            });
+        }
+    }
+    const modal = document.getElementById('confirmToggleCargoModal');
+    if (modal) { modal.classList.remove('show'); document.body.style.overflow = 'auto'; }
+    window.tempToggleCargoCode = null;
+    window.tempToggleCargoPrev = null;
+}
+
+function confirmToggleCargo() {
+    const codigo = window.tempToggleCargoCode;
+    if (codigo != null) {
+        const cargo = userCreatedCargos[codigo] || modifiedPredeterminedCargos[codigo];
+        if (cargo) {
+            const city = getSelectedCityCode();
+            if (!userCargosByCity[city]) userCargosByCity[city] = {};
+            const toSave = { ...cargo, ciudad: city };
+            userCargosByCity[city][codigo] = toSave;
+            persistUserCargosByCity();
+            const confirmModal = document.getElementById('confirmToggleCargoModal');
+            if (confirmModal) confirmModal.classList.remove('show');
+            showSuccessToggleCargoModal(codigo);
+        }
+    }
+    window.tempToggleCargoCode = null;
+    window.tempToggleCargoPrev = null;
+}
+
+function showSuccessToggleCargoModal(codigo) {
+    const modal = document.getElementById('successToggleCargoModal');
+    const cargo = userCreatedCargos[codigo] || modifiedPredeterminedCargos[codigo];
+    if (modal && cargo) {
+        const messageElement = modal.querySelector('.modal-message');
+        if (messageElement) {
+            const estado = (cargo.activo !== false) ? 'activado' : 'desactivado';
+            messageElement.textContent = `El cargo ${cargo.nombre} ha sido ${estado} exitosamente.`;
+        }
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeSuccessToggleCargoModal() {
+    const modal = document.getElementById('successToggleCargoModal');
+    if (modal) { modal.classList.remove('show'); document.body.style.overflow = 'auto'; }
+}
+
+// Exponer globalmente
+window.toggleCargoState = toggleCargoState;
+window.cancelToggleCargo = cancelToggleCargo;
+window.confirmToggleCargo = confirmToggleCargo;
+window.closeSuccessToggleCargoModal = closeSuccessToggleCargoModal;
 
 // ========================================
 // FUNCIONALIDAD DE CERRAR SESIÓN

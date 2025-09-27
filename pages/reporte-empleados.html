@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Empleados</title>
+    <link rel="stylesheet" href="../assets/css/reset.css">
+    <link rel="stylesheet" href="../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../assets/css/reporte-empleados.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="report-container" id="reportRoot">
+        <div class="report-header">
+            <div>
+                <div class="report-title" id="titulo">REPORTE DE EMPLEADOS</div>
+                <div id="subtitulo" style="color:#777; margin-top:4px;">Ciudad — Área</div>
+            </div>
+            <div class="toolbar">
+                <div class="pagination-controls">
+                    <button class="btn" onclick="goFirst()" title="Primera página"><i class="fas fa-angles-left"></i></button>
+                    <button class="btn" onclick="goPrev()" title="Página anterior"><i class="fas fa-angle-left"></i></button>
+                    <input id="currentPage" type="text" value="1" onkeydown="if(event.key==='Enter') gotoPage()">
+                    <span>de <span id="totalPages">1</span></span>
+                    <button class="btn" onclick="goNext()" title="Página siguiente"><i class="fas fa-angle-right"></i></button>
+                    <button class="btn" onclick="goLast()" title="Última página"><i class="fas fa-angles-right"></i></button>
+                </div>
+                
+                <div class="zoom-controls">
+                    <button class="btn" onclick="setZoom(-0.1)" title="Disminuir zoom"><i class="fas fa-search-minus"></i></button>
+                    <select onchange="window.__pageSize=parseInt(this.value,10); window.__page=1; refreshTable();" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20" selected>20</option>
+                        <option value="25">25</option>
+                        <option value="30">30</option>
+                    </select>
+                    <button class="btn" onclick="setZoom(0.1)" title="Aumentar zoom"><i class="fas fa-search-plus"></i></button>
+                </div>
+                
+                <div class="export-controls">
+                    <button class="btn" onclick="exportCSV()" title="Exportar Excel" style="background: #28a745; color: white; border-color: #28a745;">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button class="btn" onclick="exportDOC()" title="Exportar Word" style="background: #007bff; color: white; border-color: #007bff;">
+                        <i class="fas fa-file-word"></i> Word
+                    </button>
+                    <button class="btn" onclick="exportPDF()" title="Exportar PDF" style="background: #dc3545; color: white; border-color: #dc3545;">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+                
+            </div>
+        </div>
+        <div id="tableWrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Identificación</th>
+                        <th>Empleado</th>
+                        <th>Cargo</th>
+                        <th>Área</th>
+                        <th>Celular</th>
+                        <th>Activo</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+        <div class="footer">© 2025 - GOLDEN APP</div>
+    </div>
+
+    <!-- Librería html2pdf para generar PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- JavaScript del reporte -->
+    <script src="../assets/js/reporte-empleados.js"></script>
+</body>
+</html>

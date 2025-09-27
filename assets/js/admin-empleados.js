@@ -36,6 +36,12 @@
 let userCreatedEmpleados = {};
 
 /**
+ * Variable para rastrear si se está actualizando o creando un empleado
+ * @type {string} 'create' | 'update'
+ */
+let empleadoMode = 'create';
+
+/**
  * Almacén persistente por ciudad para empleados
  * Estructura: { [codigoCiudad]: { [identificacion]: { datosDelEmpleado, ciudad } } }
  */
@@ -51,21 +57,37 @@ function persistEmpleadosByCity() {
 }
 
 function getSelectedCityCode() {
-    try { return sessionStorage.getItem('selectedCity') || ''; } catch (e) { return ''; }
+    try { 
+        const city = sessionStorage.getItem('selectedCity') || '';
+        console.log('Ciudad seleccionada:', city);
+        return city;
+    } catch (e) { 
+        console.error('Error obteniendo ciudad:', e);
+        return ''; 
+    }
 }
 
 function loadEmpleadosForSelectedCity() {
-    // Volcar bucket de la ciudad actual a memoria (vista)
+    // Limpiar datos fantasma primero
+    limpiarDatosFantasma();
+    
+    // Cargar empleados de la ciudad seleccionada (igual que organizaciones)
     const city = getSelectedCityCode();
+    console.log('Cargando empleados para ciudad:', city);
     const bucket = (empleadosByCity && empleadosByCity[city]) ? empleadosByCity[city] : {};
+    console.log('Bucket de empleados para ciudad:', bucket);
     
     // Limpiar estructura en memoria
     try {
         Object.keys(userCreatedEmpleados).forEach(k => delete userCreatedEmpleados[k]);
     } catch (e) {}
     
-    // Rellenar en memoria
-    Object.keys(bucket).forEach(id => { userCreatedEmpleados[id] = bucket[id]; });
+    // Rellenar en memoria solo con empleados de la ciudad actual
+    Object.keys(bucket).forEach(id => { 
+        userCreatedEmpleados[id] = bucket[id];
+        console.log('Empleado cargado en memoria:', id, bucket[id]);
+    });
+    console.log('Total empleados cargados en memoria para ciudad', city, ':', Object.keys(userCreatedEmpleados).length);
     
     // Reconstruir tabla
     try {
@@ -84,9 +106,39 @@ function loadEmpleadosForSelectedCity() {
             
             Object.values(userCreatedEmpleados)
                 .sort((a,b)=>String(a.identificacion).localeCompare(String(b.identificacion)))
-                .forEach(e => addEmpleadoToTable(e, true));
+                .forEach(e => addEmpleadoToSection(e, true));
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('Error reconstruyendo tabla:', e);
+    }
+}
+
+// Función para limpiar datos fantasma del localStorage
+function limpiarDatosFantasma() {
+    try {
+        const raw = localStorage.getItem('empleadosByCity');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        let cleaned = {};
+        Object.keys(data).forEach(ciudad => {
+            const bucket = data[ciudad] || {};
+            let cityCleaned = {};
+            Object.keys(bucket).forEach(id => {
+                const emp = bucket[id];
+                // Solo mantener empleados con nombres válidos
+                if (emp.tPrimerNombre || emp.tSegundoNombre || emp.tPrimerApellido || emp.tSegundoApellido) {
+                    cityCleaned[id] = emp;
+                }
+            });
+            if (Object.keys(cityCleaned).length > 0) {
+                cleaned[ciudad] = cityCleaned;
+            }
+        });
+        localStorage.setItem('empleadosByCity', JSON.stringify(cleaned));
+        console.log('Datos fantasma eliminados. Datos limpios:', cleaned);
+    } catch (e) {
+        console.error('Error limpiando datos fantasma:', e);
+    }
 }
 
 /**
@@ -207,24 +259,20 @@ function promptForCitySelection() {
     function populateCitySelectOptions() {
         const sel = document.getElementById('citySelect');
         if (!sel) return;
-        // Preferir origen vivo; si no existe en esta página, caer a localStorage validado
+        // Preferir origen vivo; si no existe, caer a localStorage siempre que haya datos
         let ciudades = {};
         if (typeof window.getCiudadesData === 'function') {
             ciudades = window.getCiudadesData();
         } else {
-            // Solo habilitar fallback a localStorage si en esta sesión se crearon ciudades
-            const allowLocal = sessionStorage.getItem('ciudadesAllowLocal') === 'true';
-            if (allowLocal) {
-                try {
-                    const raw = localStorage.getItem('ciudadesData');
-                    const parsed = raw ? JSON.parse(raw) : {};
-                    if (parsed && typeof parsed === 'object') {
-                        ciudades = Object.fromEntries(
-                            Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
-                        );
-                    }
-                } catch (e) { ciudades = {}; }
-            }
+            try {
+                const raw = localStorage.getItem('ciudadesData');
+                const parsed = raw ? JSON.parse(raw) : {};
+                if (parsed && typeof parsed === 'object') {
+                    ciudades = Object.fromEntries(
+                        Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                    );
+                }
+            } catch (e) { ciudades = {}; }
         }
         const current = sel.value;
         sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
@@ -255,6 +303,9 @@ function promptForCitySelection() {
  * Muestra el modal de crear empleado
  */
 function showCreateEmpleadoModal() {
+    // Establecer modo como creación
+    empleadoMode = 'create';
+    
     // Validar ciudad seleccionada antes de permitir crear empleados
     ciudadActual = getSelectedCity();
     if (!ciudadActual) {
@@ -266,8 +317,111 @@ function showCreateEmpleadoModal() {
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
     
+    // Asegurar que el botón esté en estado de crear
+    const submitButton = document.getElementById('bCrearSubmit');
+    if (submitButton) {
+        submitButton.textContent = 'CREAR';
+        submitButton.onclick = () => handleCreateEmpleado();
+    }
+    
+    // Asegurar que el título esté en estado de crear
+    const createEmpleadoTitle = document.getElementById('createEmpleadoTitle');
+    if (createEmpleadoTitle) {
+        createEmpleadoTitle.textContent = 'CREAR EMPLEADO';
+    }
+    
     // Cargar datos de cargos
     loadCargos();
+}
+
+// ========================================
+// REPORTE DE EMPLEADOS
+// ========================================
+function showReporteEmpleadosModal() {
+    try {
+        const overlay = document.getElementById('reporteEmpleadosModal');
+        if (!overlay) return;
+        populateReporteCiudadSelect();
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    } catch (e) {}
+}
+
+function hideReporteEmpleadosModal() {
+    try {
+        const overlay = document.getElementById('reporteEmpleadosModal');
+        if (!overlay) return;
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    } catch (e) {}
+}
+
+function populateReporteCiudadSelect() {
+    const sel = document.getElementById('reporteCiudad');
+    if (!sel) return;
+    let ciudades = {};
+    if (typeof window.getCiudadesData === 'function') {
+        try { ciudades = window.getCiudadesData(); } catch (e) { ciudades = {}; }
+    } else {
+        try {
+            const raw = localStorage.getItem('ciudadesData');
+            const parsed = raw ? JSON.parse(raw) : {};
+            if (parsed && typeof parsed === 'object') {
+                ciudades = Object.fromEntries(
+                    Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                );
+            }
+        } catch (e) { ciudades = {}; }
+    }
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
+    Object.values(ciudades)
+        .filter(c => c.activo !== false)
+        .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo)))
+        .forEach(c => {
+            const opt = document.createElement('option');
+            const code = String(c.codigo || '').toUpperCase();
+            const name = String(c.nombre || '').toUpperCase();
+            opt.value = c.codigo;
+            opt.textContent = `${code} - ${name}`;
+            sel.appendChild(opt);
+        });
+    // Fallback: si no hay catálogo, poblar desde empleadosByCity
+    try {
+        if (sel.options.length <= 1) {
+            const rawEmp = localStorage.getItem('empleadosByCity');
+            const parsedEmp = rawEmp ? JSON.parse(rawEmp) : {};
+            Object.keys(parsedEmp || {}).sort().forEach(code => {
+                if (!sel.querySelector(`option[value="${code}"]`)) {
+                    const opt = document.createElement('option');
+                    opt.value = code;
+                    opt.textContent = `${String(code).toUpperCase()} - (empleados)`;
+                    sel.appendChild(opt);
+                }
+            });
+        }
+    } catch (e) {}
+    // Preseleccionar ciudad actual si es posible
+    try {
+        const currentCity = (typeof getSelectedCityCode === 'function') ? getSelectedCityCode() : '';
+        if (currentCity && sel.querySelector(`option[value="${currentCity}"]`)) {
+            sel.value = currentCity;
+        } else if (current && sel.querySelector(`option[value="${current}"]`)) {
+            sel.value = current;
+        }
+    } catch (e) {}
+}
+
+function handleGenerarReporteEmpleados() {
+    const ciudad = (document.getElementById('reporteCiudad') || {}).value || '';
+    const area = (document.getElementById('reporteArea') || {}).value || '';
+    if (!ciudad || !area) {
+        alert('Seleccione ciudad y área');
+        return;
+    }
+    const url = `reporte-empleados.html?ciudad=${encodeURIComponent(ciudad)}&area=${encodeURIComponent(area)}`;
+    try { hideReporteEmpleadosModal(); } catch (e) {}
+    window.open(url, '_blank');
 }
 
 /**
@@ -360,6 +514,9 @@ function toggleSection(sectionName) {
  * @returns {void}
  */
 function editEmpleado(empleadoId) {
+    // Establecer modo como actualización
+    empleadoMode = 'update';
+    
     // Buscar el empleado en los datos existentes
     const empleado = findEmpleadoById(empleadoId);
     
@@ -367,9 +524,9 @@ function editEmpleado(empleadoId) {
         console.log('Editando empleado:', empleado);
         
         // Cambiar el título del modal
-        const modalTitle = document.getElementById('modalTitle');
-        if (modalTitle) {
-            modalTitle.textContent = 'ACTUALIZAR EMPLEADO';
+        const modalTitleElement = document.getElementById('modalTitle');
+        if (modalTitleElement) {
+            modalTitleElement.textContent = 'ACTUALIZAR EMPLEADO';
         }
         
         // Pre-llenar los campos con la información existente
@@ -400,8 +557,18 @@ function editEmpleado(empleadoId) {
                     cargoSelect.value = empleado.cargo;
                     console.log('Cargo establecido:', empleado.cargo);
                     console.log('Opciones disponibles:', Array.from(cargoSelect.options).map(opt => opt.value));
+                    
+                    // Verificar si el cargo se estableció correctamente
+                    if (cargoSelect.value !== empleado.cargo) {
+                        console.warn('El cargo no se pudo establecer. Intentando nuevamente...');
+                        // Intentar una vez más después de un breve delay
+                        setTimeout(() => {
+                            cargoSelect.value = empleado.cargo;
+                            console.log('Segundo intento - Cargo establecido:', cargoSelect.value);
+                        }, 100);
+                    }
                 }
-            }, 300);
+            }, 500);
         }
         
         document.getElementById('activo').value = empleado.activo || '';
@@ -409,17 +576,160 @@ function editEmpleado(empleadoId) {
         // Establecer el estado activo en los botones toggle
         setActivo(empleado.activo || 'SI');
         
-        // Cambiar el botón y su función
+        // Cambiar el botón y su función según si tiene escalas
         const submitButton = document.getElementById('bCrearSubmit');
         if (submitButton) {
-            submitButton.textContent = 'Actualizar';
-            submitButton.onclick = () => handleUpdateEmpleado(empleadoId);
+            if (empleado.area === 'pyf' && empleado.escalas === 'SI' && empleado.escalasData) {
+                // Si es PYF y tiene escalas, mostrar botón SIGUIENTE
+                submitButton.textContent = 'SIGUIENTE';
+                submitButton.onclick = function() { 
+                    // Cargar escalas existentes en el modal
+                    cargarEscalasExistentes(empleado.escalasData);
+                    showCreateEscalasModal(); 
+                };
+                console.log('Botón actualizado a SIGUIENTE para empleado PYF con escalas:', empleadoId);
+            } else {
+                // Si no tiene escalas, mostrar botón Actualizar
+                submitButton.textContent = 'ACTUALIZAR';
+                submitButton.onclick = () => handleUpdateEmpleado(empleadoId);
+                console.log('Botón actualizado a ACTUALIZAR para empleado:', empleadoId);
+            }
+        } else {
+            console.error('No se encontró el botón bCrearSubmit');
+        }
+        
+        // Cambiar el título del modal
+        const createEmpleadoTitle = document.getElementById('createEmpleadoTitle');
+        if (createEmpleadoTitle) {
+            createEmpleadoTitle.textContent = 'ACTUALIZAR EMPLEADO';
         }
         
         // Mostrar el modal
-        showCreateEmpleadoModal();
+        const modal = document.getElementById('createEmpleadoModal');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
     } else {
         showNotification('No se encontró el empleado a editar', 'error');
+    }
+}
+
+/**
+ * Maneja la actualización de un empleado existente
+ * @param {string} empleadoId - ID del empleado a actualizar
+ */
+function handleUpdateEmpleado(empleadoId) {
+    // Guardar datos temporalmente para el modal de confirmación
+    window.tempUpdateEmpleadoData = {
+        tipoIdentificacion: document.getElementById('tipoIdentificacion').value,
+        identificacion: document.getElementById('identificacion').value,
+        primerApellido: document.getElementById('primerApellido').value,
+        segundoApellido: document.getElementById('segundoApellido').value,
+        primerNombre: document.getElementById('primerNombre').value,
+        segundoNombre: document.getElementById('segundoNombre').value,
+        direccion: document.getElementById('direccion').value,
+        celular: document.getElementById('celular').value,
+        correo: document.getElementById('correo').value,
+        area: document.getElementById('area').value,
+        cargo: document.getElementById('cargo').value,
+        activo: document.getElementById('activo').value,
+        escalas: document.getElementById('escalas').value,
+        empleadoId: empleadoId
+    };
+    
+    if (!window.tempUpdateEmpleadoData.identificacion || !window.tempUpdateEmpleadoData.primerNombre || !window.tempUpdateEmpleadoData.primerApellido) {
+        showNotification('Por favor, complete todos los campos obligatorios', 'error');
+        return;
+    }
+    
+    // Mostrar modal de confirmación
+    showConfirmUpdateEmpleadoModal();
+}
+
+/**
+ * Actualiza la tabla de resultados de búsqueda si está abierta
+ */
+function updateSearchResultsTable() {
+    const resultsModal = document.getElementById('empleadoResultsModal');
+    if (resultsModal && resultsModal.classList.contains('show')) {
+        // Recargar todos los empleados en la tabla de resultados
+        const allEmpleados = Object.values(userCreatedEmpleados);
+        displaySearchResults(allEmpleados);
+    }
+}
+
+/**
+ * Muestra el modal de confirmación para actualizar empleado
+ */
+function showConfirmUpdateEmpleadoModal() {
+    const modal = document.getElementById('confirmUpdateEmpleadoModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cancela la actualización del empleado
+ */
+function cancelUpdateEmpleado() {
+    const modal = document.getElementById('confirmUpdateEmpleadoModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    window.tempUpdateEmpleadoData = null;
+}
+
+/**
+ * Confirma la actualización del empleado
+ */
+function confirmUpdateEmpleado() {
+    if (!window.tempUpdateEmpleadoData) {
+        showNotification('Error: No hay datos para actualizar', 'error');
+        return;
+    }
+    
+    const empleadoData = window.tempUpdateEmpleadoData;
+    const nombreCompleto = `${empleadoData.primerNombre} ${empleadoData.segundoNombre} ${empleadoData.primerApellido} ${empleadoData.segundoApellido}`.trim();
+    
+    const cargoSeleccionado = cargosPorArea[empleadoData.area]?.find(c => c.codigo === empleadoData.cargo);
+    const cargoNombre = cargoSeleccionado ? cargoSeleccionado.nombre : empleadoData.cargo;
+    
+    const empleadoCompleto = {
+        ...empleadoData,
+        nombreCompleto: nombreCompleto,
+        cargoNombre: cargoNombre
+    };
+    
+    addEmpleadoToSection(empleadoCompleto, true);
+    
+    closeCreateEmpleadoModal();
+    cancelUpdateEmpleado();
+    
+    showSuccessUpdateEmpleadoModal();
+    
+    updateSearchResultsTable();
+}
+
+/**
+ * Muestra el modal de éxito para actualizar empleado
+ */
+function showSuccessUpdateEmpleadoModal() {
+    const modal = document.getElementById('successUpdateEmpleadoModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cierra el modal de éxito para actualizar empleado
+ */
+function closeSuccessUpdateEmpleadoModal() {
+    const modal = document.getElementById('successUpdateEmpleadoModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
     }
 }
 
@@ -462,7 +772,7 @@ function resetModalToCreate() {
     
     // Restaurar botón
     const submitButton = document.getElementById('bCrearSubmit');
-    submitButton.textContent = 'Crear';
+    submitButton.textContent = 'CREAR';
     submitButton.onclick = handleCreateEmpleado;
 }
 
@@ -650,22 +960,53 @@ function handleUpdateEmpleado(empleadoId) {
  * Maneja la búsqueda de empleados
  */
 function handleSearchEmpleado() {
-    // Obtener valores de los campos
-    const nombre = document.getElementById('searchEmpleadoNombre').value;
-    const area = document.getElementById('searchEmpleadoArea').value;
+    // Obtener valor del campo de identificación
+    const identificacion = document.getElementById('searchEmpleadoIdentificacion').value;
     
-    // Validar que se haya ingresado al menos un criterio
-    if (isEmpty(nombre) && isEmpty(area)) {
-        showNotification('Por favor, ingrese al menos un criterio de búsqueda', 'error');
+    // Validar que se haya ingresado la identificación
+    if (isEmpty(identificacion)) {
+        showNotification('Por favor, ingrese la identificación del empleado', 'error');
         return;
     }
     
-    // Simular búsqueda y mostrar resultados
-    const searchResults = performSearch(nombre, area);
-    displaySearchResults(searchResults);
+    // Realizar búsqueda por identificación
+    const searchResults = performSearchByIdentificacion(identificacion);
+    
+    // Cerrar modal de búsqueda
+    closeSearchEmpleadoModal();
+    
+    // Mostrar resultados en modal separado
+    showEmpleadoResultsModal(searchResults);
     
     // Limpiar formulario de búsqueda
     clearSearchEmpleadoForm();
+}
+
+/**
+ * Muestra el modal de resultados de búsqueda de empleados
+ * @param {Array} searchResults - Array de empleados encontrados
+ */
+function showEmpleadoResultsModal(searchResults) {
+    const modal = document.getElementById('empleadoResultsModal');
+    if (modal) {
+        // Mostrar resultados en el modal
+        displaySearchResults(searchResults);
+        
+        // Mostrar el modal
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cierra el modal de resultados de búsqueda de empleados
+ */
+function closeEmpleadoResultsModal() {
+    const modal = document.getElementById('empleadoResultsModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
 }
 
 // ========================================
@@ -737,6 +1078,21 @@ function loadCargosByArea(area) {
     // Limpiar el select
     cargoSelect.innerHTML = '<option value="">Seleccione el cargo</option>';
     
+    // Mostrar/ocultar campo escalas según el área
+    const escalasRow = document.getElementById('escalasRow');
+    const submitBtn = document.getElementById('bCrearSubmit');
+    
+    if (area === 'pyf') {
+        // Mostrar campo escalas para PYF
+        escalasRow.style.display = 'block';
+    } else {
+        // Ocultar campo escalas para otras áreas
+        escalasRow.style.display = 'none';
+        // Resetear botón a CREAR
+        submitBtn.textContent = 'CREAR';
+        submitBtn.onclick = function() { handleCreateEmpleado(); };
+    }
+    
     if (area && cargosPorArea[area]) {
         // Habilitar el select
         cargoSelect.disabled = false;
@@ -753,6 +1109,7 @@ function loadCargosByArea(area) {
         cargosData = cargosPorArea[area];
         
         console.log('Cargos cargados para área:', area, cargosPorArea[area]);
+        console.log('Opciones del select después de cargar:', Array.from(cargoSelect.options).map(opt => ({value: opt.value, text: opt.textContent})));
     } else {
         // Deshabilitar el select si no hay área seleccionada
         cargoSelect.disabled = true;
@@ -854,6 +1211,431 @@ function setActivo(value) {
 }
 
 /**
+ * Establece el valor de escalas y cambia el comportamiento del botón
+ * @param {string} value - Valor a establecer (SI o NO)
+ */
+function setEscalas(value) {
+    const escalasInput = document.getElementById('escalas');
+    const escalasYesBtn = document.querySelector('#escalasRow .btn-toggle-yes');
+    const escalasNoBtn = document.querySelector('#escalasRow .btn-toggle-no');
+    const submitBtn = document.getElementById('bCrearSubmit');
+    
+    // Establecer el valor
+    escalasInput.value = value;
+    
+    // Actualizar los botones
+    if (value === 'SI') {
+        escalasYesBtn.classList.add('active');
+        escalasNoBtn.classList.remove('active');
+        // Cambiar botón a "SIGUIENTE"
+        submitBtn.textContent = 'SIGUIENTE';
+        submitBtn.onclick = function() { showCreateEscalasModal(); };
+    } else {
+        escalasYesBtn.classList.remove('active');
+        escalasNoBtn.classList.add('active');
+        // Cambiar botón a "CREAR"
+        submitBtn.textContent = 'CREAR';
+        submitBtn.onclick = function() { handleCreateEmpleado(); };
+    }
+}
+
+/**
+ * Muestra el modal de crear escalas
+ */
+function showCreateEscalasModal() {
+    const empleadoModal = document.getElementById('createEmpleadoModal');
+    const escalasModal = document.getElementById('createEscalasModal');
+    
+    if (empleadoModal && escalasModal) {
+        // Ocultar modal de empleado
+        empleadoModal.classList.remove('show');
+        
+        // Mostrar modal de escalas
+        escalasModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Cambiar título según el modo
+        const escalasModalTitle = document.getElementById('escalasModalTitle');
+        if (escalasModalTitle) {
+            escalasModalTitle.textContent = empleadoMode === 'update' ? 'ACTUALIZAR ESCALAS' : 'CREAR ESCALAS';
+        }
+        
+        // Cambiar texto del botón según el modo
+        const escalasSubmitButton = document.getElementById('bCrearEscalasSubmit');
+        if (escalasSubmitButton) {
+            escalasSubmitButton.textContent = empleadoMode === 'update' ? 'ACTUALIZAR ESCALAS' : 'CREAR ESCALAS';
+        }
+        
+        // Generar formulario de escalas dinámicamente
+        generateEscalasForm();
+    }
+}
+
+/**
+ * Cierra el modal de crear escalas
+ */
+function closeCreateEscalasModal() {
+    const empleadoModal = document.getElementById('createEmpleadoModal');
+    const escalasModal = document.getElementById('createEscalasModal');
+    
+    if (empleadoModal && escalasModal) {
+        // Ocultar modal de escalas
+        escalasModal.classList.remove('show');
+        
+        // Mostrar modal de empleado
+        empleadoModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Vuelve al formulario de empleado desde escalas
+ */
+function volverAEmpleado() {
+    const empleadoModal = document.getElementById('createEmpleadoModal');
+    const escalasModal = document.getElementById('createEscalasModal');
+    
+    if (empleadoModal && escalasModal) {
+        // Ocultar modal de escalas
+        escalasModal.classList.remove('show');
+        
+        // Mostrar modal de empleado
+        empleadoModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Genera el formulario de escalas dinámicamente
+ */
+function generateEscalasForm() {
+    const formContent = document.getElementById('escalasFormContent');
+    if (!formContent) return;
+    
+    // Formulario con los campos específicos de escalas organizacionales (layout de 2 columnas)
+    // Cada cargo tiene un campo de identificación y un campo de nombre
+    formContent.innerHTML = `
+        <div class="form-row">
+            <div class="form-group">
+                <label for="asesor" class="form-label">Asesor <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="asesor" name="tAsesor" class="form-input required" placeholder="Identificación del asesor" onblur="buscarNombreEmpleado('asesor')" required>
+                    <input type="text" id="asesorNombre" name="tAsesorNombre" class="form-input" placeholder="Nombre del asesor" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="supervisor" class="form-label">Supervisor <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="supervisor" name="tSupervisor" class="form-input required" placeholder="Identificación del supervisor" onblur="buscarNombreEmpleado('supervisor')" required>
+                    <input type="text" id="supervisorNombre" name="tSupervisorNombre" class="form-input" placeholder="Nombre del supervisor" readonly>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="subgerente" class="form-label">Subgerente <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="subgerente" name="tSubgerente" class="form-input required" placeholder="Identificación del subgerente" onblur="buscarNombreEmpleado('subgerente')" required>
+                    <input type="text" id="subgerenteNombre" name="tSubgerenteNombre" class="form-input" placeholder="Nombre del subgerente" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="gerente" class="form-label">Gerente <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="gerente" name="tGerente" class="form-input required" placeholder="Identificación del gerente" onblur="buscarNombreEmpleado('gerente')" required>
+                    <input type="text" id="gerenteNombre" name="tGerenteNombre" class="form-input" placeholder="Nombre del gerente" readonly>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="director" class="form-label">Director <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="director" name="tDirector" class="form-input required" placeholder="Identificación del director" onblur="buscarNombreEmpleado('director')" required>
+                    <input type="text" id="directorNombre" name="tDirectorNombre" class="form-input" placeholder="Nombre del director" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="subdirectorNacional" class="form-label">Subdirector Nacional <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="subdirectorNacional" name="tSubdirectorNacional" class="form-input required" placeholder="Identificación del subdirector nacional" onblur="buscarNombreEmpleado('subdirectorNacional')" required>
+                    <input type="text" id="subdirectorNacionalNombre" name="tSubdirectorNacionalNombre" class="form-input" placeholder="Nombre del subdirector nacional" readonly>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="directorNacional" class="form-label">Director Nacional <span style="color: red;">*</span></label>
+                <div class="escalas-field-group">
+                    <input type="text" id="directorNacional" name="tDirectorNacional" class="form-input required" placeholder="Identificación del director nacional" onblur="buscarNombreEmpleado('directorNacional')" required>
+                    <input type="text" id="directorNacionalNombre" name="tDirectorNacionalNombre" class="form-input" placeholder="Nombre del director nacional" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <!-- Campo vacío para mantener el layout -->
+            </div>
+        </div>
+        
+        <div class="form-row" style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px;">
+            <div class="form-group" style="width: 100%; text-align: center;">
+                <p style="margin: 0; color: #856404; font-weight: 500;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    <strong>Todos los campos de escalas son obligatorios</strong>
+                </p>
+                <small style="color: #856404;">Debe completar todas las identificaciones para continuar</small>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Carga las escalas existentes en el formulario de escalas
+ * @param {Object} escalasData - Datos de las escalas del empleado
+ */
+function cargarEscalasExistentes(escalasData) {
+    if (!escalasData) return;
+    
+    // Pre-llenar los campos de identificación
+    const campos = ['asesor', 'supervisor', 'subgerente', 'gerente', 'director', 'subdirectorNacional', 'directorNacional'];
+    
+    campos.forEach(campo => {
+        const identificacionInput = document.getElementById(campo);
+        const nombreInput = document.getElementById(campo + 'Nombre');
+        
+        if (identificacionInput && escalasData[campo]) {
+            identificacionInput.value = escalasData[campo];
+            // Buscar y llenar el nombre automáticamente
+            buscarNombreEmpleado(campo);
+        }
+    });
+    
+    console.log('Escalas existentes cargadas:', escalasData);
+}
+
+/**
+ * Busca el nombre del empleado por identificación
+ * Esta función se conectará con el backend cuando esté disponible
+ * @param {string} campo - Nombre del campo (asesor, supervisor, etc.)
+ */
+function buscarNombreEmpleado(campo) {
+    const identificacionInput = document.getElementById(campo);
+    const nombreInput = document.getElementById(campo + 'Nombre');
+    
+    if (!identificacionInput || !nombreInput) return;
+    
+    const identificacion = identificacionInput.value.trim();
+    
+    if (!identificacion) {
+        nombreInput.value = '';
+        return;
+    }
+    
+    // TODO: Aquí se conectará con el backend
+    // Por ahora, simulamos la búsqueda en los empleados locales
+    try {
+        // Buscar en empleados locales como fallback
+        const empleado = userCreatedEmpleados[identificacion];
+        if (empleado) {
+            const nombreCompleto = [
+                empleado.tPrimerNombre,
+                empleado.tSegundoNombre,
+                empleado.tPrimerApellido,
+                empleado.tSegundoApellido
+            ].filter(Boolean).join(' ');
+            nombreInput.value = nombreCompleto;
+        } else {
+            // Limpiar campo si no se encuentra
+            nombreInput.value = '';
+            console.log('Empleado no encontrado localmente. Backend connection needed.');
+        }
+    } catch (e) {
+        console.error('Error buscando empleado:', e);
+        nombreInput.value = '';
+    }
+    
+    // TODO: Implementar llamada al backend cuando esté disponible
+    // Ejemplo de cómo se implementaría:
+    /*
+    fetch(`/api/empleados/buscar/${identificacion}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.empleado) {
+                nombreInput.value = data.empleado.nombreCompleto;
+            } else {
+                nombreInput.value = '';
+                console.log('Empleado no encontrado en el sistema');
+            }
+        })
+        .catch(error => {
+            console.error('Error buscando empleado:', error);
+            nombreInput.value = '';
+        });
+    */
+}
+
+/**
+ * Maneja la creación de escalas
+ */
+function handleCreateEscalas() {
+    // Mostrar modal de confirmación
+    showConfirmCreateEmpleadoEscalasModal();
+}
+
+/**
+ * Muestra el modal de confirmación para crear empleado y escalas
+ */
+function showConfirmCreateEmpleadoEscalasModal() {
+    const modal = document.getElementById('confirmCreateEmpleadoEscalasModal');
+    if (modal) {
+        // Cambiar el mensaje según el modo
+        const messageElement = modal.querySelector('.modal-body p');
+        if (messageElement) {
+            messageElement.textContent = empleadoMode === 'update' 
+                ? '¿Está seguro de actualizar este empleado y sus escalas?' 
+                : '¿Está seguro de crear este empleado y sus escalas?';
+        }
+        
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cancela la creación de empleado y escalas
+ */
+function cancelCreateEmpleadoEscalas() {
+    const modal = document.getElementById('confirmCreateEmpleadoEscalasModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+/**
+ * Confirma la creación de empleado y escalas
+ */
+function confirmCreateEmpleadoEscalas() {
+    // Recopilar datos del empleado
+    const empleadoData = {
+        tipoIdentificacion: document.getElementById('tipoIdentificacion').value,
+        identificacion: document.getElementById('identificacion').value,
+        primerApellido: document.getElementById('primerApellido').value,
+        segundoApellido: document.getElementById('segundoApellido').value,
+        primerNombre: document.getElementById('primerNombre').value,
+        segundoNombre: document.getElementById('segundoNombre').value,
+        direccion: document.getElementById('direccion').value,
+        celular: document.getElementById('celular').value,
+        correo: document.getElementById('correo').value,
+        area: document.getElementById('area').value,
+        cargo: document.getElementById('cargo').value,
+        activo: document.getElementById('activo').value,
+        escalas: document.getElementById('escalas').value
+    };
+    
+    // Recopilar datos de escalas
+    const escalasData = {
+        asesor: document.getElementById('asesor').value,
+        supervisor: document.getElementById('supervisor').value,
+        subgerente: document.getElementById('subgerente').value,
+        gerente: document.getElementById('gerente').value,
+        director: document.getElementById('director').value,
+        subdirectorNacional: document.getElementById('subdirectorNacional').value,
+        directorNacional: document.getElementById('directorNacional').value
+    };
+    
+    // VALIDAR CAMPOS DE ESCALAS OBLIGATORIOS
+    const camposEscalas = [
+        { campo: 'asesor', nombre: 'Asesor' },
+        { campo: 'supervisor', nombre: 'Supervisor' },
+        { campo: 'subgerente', nombre: 'Subgerente' },
+        { campo: 'gerente', nombre: 'Gerente' },
+        { campo: 'director', nombre: 'Director' },
+        { campo: 'subdirectorNacional', nombre: 'Subdirector Nacional' },
+        { campo: 'directorNacional', nombre: 'Director Nacional' }
+    ];
+    
+    // Verificar que todos los campos de escalas estén llenos
+    const camposVacios = [];
+    camposEscalas.forEach(({ campo, nombre }) => {
+        const valor = escalasData[campo];
+        if (!valor || valor.trim() === '') {
+            camposVacios.push(nombre);
+        }
+    });
+    
+    // Si hay campos vacíos, mostrar error y no continuar
+    if (camposVacios.length > 0) {
+        const mensaje = `Los siguientes campos de escalas son obligatorios:\n${camposVacios.join(', ')}`;
+        showNotification(mensaje, 'error');
+        return; // No continuar con la creación
+    }
+    
+    console.log('Datos del empleado:', empleadoData);
+    console.log('Datos de escalas:', escalasData);
+    
+    // Crear nombre completo
+    const nombreCompleto = `${empleadoData.primerNombre} ${empleadoData.segundoNombre} ${empleadoData.primerApellido} ${empleadoData.segundoApellido}`.trim();
+    
+    // Obtener nombre del cargo
+    const cargoSeleccionado = cargosPorArea[empleadoData.area]?.find(c => c.codigo === empleadoData.cargo);
+    const cargoNombre = cargoSeleccionado ? cargoSeleccionado.nombre : empleadoData.cargo;
+    
+    // Crear objeto completo del empleado con escalas
+    const empleadoCompleto = {
+        ...empleadoData,
+        nombreCompleto: nombreCompleto,
+        cargoNombre: cargoNombre,
+        escalasData: escalasData
+    };
+    
+    // Agregar empleado a la tabla correspondiente
+    addEmpleadoToSection(empleadoCompleto, true);
+    
+    // Cerrar modal de confirmación
+    cancelCreateEmpleadoEscalas();
+    
+    // Cerrar modales de escalas y empleado
+    closeCreateEscalasModal();
+    closeCreateEmpleadoModal();
+    
+    // Mostrar modal de éxito
+    showSuccessCreateEmpleadoEscalasModal();
+}
+
+/**
+ * Muestra el modal de éxito para empleado y escalas
+ */
+function showSuccessCreateEmpleadoEscalasModal() {
+    const modal = document.getElementById('successCreateEmpleadoEscalasModal');
+    if (modal) {
+        // Cambiar el mensaje según el modo
+        const messageElement = modal.querySelector('.modal-body p');
+        if (messageElement) {
+            messageElement.textContent = empleadoMode === 'update' 
+                ? 'Se ha actualizado con éxito el Empleado y sus escalas!' 
+                : 'Se ha creado con éxito el Empleado y sus escalas!';
+        }
+        
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Cierra el modal de éxito para empleado y escalas
+ */
+function closeSuccessCreateEmpleadoEscalasModal() {
+    const modal = document.getElementById('successCreateEmpleadoEscalasModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+/**
  * Limpia el formulario de crear empleado
  */
 function clearCreateEmpleadoForm() {
@@ -877,14 +1659,26 @@ function clearCreateEmpleadoForm() {
         yesBtn.classList.remove('active');
         noBtn.classList.remove('active');
     }
+    
+    // Restaurar botón a estado original
+    const submitButton = document.getElementById('bCrearSubmit');
+    if (submitButton) {
+        submitButton.textContent = 'CREAR';
+        submitButton.onclick = () => handleCreateEmpleado();
+    }
+    
+    // Restaurar título del modal
+    const createEmpleadoTitle = document.getElementById('createEmpleadoTitle');
+    if (createEmpleadoTitle) {
+        createEmpleadoTitle.textContent = 'CREAR EMPLEADO';
+    }
 }
 
 /**
  * Limpia el formulario de búsqueda de empleado
  */
 function clearSearchEmpleadoForm() {
-    document.getElementById('searchEmpleadoNombre').value = '';
-    document.getElementById('searchEmpleadoArea').value = '';
+    document.getElementById('searchEmpleadoIdentificacion').value = '';
 }
 
 /**
@@ -961,20 +1755,68 @@ function performSearch(nombre, area) {
 }
 
 /**
+ * Realiza la búsqueda de empleados por identificación
+ * @param {string} identificacion - Identificación del empleado a buscar
+ * @returns {Array} Array de empleados encontrados
+ */
+function performSearchByIdentificacion(identificacion) {
+    // TODO: BACKEND INTEGRATION - Búsqueda de empleados por identificación
+    // Endpoint: GET /api/empleados/search
+    // Parámetros: identificacion
+    // Respuesta esperada: { success: true, empleados: [...] }
+    //
+    // const params = new URLSearchParams();
+    // if (identificacion && identificacion.trim() !== '') {
+    //     params.append('identificacion', identificacion.trim());
+    // }
+    //
+    // return fetch(`/api/empleados/search?${params.toString()}`, {
+    //     method: 'GET',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
+    //     }
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     if (data.success) {
+    //         return data.empleados;
+    //     } else {
+    //         throw new Error(data.message || 'Error en la búsqueda');
+    //     }
+    // })
+    // .catch(error => {
+    //     console.error('Error en búsqueda:', error);
+    //     showNotification('Error al buscar empleados', 'error');
+    //     return [];
+    // });
+    
+    // Por ahora buscamos en memoria local
+    const allEmpleados = Object.values(userCreatedEmpleados);
+    
+    return allEmpleados.filter(empleado => {
+        return empleado.identificacion.toLowerCase().includes(identificacion.toLowerCase());
+    });
+}
+
+/**
  * Muestra los resultados de búsqueda en la interfaz
  * @param {Array} searchResults - Array de empleados encontrados
  */
 function displaySearchResults(searchResults) {
-    const searchResultsSection = document.getElementById('searchResultsSection');
     const searchResultsBody = document.getElementById('empleadoSearchResultsBody');
+    const escalasResultsBody = document.getElementById('empleadoEscalasResultsBody');
     
-    if (!searchResultsSection || !searchResultsBody) {
-        console.error('No se encontraron los elementos de resultados de búsqueda');
+    if (!searchResultsBody) {
+        console.error('No se encontró el elemento de resultados de búsqueda');
         return;
     }
     
     // Limpiar resultados anteriores
     searchResultsBody.innerHTML = '';
+    if (escalasResultsBody) {
+        escalasResultsBody.innerHTML = '';
+    }
     
     if (searchResults.length === 0) {
         // Mostrar mensaje de "no se encontraron resultados"
@@ -989,34 +1831,142 @@ function displaySearchResults(searchResults) {
                 </td>
             </tr>
         `;
+        
+        // Limpiar escalas si no hay resultados
+        if (escalasResultsBody) {
+            escalasResultsBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="no-data-message">
+                        <div class="no-data-content">
+                            <i class="fas fa-layer-group"></i>
+                            <p>Este empleado no tiene escalas</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
     } else {
         // Mostrar resultados encontrados
         searchResults.forEach(empleado => {
             const row = document.createElement('tr');
             row.setAttribute('data-empleado-id', empleado.identificacion);
+            const isActive = (String(empleado.activo).toUpperCase() === 'SI');
             row.innerHTML = `
-                <td>${empleado.identificacion}</td>
-                <td>${empleado.nombreCompleto}</td>
-                <td>${empleado.cargoNombre}</td>
-                <td>${empleado.celular}</td>
-                <td>${empleado.activo}</td>
+                <td>${empleado.identificacion.toUpperCase()}</td>
+                <td>${empleado.nombreCompleto.toUpperCase()}</td>
+                <td>${empleado.cargoNombre.toUpperCase()}</td>
+                <td>${empleado.celular.toUpperCase()}</td>
+                <td>
+                    <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+                </td>
                 <td>
                     <button class="btn btn-primary btn-sm" onclick="editEmpleado('${empleado.identificacion}')" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteEmpleado('${empleado.identificacion}')" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <label class="animated-toggle" data-id="${empleado.identificacion}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleEmpleadoState('${empleado.identificacion}')">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </td>
             `;
             searchResultsBody.appendChild(row);
         });
+        
+        // Mostrar escalas del primer empleado encontrado (si es PYF y tiene escalas)
+        if (searchResults.length > 0 && escalasResultsBody) {
+            const primerEmpleado = searchResults[0];
+            if (primerEmpleado.area === 'pyf' && primerEmpleado.escalasData) {
+                renderEscalasDelEmpleado(primerEmpleado.escalasData);
+            } else {
+                // Limpiar escalas si no es PYF o no tiene escalas
+                escalasResultsBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-data-message">
+                            <div class="no-data-content">
+                                <i class="fas fa-layer-group"></i>
+                                <p>Este empleado no tiene escalas</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
     }
     
-    // Mostrar la sección de resultados
-    searchResultsSection.style.display = 'block';
-    
     console.log(`Búsqueda completada. Se encontraron ${searchResults.length} empleados.`);
+}
+
+/**
+ * Renderiza las escalas del empleado en la tabla de resultados
+ * @param {Object} escalasData - Datos de las escalas del empleado
+ */
+function renderEscalasDelEmpleado(escalasData) {
+    const escalasResultsBody = document.getElementById('empleadoEscalasResultsBody');
+    if (!escalasResultsBody) return;
+    
+    // Limpiar contenido anterior
+    escalasResultsBody.innerHTML = '';
+    
+    // Crear fila con las escalas (mostrando nombres en lugar de identificaciones)
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${obtenerNombrePorIdentificacion(escalasData.asesor) || '-'}</td>
+        <td>${obtenerNombrePorIdentificacion(escalasData.supervisor) || '-'}</td>
+        <td>${obtenerNombrePorIdentificacion(escalasData.subgerente) || '-'}</td>
+        <td>${obtenerNombrePorIdentificacion(escalasData.gerente) || '-'}</td>
+        <td>${obtenerNombrePorIdentificacion(escalasData.director) || '-'}</td>
+        <td>${obtenerNombrePorIdentificacion(escalasData.subdirectorNacional) || '-'}</td>
+        <td>${obtenerNombrePorIdentificacion(escalasData.directorNacional) || '-'}</td>
+    `;
+    
+    escalasResultsBody.appendChild(row);
+}
+
+/**
+ * Obtiene el nombre completo de un empleado por su identificación
+ * @param {string} identificacion - Identificación del empleado
+ * @returns {string} - Nombre completo del empleado o null si no se encuentra
+ */
+function obtenerNombrePorIdentificacion(identificacion) {
+    if (!identificacion) return null;
+    
+    try {
+        // Buscar en empleados locales primero
+        const empleado = userCreatedEmpleados[identificacion];
+        if (empleado) {
+            return [
+                empleado.tPrimerNombre,
+                empleado.tSegundoNombre,
+                empleado.tPrimerApellido,
+                empleado.tSegundoApellido
+            ].filter(Boolean).join(' ');
+        }
+        
+        // TODO: Aquí se conectará con el backend para buscar en la base de datos
+        // Por ahora, retornamos null si no se encuentra localmente
+        console.log(`Empleado con identificación ${identificacion} no encontrado localmente. Backend connection needed.`);
+        return null;
+        
+        // TODO: Implementar llamada al backend cuando esté disponible
+        // Ejemplo de cómo se implementaría:
+        /*
+        return fetch(`/api/empleados/buscar/${identificacion}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.empleado) {
+                    return data.empleado.nombreCompleto;
+                }
+                return null;
+            })
+            .catch(error => {
+                console.error('Error buscando empleado:', error);
+                return null;
+            });
+        */
+    } catch (e) {
+        console.error('Error obteniendo nombre por identificación:', e);
+        return null;
+    }
 }
 
 /**
@@ -1051,6 +2001,8 @@ function addEmpleadoToSection(empleadoData, replaceIfExists = false) {
     const toSave = { ...empleadoData, ciudad: city };
     empleadosByCity[city][identificacion] = toSave;
     persistEmpleadosByCity();
+    console.log('Empleado guardado en localStorage para ciudad:', city, 'ID:', identificacion);
+    console.log('Total empleados en ciudad:', Object.keys(empleadosByCity[city]).length);
     // También reflejar en memoria y UI actual
     userCreatedEmpleados[identificacion] = toSave;
     
@@ -1105,19 +2057,31 @@ function addEmpleadoToSection(empleadoData, replaceIfExists = false) {
         return idCell.textContent.trim() === identificacion.trim();
     });
     
+    const isActive = (String(empleadoData.activo || '').toUpperCase() === 'SI');
+    
+    // Construir nombre completo de forma segura
+    const nombreCompleto = construirNombreCompleto(empleadoData);
+    
+    // Obtener nombre del cargo de forma segura
+    const cargoCodigo = empleadoData.tCargo || empleadoData.cargo || '';
+    const cargoNombre = getCargoNombre(cargoCodigo, empleadoData.area);
+    
     const rowHtml = `
-        <td>${identificacion}</td>
-        <td>${empleadoData.nombreCompleto}</td>
-        <td>${empleadoData.cargoNombre}</td>
-        <td>${empleadoData.celular}</td>
-        <td>${empleadoData.activo}</td>
+        <td>${(identificacion || '').toString().toUpperCase()}</td>
+        <td>${nombreCompleto}</td>
+        <td>${cargoNombre}</td>
+        <td>${(empleadoData.tCelular || empleadoData.celular || '').toString().toUpperCase()}</td>
+        <td>
+            <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+        </td>
         <td>
             <button class="btn btn-primary btn-sm" onclick="editEmpleado('${identificacion}')" title="Editar">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-sm btn-danger" onclick="deleteEmpleado('${identificacion}')" title="Eliminar">
-                <i class="fas fa-trash"></i>
-            </button>
+            <label class="animated-toggle" data-id="${identificacion}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleEmpleadoState('${identificacion}')">
+                <span class="toggle-slider"></span>
+            </label>
         </td>
     `;
     
@@ -1372,7 +2336,7 @@ function processEmpleadoUpdate(nuevoEmpleado) {
     
     const submitButton = document.getElementById('bCrearSubmit');
     if (submitButton) {
-        submitButton.textContent = 'Crear';
+        submitButton.textContent = 'CREAR';
         submitButton.onclick = handleCreateEmpleado;
     }
 }
@@ -1568,6 +2532,132 @@ function showConfirmDeleteEmpleadoModal() {
         document.body.style.overflow = 'hidden';
 }
 
+// ========================================
+// FUNCIONES PARA ACTIVAR/DESACTIVAR EMPLEADO
+// ========================================
+
+function toggleEmpleadoState(empleadoId) {
+    const emp = userCreatedEmpleados[empleadoId];
+    if (!emp) return;
+    const estadoOriginal = (String(emp.activo).toUpperCase() === 'SI');
+    // Cambiar estado en memoria usando SI/NO
+    emp.activo = estadoOriginal ? 'NO' : 'SI';
+    // Actualizar UI en la sección correspondiente
+    const sections = ['administrativo','pyf','servicio'];
+    for (let sec of sections) {
+        const tbody = document.querySelector(`#content-${sec} tbody`);
+        if (!tbody) continue;
+        const row = tbody.querySelector(`tr[data-empleado-id="${empleadoId}"]`);
+        if (row) {
+            const badge = row.querySelector('span.badge');
+            const toggleEl = row.querySelector('.animated-toggle');
+            const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+            const isActive = (String(emp.activo).toUpperCase() === 'SI');
+            if (badge) {
+                badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+            }
+            if (toggleEl && toggleInput) {
+                toggleInput.checked = isActive;
+                toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+            }
+        }
+    }
+    // Mostrar confirmación
+    showConfirmToggleEmpleadoModal(empleadoId, estadoOriginal);
+}
+
+function showConfirmToggleEmpleadoModal(empleadoId, estadoOriginal) {
+    window.tempToggleEmpleadoId = empleadoId;
+    window.tempToggleEmpleadoPrev = estadoOriginal; // boolean
+    const modal = document.getElementById('confirmToggleEmpleadoModal');
+    const emp = userCreatedEmpleados[empleadoId];
+    if (modal && emp) {
+        const actionText = estadoOriginal ? 'desactivar' : 'activar';
+        const titleElement = modal.querySelector('.modal-title');
+        const messageElement = modal.querySelector('.modal-message');
+        if (titleElement) titleElement.textContent = `${actionText.toUpperCase()} EMPLEADO`;
+        if (messageElement) messageElement.textContent = `¿Está seguro de que desea ${actionText} al empleado ${emp.nombreCompleto}?`;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function cancelToggleEmpleado() {
+    const empleadoId = window.tempToggleEmpleadoId;
+    const prev = window.tempToggleEmpleadoPrev;
+    if (empleadoId != null) {
+        const emp = userCreatedEmpleados[empleadoId];
+        if (emp) {
+            emp.activo = prev ? 'SI' : 'NO';
+            // Revertir UI
+            const sections = ['administrativo','pyf','servicio'];
+            for (let sec of sections) {
+                const tbody = document.querySelector(`#content-${sec} tbody`);
+                if (!tbody) continue;
+                const row = tbody.querySelector(`tr[data-empleado-id="${empleadoId}"]`);
+                if (row) {
+                    const badge = row.querySelector('span.badge');
+                    const toggleEl = row.querySelector('.animated-toggle');
+                    const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                    const isActive = (String(emp.activo).toUpperCase() === 'SI');
+                    if (badge) {
+                        badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                        badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                    }
+                    if (toggleEl && toggleInput) {
+                        toggleInput.checked = isActive;
+                        toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                    }
+                }
+            }
+        }
+    }
+    const modal = document.getElementById('confirmToggleEmpleadoModal');
+    if (modal) { modal.classList.remove('show'); document.body.style.overflow = 'auto'; }
+    window.tempToggleEmpleadoId = null;
+    window.tempToggleEmpleadoPrev = null;
+}
+
+function confirmToggleEmpleado() {
+    const empleadoId = window.tempToggleEmpleadoId;
+    if (empleadoId != null) {
+        const emp = userCreatedEmpleados[empleadoId];
+        if (emp) {
+            // Persistir por ciudad
+            const city = getSelectedCityCode();
+            if (!empleadosByCity[city]) empleadosByCity[city] = {};
+            const toSave = { ...emp, ciudad: city };
+            empleadosByCity[city][empleadoId] = toSave;
+            persistEmpleadosByCity();
+            const confirmModal = document.getElementById('confirmToggleEmpleadoModal');
+            if (confirmModal) confirmModal.classList.remove('show');
+            showSuccessToggleEmpleadoModal(empleadoId);
+        }
+    }
+    window.tempToggleEmpleadoId = null;
+    window.tempToggleEmpleadoPrev = null;
+}
+
+function showSuccessToggleEmpleadoModal(empleadoId) {
+    const modal = document.getElementById('successToggleEmpleadoModal');
+    const emp = userCreatedEmpleados[empleadoId];
+    if (modal && emp) {
+        const messageElement = modal.querySelector('.modal-message');
+        if (messageElement) {
+            const estado = (String(emp.activo).toUpperCase() === 'SI') ? 'activado' : 'desactivado';
+            messageElement.textContent = `El empleado ${emp.nombreCompleto} ha sido ${estado} exitosamente.`;
+        }
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeSuccessToggleEmpleadoModal() {
+    const modal = document.getElementById('successToggleEmpleadoModal');
+    if (modal) { modal.classList.remove('show'); document.body.style.overflow = 'auto'; }
+}
+
 /**
  * Cancela la eliminación del empleado
  */
@@ -1699,6 +2789,8 @@ function initializePage() {
     // Escuchar actualizaciones de ciudades
     window.addEventListener('ciudades:updated', () => {
         ciudadActual = getSelectedCity();
+        // Recargar empleados cuando cambie la ciudad
+        loadEmpleadosForSelectedCity();
     });
     
     // CONFIGURACIÓN DE MODALES: Cerrar al hacer clic fuera
@@ -1736,6 +2828,55 @@ function initializePage() {
     loadCargos();
     
     console.log('Página de empleados inicializada correctamente');
+
+    // ========================================
+    // MODALES DE TOGGLE (crear si no existen)
+    // ========================================
+    (function ensureEmpleadoToggleModals(){
+        try {
+            let confirm = document.getElementById('confirmToggleEmpleadoModal');
+            if (!confirm) {
+                confirm = document.createElement('div');
+                confirm.id = 'confirmToggleEmpleadoModal';
+                confirm.className = 'modal-overlay';
+                confirm.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title"></h3>
+                            <button class="modal-close" onclick="cancelToggleEmpleado()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="cancelToggleEmpleado()">Cancelar</button>
+                            <button class="btn btn-primary" onclick="confirmToggleEmpleado()">Confirmar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(confirm);
+            }
+            let success = document.getElementById('successToggleEmpleadoModal');
+            if (!success) {
+                success = document.createElement('div');
+                success.id = 'successToggleEmpleadoModal';
+                success.className = 'modal-overlay';
+                success.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                            <button class="modal-close" onclick="closeSuccessToggleEmpleadoModal()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="closeSuccessToggleEmpleadoModal()">Aceptar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(success);
+            }
+        } catch (e) {}
+    })();
 }
 
 // ========================================
@@ -1804,12 +2945,44 @@ window.handleCreateEmpleado = handleCreateEmpleado;
 window.handleSearchEmpleado = handleSearchEmpleado;
 window.toggleSection = toggleSection;
 window.setActivo = setActivo;
+window.setEscalas = setEscalas;
 window.loadCargosByArea = loadCargosByArea;
+window.showCreateEscalasModal = showCreateEscalasModal;
+window.closeCreateEscalasModal = closeCreateEscalasModal;
+window.handleCreateEscalas = handleCreateEscalas;
+window.volverAEmpleado = volverAEmpleado;
+window.showConfirmCreateEmpleadoEscalasModal = showConfirmCreateEmpleadoEscalasModal;
+window.cancelCreateEmpleadoEscalas = cancelCreateEmpleadoEscalas;
+window.confirmCreateEmpleadoEscalas = confirmCreateEmpleadoEscalas;
+window.showSuccessCreateEmpleadoEscalasModal = showSuccessCreateEmpleadoEscalasModal;
+window.closeSuccessCreateEmpleadoEscalasModal = closeSuccessCreateEmpleadoEscalasModal;
+window.renderEscalasDelEmpleado = renderEscalasDelEmpleado;
+window.showEmpleadoResultsModal = showEmpleadoResultsModal;
+window.closeEmpleadoResultsModal = closeEmpleadoResultsModal;
+window.handleUpdateEmpleado = handleUpdateEmpleado;
+window.updateSearchResultsTable = updateSearchResultsTable;
+window.debugEmpleados = debugEmpleados;
 
 // Función de debug para verificar datos
 function debugEmpleados() {
     console.log('=== DEBUG EMPLEADOS ===');
     console.log('userCreatedEmpleados:', userCreatedEmpleados);
+    console.log('empleadosByCity:', empleadosByCity);
+    console.log('Ciudad actual:', getSelectedCityCode());
+    console.log('localStorage empleadosByCity:', localStorage.getItem('empleadosByCity'));
+    
+    // Verificar si hay datos en localStorage
+    try {
+        const stored = localStorage.getItem('empleadosByCity');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            console.log('Datos parseados de localStorage:', parsed);
+        } else {
+            console.log('No hay datos en localStorage');
+        }
+    } catch (e) {
+        console.error('Error parseando localStorage:', e);
+    }
     console.log('tempUpdateEmpleadoData:', window.tempUpdateEmpleadoData);
     console.log('cargosData:', cargosData);
     console.log('cargosPorArea:', cargosPorArea);
@@ -1970,6 +3143,321 @@ window.cancelDeleteEmpleado = cancelDeleteEmpleado;
 window.confirmDeleteEmpleado = confirmDeleteEmpleado;
 window.showSuccessDeleteEmpleadoModal = showSuccessDeleteEmpleadoModal;
 window.closeSuccessDeleteEmpleadoModal = closeSuccessDeleteEmpleadoModal;
+// Toggle global
+window.toggleEmpleadoState = toggleEmpleadoState;
+window.cancelToggleEmpleado = cancelToggleEmpleado;
+window.confirmToggleEmpleado = confirmToggleEmpleado;
+window.closeSuccessToggleEmpleadoModal = closeSuccessToggleEmpleadoModal;
+
+// Función para verificar persistencia de empleados
+function verificarPersistenciaEmpleados() {
+    console.log('=== VERIFICACIÓN DE PERSISTENCIA DE EMPLEADOS ===');
+    const city = getSelectedCityCode();
+    console.log('Ciudad actual:', city);
+    
+    // Verificar localStorage
+    const raw = localStorage.getItem('empleadosByCity');
+    if (raw) {
+        try {
+            const data = JSON.parse(raw);
+            console.log('Datos en localStorage:', data);
+            
+            if (data[city]) {
+                const empleados = Object.keys(data[city]).length;
+                console.log(`✅ Empleados en localStorage para ciudad ${city}: ${empleados}`);
+                Object.values(data[city]).forEach(emp => {
+                    console.log(`  - ${emp.identificacion}: ${emp.tPrimerNombre} ${emp.tPrimerApellido} (${emp.area})`);
+                });
+            } else {
+                console.log(`❌ No hay empleados en localStorage para ciudad ${city}`);
+                console.log('Ciudades disponibles:', Object.keys(data));
+            }
+        } catch (e) {
+            console.error('Error parseando localStorage:', e);
+        }
+    } else {
+        console.log('❌ No hay datos en localStorage');
+    }
+    
+    // Verificar memoria
+    const empleadosEnMemoria = Object.keys(userCreatedEmpleados).length;
+    console.log(`Empleados en memoria: ${empleadosEnMemoria}`);
+    
+    console.log('===============================================');
+}
+
+// Exponer datos globalmente para el reporte
+window.userCreatedEmpleados = userCreatedEmpleados;
+
+// Función para cargar empleados desde localStorage al inicializar
+function loadEmpleadosFromStorage() {
+    console.log('=== CARGANDO EMPLEADOS DESDE LOCALSTORAGE ===');
+    
+    try {
+        const city = getSelectedCityCode();
+        if (!city) {
+            console.log('No hay ciudad seleccionada');
+            return;
+        }
+        
+        const raw = localStorage.getItem('empleadosByCity');
+        if (raw) {
+            const data = JSON.parse(raw);
+            console.log('Datos encontrados en localStorage:', data);
+            
+            if (data[city]) {
+                const empleados = data[city];
+                console.log(`Cargando ${Object.keys(empleados).length} empleados para ciudad ${city}`);
+                
+                // Limpiar datos actuales en memoria
+                userCreatedEmpleados = {};
+                
+                // Cargar empleados desde localStorage
+                Object.values(empleados).forEach(empleado => {
+                    userCreatedEmpleados[empleado.identificacion] = empleado;
+                    console.log('Cargando empleado:', empleado.identificacion, empleado);
+                    
+                    // Agregar a la sección correspondiente
+                    addEmpleadoToSection(empleado, false);
+                });
+                
+                console.log('✅ Empleados cargados exitosamente desde localStorage');
+                return true;
+            } else {
+                console.log(`No hay empleados en localStorage para ciudad ${city}`);
+                return false;
+            }
+        } else {
+            console.log('No hay datos en localStorage');
+            return false;
+        }
+    } catch (e) {
+        console.error('Error cargando empleados desde localStorage:', e);
+        return false;
+    }
+}
+
+// Función para verificar si hay empleados guardados
+function hasStoredEmpleados() {
+    try {
+        const city = getSelectedCityCode();
+        if (!city) return false;
+        
+        const raw = localStorage.getItem('empleadosByCity');
+        if (!raw) return false;
+        
+        const data = JSON.parse(raw);
+        return data[city] && Object.keys(data[city]).length > 0;
+    } catch (e) {
+        console.error('Error verificando empleados guardados:', e);
+        return false;
+    }
+}
+
+// Función para limpiar datos de prueba
+function limpiarDatosPrueba() {
+    console.log('=== LIMPIANDO DATOS DE PRUEBA ===');
+    
+    try {
+        const raw = localStorage.getItem('empleadosByCity');
+        if (raw) {
+            const data = JSON.parse(raw);
+            let datosModificados = false;
+            
+            // Buscar y eliminar empleados de prueba
+            Object.keys(data).forEach(ciudad => {
+                if (data[ciudad]) {
+                    // Eliminar empleados con identificaciones de prueba
+                    const empleadosPrueba = ['TEST123', '123456', 'PRUEBA', 'TEST'];
+                    
+                    empleadosPrueba.forEach(idPrueba => {
+                        if (data[ciudad][idPrueba]) {
+                            console.log(`Eliminando empleado de prueba: ${idPrueba} de ciudad ${ciudad}`);
+                            delete data[ciudad][idPrueba];
+                            datosModificados = true;
+                        }
+                    });
+                    
+                    // Eliminar empleados con nombres de prueba
+                    Object.keys(data[ciudad]).forEach(id => {
+                        const empleado = data[ciudad][id];
+                        const nombreCompleto = construirNombreCompleto(empleado);
+                        
+                        // Detectar nombres de prueba comunes
+                        if (nombreCompleto.includes('JUAN PÉREZ') || 
+                            nombreCompleto.includes('TEST') ||
+                            nombreCompleto.includes('PRUEBA') ||
+                            nombreCompleto.includes('SIN NOMBRE')) {
+                            console.log(`Eliminando empleado de prueba: ${id} (${nombreCompleto}) de ciudad ${ciudad}`);
+                            delete data[ciudad][id];
+                            datosModificados = true;
+                        }
+                    });
+                }
+            });
+            
+            if (datosModificados) {
+                localStorage.setItem('empleadosByCity', JSON.stringify(data));
+                console.log('✅ Datos de prueba eliminados');
+                return true;
+            } else {
+                console.log('No se encontraron datos de prueba');
+                return false;
+            }
+        } else {
+            console.log('No hay datos en localStorage');
+            return false;
+        }
+    } catch (e) {
+        console.error('Error limpiando datos de prueba:', e);
+        return false;
+    }
+}
+
+// Cargar empleados al inicializar la página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Inicializando página de empleados...');
+    
+    // Limpiar datos de prueba primero
+    limpiarDatosPrueba();
+    
+    // Cargar empleados inmediatamente y también con delay
+    loadEmpleadosFromStorage();
+    
+    // Esperar un poco para que se cargue la ciudad y volver a intentar
+    setTimeout(() => {
+        console.log('Reintentando carga de empleados...');
+        loadEmpleadosFromStorage();
+    }, 1000);
+    
+    // Intentar una vez más después de más tiempo
+    setTimeout(() => {
+        console.log('Último intento de carga de empleados...');
+        loadEmpleadosFromStorage();
+    }, 2000);
+});
+
+// También cargar cuando se cambie la ciudad
+window.addEventListener('storage', function(e) {
+    if (e.key === 'selectedCity') {
+        console.log('Ciudad cambiada, recargando empleados...');
+        setTimeout(() => {
+            loadEmpleadosFromStorage();
+        }, 500);
+    }
+});
+
+// Función para forzar la carga de empleados (llamable manualmente)
+function forceLoadEmpleados() {
+    console.log('=== FORZANDO CARGA DE EMPLEADOS ===');
+    loadEmpleadosFromStorage();
+}
+
+// Función para verificar y mostrar datos en localStorage
+function debugLocalStorage() {
+    console.log('=== DEBUG LOCALSTORAGE ===');
+    const raw = localStorage.getItem('empleadosByCity');
+    if (raw) {
+        const data = JSON.parse(raw);
+        console.log('Datos en localStorage:', data);
+        
+        Object.keys(data).forEach(ciudad => {
+            const empleados = data[ciudad];
+            console.log(`Ciudad ${ciudad}: ${Object.keys(empleados).length} empleados`);
+            Object.values(empleados).forEach(emp => {
+                console.log(`  - ${emp.identificacion}: ${emp.tPrimerNombre} ${emp.tPrimerApellido} (${emp.area})`);
+            });
+        });
+    } else {
+        console.log('No hay datos en localStorage');
+    }
+    console.log('========================');
+}
+
+// Función para construir el nombre completo del empleado (desde reporte-empleados.html)
+function construirNombreCompleto(empleado) {
+    const nombres = [];
+    
+    // Campos principales
+    if (empleado.tPrimerNombre) nombres.push(empleado.tPrimerNombre.toUpperCase());
+    if (empleado.tSegundoNombre) nombres.push(empleado.tSegundoNombre.toUpperCase());
+    if (empleado.tPrimerApellido) nombres.push(empleado.tPrimerApellido.toUpperCase());
+    if (empleado.tSegundoApellido) nombres.push(empleado.tSegundoApellido.toUpperCase());
+    
+    // Si no hay nombres con prefijo 't', intentar sin prefijo
+    if (nombres.length === 0) {
+        if (empleado.primerNombre) nombres.push(empleado.primerNombre.toUpperCase());
+        if (empleado.segundoNombre) nombres.push(empleado.segundoNombre.toUpperCase());
+        if (empleado.primerApellido) nombres.push(empleado.primerApellido.toUpperCase());
+        if (empleado.segundoApellido) nombres.push(empleado.segundoApellido.toUpperCase());
+    }
+    
+    // Si aún no hay nombres, intentar con 'nombreCompleto'
+    if (nombres.length === 0 && empleado.nombreCompleto) {
+        return empleado.nombreCompleto.toUpperCase();
+    }
+    
+    // Si no hay ningún nombre, mostrar mensaje
+    if (nombres.length === 0) {
+        return 'SIN NOMBRE';
+    }
+    
+    return nombres.join(' ');
+}
+
+// Función para obtener el nombre completo del cargo (desde reporte-empleados.html)
+function getCargoNombre(cargoCodigo, area = null) {
+    const cargosPorArea = {
+        administrativo: [
+            { codigo: 'EC', nombre: 'EJECUTIVO DE CUENTA' },
+            { codigo: 'EA', nombre: 'EJECUTIVO ADMON' },
+            { codigo: 'EP', nombre: 'EJECUTIVO PREJURIDICO' },
+            { codigo: 'EJ', nombre: 'EJECUTIVO JURIDICO' },
+            { codigo: 'SP', nombre: 'SUPERVISOR DE CARTERA' },
+            { codigo: 'SN', nombre: 'SUPERVISOR NACIONAL DE CARTERA' },
+            { codigo: 'C', nombre: 'CASTIGO CARTERA' },
+            { codigo: 'PV', nombre: 'PROXIMA VIGENCIA' },
+            { codigo: 'V', nombre: 'VERIFICADOR' }
+        ],
+        pyf: [
+            { codigo: 'AS', nombre: 'ASESOR' },
+            { codigo: 'SU', nombre: 'SUPERVISOR' },
+            { codigo: 'SG', nombre: 'SUB GERENTE' },
+            { codigo: 'GT', nombre: 'GERENTE' },
+            { codigo: 'DR', nombre: 'DIRECTOR' },
+            { codigo: 'SN', nombre: 'DIRECTOR SUB NACIONAL' },
+            { codigo: 'DN', nombre: 'DIRECTOR NACIONAL' }
+        ],
+        servicio: [
+            { codigo: 'TU', nombre: 'TUTOR' },
+            { codigo: 'MO', nombre: 'MONITOR TUTORIAS' },
+            { codigo: 'CN', nombre: 'COORDINADOR NACIONAL DE TUTORIAS' }
+        ]
+    };
+    
+    let cargo;
+    
+    if (area && cargosPorArea[area]) {
+        cargo = cargosPorArea[area].find(c => c.codigo === cargoCodigo);
+    } else {
+        for (const areaKey in cargosPorArea) {
+            cargo = cargosPorArea[areaKey].find(c => c.codigo === cargoCodigo);
+            if (cargo) break;
+        }
+    }
+    
+    return cargo ? cargo.nombre : cargoCodigo.toUpperCase();
+}
+
+// Exponer funciones globalmente
+window.forceLoadEmpleados = forceLoadEmpleados;
+window.debugLocalStorage = debugLocalStorage;
+window.limpiarDatosPrueba = limpiarDatosPrueba;
+window.getSelectedCityCode = getSelectedCityCode;
+window.buscarNombreEmpleado = buscarNombreEmpleado;
+window.obtenerNombrePorIdentificacion = obtenerNombrePorIdentificacion;
+window.cargarEscalasExistentes = cargarEscalasExistentes;
+window.verificarPersistenciaEmpleados = verificarPersistenciaEmpleados;
 
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', initializePage);

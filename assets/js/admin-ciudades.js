@@ -26,6 +26,16 @@ try {
     }
 } catch (e) { /* noop */ }
 const filialData = {};
+// Cargar filiales persistidas desde localStorage (si existen)
+try {
+    const storedFiliales = localStorage.getItem('filialesData');
+    if (storedFiliales) {
+        const parsed = JSON.parse(storedFiliales);
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(k => { filialData[k] = parsed[k]; });
+        }
+    }
+} catch (e) { /* noop */ }
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -144,6 +154,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Limpiar atributo de código original
         document.getElementById('tCodigo').removeAttribute('data-original-code');
+        
+        // Solo habilitar el campo código si no estamos en modo edición
+        const isEditing = document.getElementById('tCodigo').hasAttribute('data-original-code');
+        if (!isEditing) {
+            document.getElementById('tCodigo').disabled = false;
+        }
         
         // Restaurar modo "crear" (título y botón)
         document.getElementById('createCityTitle').textContent = 'CREAR CIUDAD';
@@ -734,6 +750,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Cerrar modal y actualizar tabla
         hideCreateCityModal();
         addCityToTable(nuevaCiudad, true);
+        
+        // Actualizar resultados de búsqueda si están abiertos
+        const cityResultsModal = document.getElementById('cityResultsModal');
+        if (cityResultsModal && cityResultsModal.style.display === 'flex') {
+            // Re-renderizar los resultados de búsqueda con los datos actualizados
+            renderCitySearchResults(nuevaCiudad);
+        }
+        
         refreshCitySelects();
     }
     
@@ -756,6 +780,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const direccion = document.getElementById('fDireccion').value.trim();
             const telefono = document.getElementById('fTelefono').value.trim();
             
+            console.log('=== DEBUG CREACIÓN FILIAL ===');
+            console.log('Código:', codigo);
+            console.log('Nombre:', nombre);
+            console.log('Ciudad seleccionada:', ciudad);
+            console.log('Dirección:', direccion);
+            console.log('Teléfono:', telefono);
+            
             if (!codigo || !nombre || !ciudad) {
                 alert('Por favor, complete todos los campos obligatorios de la filial.');
                 return;
@@ -767,16 +798,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const isUpdate = title && title.textContent.includes('ACTUALIZAR');
             
             if (isUpdate) {
-                // ========================================
-                // 🔗 CONEXIÓN BACKEND - ACTUALIZAR FILIAL
-                // ========================================
-                // Endpoint: PUT /api/filiales/{codigo}
-                // Datos: { codigo, nombre, ciudad, direccion, telefono, activo }
-                
-                // Es una actualización - procesar directamente
-                filialData[codigo] = filial;
-                addBranchToTable(filial, true);
-                hideUpsertBranchModal();
+                // Es una actualización - mostrar modal de confirmación
+                window.tempBranchData = filial;
+                showConfirmUpdateBranchModal();
             } else {
                 // Es una creación - mostrar modal de confirmación
                 window.tempBranchData = filial;
@@ -833,6 +857,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Datos de la filial a crear:', branchData);
+        console.log('Ciudad de la filial:', branchData.ciudad);
         
         // ========================================
         // 🔗 CONEXIÓN BACKEND - CREAR FILIAL
@@ -840,8 +865,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Endpoint: POST /api/filiales
         // Datos: { codigo, nombre, ciudad, direccion, telefono, activo: true }
         
-        // Por ahora solo guardamos en memoria local
+        // Guardar en memoria local y persistir
         filialData[branchData.codigo] = branchData;
+        console.log('Filial guardada en memoria:', filialData[branchData.codigo]);
+        console.log('Todas las filiales en memoria:', filialData);
+        try { 
+            localStorage.setItem('filialesData', JSON.stringify(filialData)); 
+            console.log('Filiales guardadas en localStorage');
+        } catch (e) { console.error('Error guardando en localStorage:', e); }
         
         // Cerrar modal de creación
         hideUpsertBranchModal();
@@ -877,6 +908,71 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.style.overflow = 'auto';
         }
     }
+
+    // ========================================
+    // FUNCIONES DE CONFIRMACIÓN PARA ACTUALIZAR FILIAL
+    // ========================================
+    function showConfirmUpdateBranchModal() {
+        const modal = document.getElementById('confirmUpdateBranchModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function cancelUpdateBranch() {
+        const confirmModal = document.getElementById('confirmUpdateBranchModal');
+        if (confirmModal) confirmModal.classList.remove('show');
+        window.tempBranchData = null;
+        document.body.style.overflow = 'auto';
+    }
+
+    function confirmUpdateBranch() {
+        // Cerrar modal de confirmación
+        const confirmModal = document.getElementById('confirmUpdateBranchModal');
+        if (confirmModal) confirmModal.classList.remove('show');
+        // Obtener datos temporales
+        const branchData = window.tempBranchData;
+        if (!branchData) { console.error('No se encontraron datos de la filial para actualizar'); return; }
+        // ========================================
+        // 🔗 CONEXIÓN BACKEND - ACTUALIZAR FILIAL
+        // Endpoint: PUT /api/filiales/{codigo}
+        // Datos: { codigo, nombre, ciudad, direccion, telefono, activo }
+        // ========================================
+        // Procesar actualización en memoria/UI
+        filialData[branchData.codigo] = branchData;
+        try { localStorage.setItem('filialesData', JSON.stringify(filialData)); } catch (e) {}
+        addBranchToTable(branchData, true);
+        hideUpsertBranchModal();
+        // Mostrar éxito
+        showSuccessUpdateBranchModal();
+        try { showNotification('Filial actualizada exitosamente', 'success'); } catch (e) {}
+        // Limpiar temp
+        window.tempBranchData = null;
+    }
+
+    function showSuccessUpdateBranchModal() {
+        const modal = document.getElementById('successUpdateBranchModal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeSuccessUpdateBranchModal() {
+        const modal = document.getElementById('successUpdateBranchModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Exponer funciones de actualización de filial globalmente
+    window.showConfirmUpdateBranchModal = showConfirmUpdateBranchModal;
+    window.cancelUpdateBranch = cancelUpdateBranch;
+    window.confirmUpdateBranch = confirmUpdateBranch;
+    window.showSuccessUpdateBranchModal = showSuccessUpdateBranchModal;
+    window.closeSuccessUpdateBranchModal = closeSuccessUpdateBranchModal;
     
     // ========================================
     // FUNCIONES DE CONFIRMACIÓN PARA ACTUALIZAR CIUDADES
@@ -1045,7 +1141,25 @@ function resultsByCity(code) {
     // Endpoint: GET /api/filiales/ciudad/{codigo}
     // Parámetro: codigo
     
-    return Object.values(filialData).filter(f => f.ciudad === code);
+    console.log('=== DEBUG BÚSQUEDA FILIALES ===');
+    console.log('Ciudad buscada:', code);
+    console.log('Total filiales en memoria:', Object.keys(filialData).length);
+    console.log('Filiales en memoria:', filialData);
+    
+    // Mostrar detalles de cada filial
+    Object.values(filialData).forEach(filial => {
+        console.log(`Filial ${filial.codigo}:`, {
+            codigo: filial.codigo,
+            nombre: filial.nombre,
+            ciudad: filial.ciudad,
+            activo: filial.activo
+        });
+    });
+    
+    const results = Object.values(filialData).filter(f => f.ciudad === code);
+    console.log('Filiales encontradas para ciudad', code, ':', results);
+    
+    return results;
 }
     
     function renderCitySearchResults(ciudad) {
@@ -1090,6 +1204,10 @@ function resultsByCity(code) {
     }
     
     function renderBranchSearchResults(results) {
+        console.log('=== DEBUG RENDER FILIALES ===');
+        console.log('Resultados recibidos:', results);
+        console.log('Cantidad de resultados:', results ? results.length : 0);
+        
         const body = document.getElementById('branchSearchResultsBody');
         if (!body) return;
         body.innerHTML = '';
@@ -1107,6 +1225,7 @@ function resultsByCity(code) {
             return;
         }
         results.forEach(filial => {
+            const isActive = filial.activo !== false;
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${filial.codigo}</td>
@@ -1115,12 +1234,16 @@ function resultsByCity(code) {
                 <td>${filial.direccion || ''}</td>
                 <td>${filial.telefono || ''}</td>
                 <td>
-                    <button class="btn btn-small" onclick="editBranch('${filial.codigo}')">
+                    <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVA' : 'INACTIVA'}</span>
+                </td>
+                <td>
+                    <button class="btn btn-small" onclick="editBranch('${filial.codigo}')" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-small btn-danger" onclick="deleteBranch('${filial.codigo}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <label class="animated-toggle" data-codigo="${filial.codigo}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleBranchState('${filial.codigo}')">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </td>`;
             body.appendChild(row);
         });
@@ -1182,8 +1305,9 @@ function resultsByCity(code) {
         document.getElementById('createCityTitle').textContent = 'ACTUALIZAR CIUDAD';
         document.getElementById('bCrear').textContent = 'Actualizar';
         
-        // Cerrar modal actual y abrir modal de crear/actualizar
+        // Cerrar todos los modales abiertos y abrir modal de crear/actualizar
         hideModal();
+        hideCityResultsModal(); // Cerrar modal de resultados de búsqueda
         showCreateCityModal();
     }
     
@@ -1201,6 +1325,9 @@ function resultsByCity(code) {
         document.getElementById('fCiudad').value = filial.ciudad || '';
         document.getElementById('fDireccion').value = filial.direccion || '';
         document.getElementById('fTelefono').value = filial.telefono || '';
+        
+        // Deshabilitar el campo código para evitar cambios
+        document.getElementById('fCodigo').disabled = true;
         
         // Cambiar el título y texto del botón
         document.getElementById('upsertBranchTitle').textContent = 'ACTUALIZAR FILIAL';
@@ -1267,8 +1394,49 @@ function resultsByCity(code) {
     // INICIALIZACIÓN
     // ========================================
     
+    /**
+     * Carga las filiales desde localStorage y las muestra en la tabla
+     */
+    function loadFilialesFromStorage() {
+        console.log('=== DEBUG CARGA FILIALES ===');
+        console.log('Filiales en memoria al cargar:', filialData);
+        console.log('Cantidad de filiales:', Object.keys(filialData).length);
+        
+        const tableBody = document.getElementById('filialesTableBody');
+        if (!tableBody) return;
+        
+        // Limpiar tabla actual
+        tableBody.innerHTML = '';
+        
+        // Si no hay filiales, mostrar mensaje de no datos
+        if (Object.keys(filialData).length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="no-data-message">
+                        <div class="no-data-content">
+                            <i class="fas fa-building"></i>
+                            <p>No existen registros de filiales</p>
+                            <small>Haz clic en "Crear Filial" para crear el primer registro</small>
+                        </div>
+                    </td>
+                </tr>`;
+            return;
+        }
+        
+        // Cargar todas las filiales en la tabla
+        Object.values(filialData)
+            .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+            .forEach(filial => {
+                console.log('Cargando filial en tabla:', filial);
+                addBranchToTable(filial, false);
+            });
+    }
+    
     // Inicializar funcionalidades adicionales
     console.log('Dashboard inicializado exitosamente');
+    
+    // Cargar filiales desde localStorage al inicializar
+    loadFilialesFromStorage();
     
     // Los toggle switches ahora usan onclick directamente en el HTML
     
@@ -1334,6 +1502,9 @@ function resultsByCity(code) {
         
         // Guardar el código original para poder eliminarlo después si cambia
         document.getElementById('tCodigo').setAttribute('data-original-code', codigo);
+        
+        // Deshabilitar el campo código para evitar cambios
+        document.getElementById('tCodigo').disabled = true;
         
         // Cerrar modal actual y abrir modal de crear/actualizar
         hideModal();
@@ -1958,56 +2129,58 @@ function toggleBranchState(codigo) {
     
     console.log('Estado DESPUÉS del cambio:', filial.activo);
     
-    // Buscar el toggle animado en la fila de la filial
-    const tableRows = document.querySelectorAll('#filialesTableBody tr');
-    let toggleElement = null;
-    let toggleInput = null;
-    let badgeElement = null;
-    
-    for (let row of tableRows) {
-        const firstCell = row.querySelector('td');
-        if (firstCell && firstCell.textContent.trim() === codigo) {
-            toggleElement = row.querySelector('.animated-toggle');
-            toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
-            // Buscar el badge de manera más específica
-            badgeElement = row.querySelector('span.badge');
-            console.log('Fila encontrada para:', codigo);
-            console.log('Badge encontrado:', badgeElement);
-            break;
-        }
-    }
-    
-    console.log('Toggle animado encontrado:', toggleElement);
-    
-    if (toggleElement && toggleInput) {
-        // Actualizar el checkbox
-        toggleInput.checked = filial.activo;
+    // Función auxiliar para actualizar UI en una tabla específica
+    function updateTableUI(tableSelector) {
+        const tableRows = document.querySelectorAll(`${tableSelector} tr`);
+        let toggleElement = null;
+        let toggleInput = null;
+        let badgeElement = null;
         
-        // Actualizar el título
-        toggleElement.title = filial.activo ? 'Desactivar' : 'Activar';
-        
-        console.log('Toggle actualizado a:', filial.activo ? 'ACTIVO (verde)' : 'INACTIVO (rojo)');
-        
-        // Actualizar el badge de estado
-        if (badgeElement) {
-            console.log('Badge encontrado:', badgeElement);
-            console.log('Estado de filial.activo:', filial.activo);
-            if (filial.activo) {
-                badgeElement.className = 'badge badge-success';
-                badgeElement.textContent = 'ACTIVA';
-                console.log('Badge cambiado a VERDE - ACTIVA');
-            } else {
-                badgeElement.className = 'badge badge-secondary';
-                badgeElement.textContent = 'INACTIVA';
-                console.log('Badge cambiado a GRIS - INACTIVA');
+        for (let row of tableRows) {
+            const firstCell = row.querySelector('td');
+            if (firstCell && firstCell.textContent.trim() === codigo) {
+                toggleElement = row.querySelector('.animated-toggle');
+                toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                badgeElement = row.querySelector('span.badge');
+                console.log('Fila encontrada para:', codigo, 'en', tableSelector);
+                break;
             }
-            console.log('Badge final - Clase:', badgeElement.className, 'Texto:', badgeElement.textContent);
-        } else {
-            console.log('ERROR: Badge NO encontrado en la fila');
         }
-    } else {
-        console.log('Toggle animado NO encontrado');
+        
+        if (toggleElement && toggleInput) {
+            // Actualizar el checkbox
+            toggleInput.checked = filial.activo;
+            
+            // Actualizar el título
+            toggleElement.title = filial.activo ? 'Desactivar' : 'Activar';
+            
+            console.log('Toggle actualizado a:', filial.activo ? 'ACTIVO (verde)' : 'INACTIVO (rojo)');
+            
+            // Actualizar el badge de estado
+            if (badgeElement) {
+                console.log('Badge encontrado:', badgeElement);
+                console.log('Estado de filial.activo:', filial.activo);
+                if (filial.activo) {
+                    badgeElement.className = 'badge badge-success';
+                    badgeElement.textContent = 'ACTIVA';
+                    console.log('Badge cambiado a VERDE - ACTIVA');
+                } else {
+                    badgeElement.className = 'badge badge-secondary';
+                    badgeElement.textContent = 'INACTIVA';
+                    console.log('Badge cambiado a GRIS - INACTIVA');
+                }
+                console.log('Badge final - Clase:', badgeElement.className, 'Texto:', badgeElement.textContent);
+            } else {
+                console.log('ERROR: Badge NO encontrado en la fila');
+            }
+        } else {
+            console.log('Toggle animado NO encontrado en', tableSelector);
+        }
     }
+    
+    // Actualizar UI en ambas tablas (principal y resultados de búsqueda)
+    updateTableUI('#filialesTableBody');
+    updateTableUI('#branchSearchResultsBody');
     
     console.log('=== TOGGLE BRANCH STATE COMPLETADO ===');
     
@@ -2105,6 +2278,10 @@ function cancelToggleBranch() {
 function confirmToggleBranch() {
     const codigo = window.tempToggleBranchCode;
     
+    console.log('=== DEBUG CONFIRM TOGGLE ===');
+    console.log('Código de filial:', codigo);
+    console.log('Filial en memoria:', filialData[codigo]);
+    
     if (codigo) {
         const filial = filialData[codigo];
         if (filial) {
@@ -2113,6 +2290,12 @@ function confirmToggleBranch() {
             // ========================================
             // Endpoint: PUT /api/filiales/toggle
             // Datos: { codigo, activo, timestamp }
+            
+            // Persistir cambios en localStorage
+            try { 
+                localStorage.setItem('filialesData', JSON.stringify(filialData)); 
+                console.log('Filiales guardadas en localStorage:', filialData);
+            } catch (e) { console.error('Error guardando en localStorage:', e); }
             
             // Por ahora solo mostramos el modal de éxito
             console.log('Estado de filial confirmado:', filial.activo ? 'ACTIVA' : 'INACTIVA');

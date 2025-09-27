@@ -149,6 +149,9 @@
                          <button id="bCrear" class="btn btn-primary" onclick="showCreateEmpleadoModal()">
                              Crear
                          </button>
+                         <button id="bReporte" class="btn btn-primary" onclick="showReporteEmpleadosModal()">
+                             Reporte
+                         </button>
                     </div>
                 </div>
 
@@ -373,10 +376,84 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Campo ESCALAS - Solo visible para PYF -->
+                <div class="form-row" id="escalasRow" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">ESCALAS *</label>
+                        <div class="toggle-buttons">
+                            <button type="button" class="btn-toggle btn-toggle-yes" onclick="setEscalas('SI')">SI</button>
+                            <button type="button" class="btn-toggle btn-toggle-no" onclick="setEscalas('NO')">NO</button>
+                            <input type="hidden" id="escalas" name="bEscalas" required>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeCreateEmpleadoModal()">Cancelar</button>
                  <button id="bCrearSubmit" type="button" class="btn btn-primary" onclick="handleCreateEmpleado()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Escalas -->
+    <div class="modal-overlay" id="createEscalasModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="btn-back" onclick="volverAEmpleado()" title="Volver al formulario de empleado">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3 id="escalasModalTitle">CREAR ESCALAS</h3>
+                <button class="modal-close" onclick="closeCreateEscalasModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario de escalas se llenará dinámicamente -->
+                <div id="escalasFormContent">
+                    <!-- Los campos de escalas se agregarán aquí dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCreateEscalasModal()">Cancelar</button>
+                <button id="bCrearEscalasSubmit" type="button" class="btn btn-primary" onclick="handleCreateEscalas()">Crear Escalas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Empleado y Escalas -->
+    <div class="modal-overlay" id="confirmCreateEmpleadoEscalasModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR CREACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreateEmpleadoEscalas()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de crear este empleado y sus escalas?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateEmpleadoEscalas()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateEmpleadoEscalas()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Empleado y Escalas -->
+    <div class="modal-overlay" id="successCreateEmpleadoEscalasModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreateEmpleadoEscalasModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Empleado y escalas creados exitosamente</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCreateEmpleadoEscalasModal()">Aceptar</button>
             </div>
         </div>
     </div>
@@ -392,44 +469,10 @@
              </div>
              <div class="modal-body">
                 <div class="form-group">
-                    <label for="searchEmpleadoNombre" class="form-label">Nombre del Empleado</label>
-                    <input type="text" id="searchEmpleadoNombre" name="tNombre" class="form-input" placeholder="Ingrese el nombre del empleado a buscar">
+                    <label for="searchEmpleadoIdentificacion" class="form-label">Identificación del Empleado</label>
+                    <input type="text" id="searchEmpleadoIdentificacion" name="tIdentificacion" class="form-input" placeholder="Ingrese la identificación del empleado a buscar">
                 </div>
-                
-                 <div class="form-group">
-                    <label for="searchEmpleadoArea" class="form-label">Área</label>
-                    <div class="select-container">
-                        <select id="searchEmpleadoArea" name="bArea" class="form-select">
-                            <option value="">Todas las áreas</option>
-                            <option value="administrativo">Administrativo</option>
-                            <option value="pyf">PYF</option>
-                            <option value="servicio">Servicio</option>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
-                    </div>
-                 </div>
                  
-                                   <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
-                  <div id="searchResultsSection" style="display: none; margin-top: 30px;">
-                      <h4 class="search-results-title">RESULTADOS DE BÚSQUEDA</h4>
-                      <div class="data-table">
-                          <table class="table">
-                              <thead>
-                                  <tr>
-                                    <th>Identificación</th>
-                                    <th>Nombre Completo</th>
-                                    <th>Cargo</th>
-                                    <th>Celular</th>
-                                    <th>Estado</th>
-                                      <th>Opciones</th>
-                                  </tr>
-                              </thead>
-                            <tbody id="empleadoSearchResultsBody">
-                                  <!-- Los resultados de búsqueda se mostrarán aquí dinámicamente -->
-                              </tbody>
-                          </table>
-                      </div>
-                  </div>
              </div>
              <div class="modal-footer">
                  <button type="button" class="btn btn-secondary" onclick="closeSearchEmpleadoModal()">Cancelar</button>
@@ -437,6 +480,118 @@
              </div>
          </div>
      </div>
+
+    <!-- Modal de Resultados de Búsqueda de Empleado -->
+    <div class="modal-overlay" id="empleadoResultsModal">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - EMPLEADO</h3>
+                <button class="modal-close" onclick="closeEmpleadoResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Identificación</th>
+                                <th>Nombre Completo</th>
+                                <th>Cargo</th>
+                                <th>Celular</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="empleadoSearchResultsBody">
+                            <tr>
+                                <td colspan="6" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otra identificación</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- SECCIÓN DE ESCALAS DEL EMPLEADO -->
+                <div class="data-table" style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4>ESCALAS DEL EMPLEADO</h4>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Asesor</th>
+                                <th>Supervisor</th>
+                                <th>Subgerente</th>
+                                <th>Gerente</th>
+                                <th>Director</th>
+                                <th>Subdirector Nacional</th>
+                                <th>Director Nacional</th>
+                            </tr>
+                        </thead>
+                        <tbody id="empleadoEscalasResultsBody">
+                            <tr>
+                                <td colspan="7" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-layer-group"></i>
+                                        <p>Este empleado no tiene escalas</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEmpleadoResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte de Empleados -->
+    <div class="modal-overlay" id="reporteEmpleadosModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">REPORTE DE EMPLEADOS</h3>
+                <button class="modal-close" onclick="hideReporteEmpleadosModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reporteCiudad" class="form-label">Ciudad *</label>
+                        <div class="select-container">
+                            <select id="reporteCiudad" class="form-select">
+                                <option value="">Seleccione la ciudad</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reporteArea" class="form-label">Área *</label>
+                        <div class="select-container">
+                            <select id="reporteArea" class="form-select">
+                                <option value="administrativo">Administrativo</option>
+                                <option value="pyf">PYF</option>
+                                <option value="servicio">Servicios</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideReporteEmpleadosModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bGenerarReporte" onclick="handleGenerarReporteEmpleados()">Generar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ========================================
          MODALES DE CONFIRMACIÓN
@@ -464,6 +619,32 @@
             <div class="modal-body">
                 <p>Se ha creado con éxito el Empleado!</p>
                 <button type="button" class="btn btn-primary" onclick="closeSuccessModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar empleado -->
+    <div class="modal-overlay" id="confirmUpdateEmpleadoModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar este Empleado?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateEmpleado()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateEmpleado()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar empleado -->
+    <div class="modal-overlay" id="successUpdateEmpleadoModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito el Empleado!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateEmpleadoModal()">Volver</button>
             </div>
         </div>
     </div>

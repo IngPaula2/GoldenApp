@@ -9,6 +9,40 @@
  * @date 2024
  */
 
+// Cargar datos persistidos desde localStorage (si existen)
+try {
+    const storedTitulares = localStorage.getItem('titularesData');
+    if (storedTitulares) {
+        const parsed = JSON.parse(storedTitulares);
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(k => { titularesData[k] = parsed[k]; });
+            console.log('✅ Titulares cargados desde localStorage:', Object.keys(titularesData).length);
+        }
+    }
+} catch (e) { console.error('Error cargando titulares:', e); }
+
+try {
+    const storedBeneficiarios = localStorage.getItem('beneficiariosData');
+    if (storedBeneficiarios) {
+        const parsed = JSON.parse(storedBeneficiarios);
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(k => { beneficiariosData[k] = parsed[k]; });
+            console.log('✅ Beneficiarios cargados desde localStorage:', Object.keys(beneficiariosData).length);
+        }
+    }
+} catch (e) { console.error('Error cargando beneficiarios:', e); }
+
+try {
+    const storedTitularBeneficiarios = localStorage.getItem('titularIdToBeneficiarios');
+    if (storedTitularBeneficiarios) {
+        const parsed = JSON.parse(storedTitularBeneficiarios);
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(k => { titularIdToBeneficiarios[k] = parsed[k]; });
+            console.log('✅ Relaciones titular-beneficiario cargadas desde localStorage:', Object.keys(titularIdToBeneficiarios).length);
+        }
+    }
+} catch (e) { console.error('Error cargando relaciones:', e); }
+
 // Dashboard JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Cargar titulares de la ciudad seleccionada si existe
@@ -178,6 +212,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // También reflejar en memoria y UI actual
         titularesData[numeroId] = toSave;
         
+        // Persistir en localStorage
+        try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
+        
         // Actualizar tabla principal
         addTitularToTable(nuevoTitular, true);
         
@@ -292,6 +329,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // También reflejar en memoria y UI actual
             titularesData[titularData.numeroId] = toSave;
             
+            // Persistir en localStorage
+            try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
+            
             // Cerrar modal de creación y limpiar formulario
             hideCreateTitularModal();
             
@@ -355,6 +395,133 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========================================
+    // MODALES DE TOGGLE (crear si no existen)
+    // ========================================
+    (function ensureTitularToggleModals(){
+        try {
+            let confirm = document.getElementById('confirmToggleTitularModal');
+            if (!confirm) {
+                confirm = document.createElement('div');
+                confirm.id = 'confirmToggleTitularModal';
+                confirm.className = 'modal-overlay';
+                confirm.style.zIndex = '9999';
+                confirm.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title"></h3>
+                            <button class="modal-close" onclick="cancelToggleTitular()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body" style="text-align:center;">
+                            <p class="modal-message" style="margin:0 auto;"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="cancelToggleTitular()">Cancelar</button>
+                            <button class="btn btn-primary" onclick="confirmToggleTitular()">Confirmar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(confirm);
+            }
+            let success = document.getElementById('successToggleTitularModal');
+            if (!success) {
+                success = document.createElement('div');
+                success.id = 'successToggleTitularModal';
+                success.className = 'modal-overlay';
+                success.style.zIndex = '9999';
+                success.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                            <button class="modal-close" onclick="closeSuccessToggleTitularModal()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body" style="text-align:center;">
+                            <p class="modal-message" style="margin:0 auto;"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="closeSuccessToggleTitularModal()">Aceptar</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(success);
+            }
+        } catch (e) {}
+    })();
+
+    // ========================================
+    // AJUSTE DE ENCABEZADOS (ESTADO / OPCIONES)
+    // ========================================
+    (function ensureTitularesHeaders(){
+        try {
+            const body = document.getElementById('titularesTableBody');
+            if (body) {
+                const table = body.closest('table');
+                const thead = table ? table.querySelector('thead') : null;
+                const headerRow = thead ? thead.querySelector('tr') : null;
+                if (headerRow) {
+                    const ths = Array.from(headerRow.querySelectorAll('th'));
+                    const labels = ths.map(th => (th.textContent || '').trim().toUpperCase());
+                    // Asegurar ESTADO y OPCIONES al final
+                    if (ths.length >= 7) {
+                        // Si la penúltima no es ESTADO, ajustarla o crearla
+                        if (ths.length === 7) {
+                            // Solo hay hasta CORREO → agregar ESTADO y OPCIONES
+                            const thEstado = document.createElement('th');
+                            thEstado.textContent = 'ESTADO';
+                            headerRow.appendChild(thEstado);
+                            const thOpc = document.createElement('th');
+                            thOpc.textContent = 'OPCIONES';
+                            headerRow.appendChild(thOpc);
+                        } else if (ths.length === 8) {
+                            // Si hay 8 columnas, normalizar la última a ESTADO y agregar OPCIONES
+                            if (ths[7]) ths[7].textContent = 'ESTADO';
+                            const thOpc = document.createElement('th');
+                            thOpc.textContent = 'OPCIONES';
+                            headerRow.appendChild(thOpc);
+                        } else {
+                            // 9 o más, normalizar
+                            if (ths[7]) ths[7].textContent = 'ESTADO';
+                            if (ths[8]) ths[8].textContent = 'OPCIONES';
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+        try {
+            const body = document.getElementById('searchResultsTableBody');
+            if (body) {
+                const table = body.closest('table');
+                const thead = table ? table.querySelector('thead') : null;
+                const headerRow = thead ? thead.querySelector('tr') : null;
+                if (headerRow) {
+                    const ths = Array.from(headerRow.querySelectorAll('th'));
+                    const labels = ths.map(th => (th.textContent || '').trim().toUpperCase());
+                    // Queremos 7 columnas: ID, NOMBRE, ESTADO, DIRECCIÓN, CELULAR, CORREO, OPCIONES
+                    if (ths.length < 7) {
+                        // Completar faltantes
+                        while (ths.length < 6) {
+                            const th = document.createElement('th');
+                            th.textContent = '';
+                            headerRow.appendChild(th);
+                            ths.push(th);
+                        }
+                        const thEstado = document.createElement('th');
+                        thEstado.textContent = 'ESTADO';
+                        headerRow.appendChild(thEstado);
+                        const thOpc = document.createElement('th');
+                        thOpc.textContent = 'OPCIONES';
+                        headerRow.appendChild(thOpc);
+                    } else {
+                        if (ths[2]) ths[2].textContent = 'ESTADO';
+                        if (ths[6]) ths[6].textContent = 'OPCIONES';
+                        if (!labels.includes('OPCIONES')) {
+                            const thOpc = document.createElement('th');
+                            thOpc.textContent = 'OPCIONES';
+                            headerRow.appendChild(thOpc);
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+    })();
+    // ========================================
     // FUNCIONES DE CONFIRMACIÓN PARA BENEFICIARIOS
     // ========================================
     
@@ -362,10 +529,14 @@ document.addEventListener('DOMContentLoaded', function() {
      * Muestra el modal de confirmación para crear beneficiario
      */
     function showConfirmCreateBeneficiarioModal() {
+        console.log('🔍 Intentando mostrar modal de confirmación de creación');
         const modal = document.getElementById('confirmCreateBeneficiarioModal');
         if (modal) {
+            console.log('✅ Modal de creación encontrado, mostrando...');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
+        } else {
+            console.error('❌ No se encontró el modal confirmCreateBeneficiarioModal');
         }
     }
     
@@ -419,14 +590,21 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Persistir titular en memoria y tabla
             titularesData[titular.numeroId] = titular;
+            
+            // Persistir en localStorage
+            try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
+            
             addTitularToTable(titular, true);
             
-            // Persistir beneficiario y asociarlo al titular
-            addBeneficiarioToTable(beneficiarioData);
+            // Persistir beneficiario y asociarlo al titular (actualiza/insert)
+            updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
             if (!titularIdToBeneficiarios[titular.numeroId]) {
                 titularIdToBeneficiarios[titular.numeroId] = [];
             }
             titularIdToBeneficiarios[titular.numeroId].push(beneficiarioData);
+            
+            // Persistir relaciones en localStorage
+            try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
             
             // Limpiar datos temporales
             sessionStorage.removeItem('tempTitular');
@@ -443,14 +621,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (titularFromResults) {
                 console.log('🔍 Creando beneficiario para titular desde resultados:', titularFromResults);
                 
-                // Agregar el beneficiario a la tabla principal
-                addBeneficiarioToTable(beneficiarioData);
+                // Actualizar o agregar beneficiario en la tabla principal
+                updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
                 
                 // Asociar el beneficiario al titular - SIGUIENDO EL PATRÓN DE CIUDADES
                 if (!titularIdToBeneficiarios[titularFromResults]) {
                     titularIdToBeneficiarios[titularFromResults] = [];
                 }
                 titularIdToBeneficiarios[titularFromResults].push(beneficiarioData);
+                
+                // Persistir relaciones en localStorage
+                try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
                 
                 // Re-renderizar la tabla de resultados de titular
                 renderBeneficiariosDeTitular(titularFromResults);
@@ -463,8 +644,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('✅ Beneficiario creado y asociado al titular:', titularFromResults);
             } else {
-                // Si no viene del modal de titular ni de resultados, solo crear beneficiario
-                addBeneficiarioToTable(beneficiarioData);
+                // Si no viene del modal de titular ni de resultados, actualizar/insertar beneficiario
+                updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
                 
                 // Cerrar modal de creación
                 hideCreateBeneficiarioModal();
@@ -501,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Refrescar tablas de resultados después de cerrar el modal de éxito
         setTimeout(() => {
             console.log('🔄 Refrescando tablas después de cerrar modal de éxito de crear beneficiario');
-            forceRefreshAllResultsTables();
+            window.forceRefreshAllResultsTables();
         }, 200);
     }
     
@@ -595,14 +776,21 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Persistir titular en memoria y tabla
             titularesData[titular.numeroId] = titular;
+            
+            // Persistir en localStorage
+            try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
+            
             addTitularToTable(titular, true);
             
-            // Persistir beneficiario y asociarlo al titular
-            addBeneficiarioToTable(beneficiarioData);
+            // Persistir beneficiario y asociarlo al titular (actualiza/insert)
+            updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
             if (!titularIdToBeneficiarios[titular.numeroId]) {
                 titularIdToBeneficiarios[titular.numeroId] = [];
             }
             titularIdToBeneficiarios[titular.numeroId].push(beneficiarioData);
+            
+            // Persistir relaciones en localStorage
+            try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
             
             // Limpiar datos temporales
             sessionStorage.removeItem('tempTitular');
@@ -710,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Refrescar tablas de resultados después de cerrar el modal de éxito
         setTimeout(() => {
             console.log('🔄 Refrescando tablas después de cerrar modal de éxito de titular');
-            forceRefreshAllResultsTables();
+            window.forceRefreshAllResultsTables();
         }, 200);
     }
     
@@ -722,10 +910,14 @@ document.addEventListener('DOMContentLoaded', function() {
      * Muestra el modal de confirmación para actualizar beneficiario
      */
     function showConfirmUpdateBeneficiarioModal() {
+        console.log('🔍 Intentando mostrar modal de confirmación de actualización');
         const modal = document.getElementById('confirmUpdateBeneficiarioModal');
         if (modal) {
+            console.log('✅ Modal de actualización encontrado, mostrando...');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
+        } else {
+            console.error('❌ No se encontró el modal confirmUpdateBeneficiarioModal');
         }
     }
     
@@ -806,7 +998,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Refrescar tablas de resultados después de cerrar el modal de éxito
         setTimeout(() => {
             console.log('🔄 Refrescando tablas después de cerrar modal de éxito de beneficiario');
-            forceRefreshAllResultsTables();
+            window.forceRefreshAllResultsTables();
         }, 200);
     }
     
@@ -825,6 +1017,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         beneficiariosData[numeroId] = beneficiarioData;
         
+        // Persistir en localStorage
+        try { localStorage.setItem('beneficiariosData', JSON.stringify(beneficiariosData)); } catch (e) {}
+        
         // Actualizar en la tabla principal
         updateBeneficiarioInTable(beneficiarioData, originalId);
         
@@ -832,26 +1027,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const titularModal = document.getElementById('titularResultsModal');
         if (titularModal && titularModal.classList.contains('show')) {
             const currentTitularId = sessionStorage.getItem('currentSearchedTitularId');
+            console.log('🔄 Actualizando tabla de resultados para titular:', currentTitularId);
+            
             if (currentTitularId) {
+                // Asegurar que existe la relación
+                if (!titularIdToBeneficiarios[currentTitularId]) {
+                    titularIdToBeneficiarios[currentTitularId] = [];
+                }
+                
                 // Actualizar en la relación titular-beneficiarios
                 if (originalId && originalId !== numeroId) {
                     const index = titularIdToBeneficiarios[currentTitularId].findIndex(b => b.numeroId === originalId);
                     if (index > -1) {
+                        console.log('🗑️ Eliminando beneficiario con ID original:', originalId);
                         titularIdToBeneficiarios[currentTitularId].splice(index, 1);
                     }
                 }
                 
                 const existingIndex = titularIdToBeneficiarios[currentTitularId].findIndex(b => b.numeroId === (originalId || numeroId));
                 if (existingIndex > -1) {
+                    console.log('✏️ Actualizando beneficiario existente en índice:', existingIndex);
                     titularIdToBeneficiarios[currentTitularId][existingIndex] = beneficiarioData;
                 } else {
+                    console.log('➕ Agregando nuevo beneficiario a la lista');
                     titularIdToBeneficiarios[currentTitularId].push(beneficiarioData);
                 }
                 
-                // Re-renderizar la tabla de beneficiarios
+                // Persistir relaciones en localStorage
+                try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
+                
+                console.log('📊 Lista actualizada de beneficiarios:', titularIdToBeneficiarios[currentTitularId]);
+                
+                // Re-renderizar la tabla de beneficiarios (actualiza la fila en resultados)
                 renderBeneficiariosDeTitular(currentTitularId);
             }
         }
+
+        // Si existe una tabla de resultados de búsqueda individual, refrescarla también
+        try { refreshBeneficiarioResultsTable(); } catch (e) {}
     }
     
     // Función simplificada siguiendo el patrón de ciudades
@@ -891,6 +1104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = tableBody.querySelectorAll('tr');
         
         // Buscar la fila a actualizar
+    let updated = false;
         for (let row of rows) {
             const cells = row.querySelectorAll('td');
             if (cells.length >= 2) {
@@ -916,13 +1130,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${beneficiario.direccion}</td>
                         <td>${beneficiario.telefono}</td>
                         <td>${beneficiario.email}</td>
-                        <td>${beneficiario.activo}</td>
+                        <td>${String(beneficiario.activo || '').toUpperCase()}</td>
                         <td>
                             <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
                                 <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-small btn-danger" onclick="deleteBeneficiario('${beneficiario.numeroId}')">
-                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
@@ -936,10 +1147,43 @@ document.addEventListener('DOMContentLoaded', function() {
                         this.style.backgroundColor = '';
                     });
                     
-                    break;
+                updated = true;
+                break;
                 }
             }
         }
+    if (!updated) {
+        // Si no existía, agregar como nueva fila
+        try {
+            if (tableBody.querySelector('.no-data-message')) {
+                tableBody.querySelector('.no-data-message').parentElement?.remove();
+            }
+        } catch (e) {}
+        const nombreCompleto = [
+            beneficiario.apellido1 || '',
+            beneficiario.apellido2 || '',
+            beneficiario.nombre1 || '',
+            beneficiario.nombre2 || ''
+        ].filter(nombre => nombre.trim() !== '').join(' ');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${beneficiario.tipoId}</td>
+            <td>${beneficiario.numeroId}</td>
+            <td>${nombreCompleto}</td>
+            <td>${beneficiario.direccion}</td>
+            <td>${beneficiario.telefono}</td>
+            <td>${beneficiario.email}</td>
+            <td>${String(beneficiario.activo || '').toUpperCase()}</td>
+            <td>
+                <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(newRow);
+    }
+    // Persistir
+    try { beneficiariosData[beneficiario.numeroId] = beneficiario; } catch (e) {}
     }
     
     
@@ -1241,10 +1485,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.getCiudadesData === 'function') {
             ciudades = window.getCiudadesData();
         } else {
-            const allowLocal = sessionStorage.getItem('ciudadesAllowLocal') === 'true';
-            if (allowLocal) {
-                try { ciudades = JSON.parse(localStorage.getItem('ciudadesData') || '{}'); } catch (e) { ciudades = {}; }
-            }
+            // Fallback SIEMPRE a localStorage si hay datos válidos
+            try { 
+                const raw = localStorage.getItem('ciudadesData');
+                const parsed = raw ? JSON.parse(raw) : {};
+                if (parsed && typeof parsed === 'object') {
+                    ciudades = Object.fromEntries(
+                        Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                    );
+                }
+            } catch (e) { ciudades = {}; }
         }
         const currentValue = citySelect.value;
         citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
@@ -1569,7 +1819,13 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Nuevo beneficiario a crear:', nuevoBeneficiario);
             
             // Determinar si es crear o actualizar basado en el texto del botón
-            const isUpdate = document.getElementById('bCrearBeneficiario').textContent === 'Actualizar';
+            const createButton = document.getElementById('bCrearBeneficiario');
+            const isUpdate = createButton && createButton.textContent === 'Actualizar';
+            
+            console.log('🔍 Detección de modo:', {
+                buttonText: createButton ? createButton.textContent : 'No encontrado',
+                isUpdate: isUpdate
+            });
             
             // Verificar si viene del modal de titular
             const tempTitular = sessionStorage.getItem('tempTitular');
@@ -1589,15 +1845,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (isUpdate) {
                     // Es una actualización - mostrar modal de confirmación
+                    console.log('✅ Mostrando modal de confirmación de ACTUALIZACIÓN');
                     window.tempBeneficiarioData = nuevoBeneficiario;
                     showConfirmUpdateBeneficiarioModal();
-                    } else {
+                } else {
                     // Es una creación - mostrar modal de confirmación
+                    console.log('✅ Mostrando modal de confirmación de CREACIÓN');
                     window.tempBeneficiarioData = nuevoBeneficiario;
                     showConfirmCreateBeneficiarioModal();
                 }
                 
-                addBeneficiarioToTable(nuevoBeneficiario);
+                // Solo agregar a la tabla si es creación, no si es actualización
+                if (!isUpdate) {
+                    addBeneficiarioToTable(nuevoBeneficiario);
+                }
                 
                 // Refrescar lista en el modal de resultados
                 renderBeneficiariosDeTitular(titularId);
@@ -1758,6 +2019,7 @@ document.addEventListener('DOMContentLoaded', function() {
             titular.nombre2 || ''
         ].filter(nombre => nombre.trim() !== '').join(' ');
         
+        const isActive = (String(titular.activo || 'SI').toUpperCase() === 'SI');
         const rowHtml = `
             <td>${titular.tipoId || ''}</td>
             <td>${titular.numeroId}</td>
@@ -1767,12 +2029,18 @@ document.addEventListener('DOMContentLoaded', function() {
             <td>${titular.celular || titular.telefono || ''}</td>
             <td>${titular.correo || titular.email || ''}</td>
             <td>
-                <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-small btn-danger" onclick="deleteTitular('${titular.numeroId}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+            </td>
+            <td>
+                <div class="options-inline" style="display:flex; align-items:center; gap:12px;">
+                    <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <label class="animated-toggle" data-id="${titular.numeroId}" title="${isActive ? 'Desactivar' : 'Activar'}" style="display:inline-flex;">
+                        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTitularState('${titular.numeroId}')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </td>
         `;
         
@@ -1805,6 +2073,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Guardar en beneficiariosData (estructura principal)
         beneficiariosData[beneficiario.numeroId] = beneficiario;
         
+        // Persistir en localStorage
+        try { localStorage.setItem('beneficiariosData', JSON.stringify(beneficiariosData)); } catch (e) {}
+        
         const tableBody = document.getElementById('beneficiariosTableBody');
         const noDataRow = tableBody.querySelector('.no-data-message');
         
@@ -1828,13 +2099,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <td>${beneficiario.direccion}</td>
             <td>${beneficiario.telefono}</td>
             <td>${beneficiario.email}</td>
-            <td>${beneficiario.activo}</td>
+            <td>${String(beneficiario.activo || '').toUpperCase()}</td>
             <td>
                 <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
                     <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-small btn-danger" onclick="deleteBeneficiario('${beneficiario.numeroId}')">
-                    <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
@@ -2257,13 +2525,7 @@ function editBeneficiario(numeroId) {
  * Función para eliminar un beneficiario
  * @param {string} numeroId - Número de ID del beneficiario a eliminar
  */
-function deleteBeneficiario(numeroId) {
-    // Guardar el ID del beneficiario a eliminar
-    window.tempDeleteBeneficiarioId = numeroId;
-    
-    // Mostrar modal de confirmación
-    showConfirmDeleteBeneficiarioModal();
-}
+// Eliminar de beneficiarios ya no está disponible; se gestiona por toggle de estado
 
 // ========================================
 // FUNCIONES GLOBALES PARA TOGGLE DE BENEFICIARIOS
@@ -2441,12 +2703,15 @@ function setFechaActual() {
           <td>${titular.telefono}</td>
           <td>${titular.email}</td>
           <td>
-              <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
-                  <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn btn-small btn-danger" onclick="deleteTitular('${titular.numeroId}')">
-                  <i class="fas fa-trash"></i>
-              </button>
+              <div class="options-inline" style="display:flex; align-items:center; gap:12px;">
+                  <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
+                      <i class="fas fa-edit"></i>
+                  </button>
+                  <label class="animated-toggle" data-id="${titular.numeroId}" title="${isActive ? 'Desactivar' : 'Activar'}" style="display:inline-flex;">
+                      <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTitularState('${titular.numeroId}')">
+                      <span class="toggle-slider"></span>
+                  </label>
+              </div>
           </td>
       `;
       
@@ -2511,13 +2776,10 @@ function setFechaActual() {
               <td>${b.direccion}</td>
               <td>${b.telefono}</td>
               <td>${b.email}</td>
-              <td>${b.activo}</td>
+              <td>${String(b.activo || '').toUpperCase()}</td>
               <td>
                   <button class="btn btn-small" onclick="editBeneficiario('${b.numeroId}')">
                       <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-small btn-danger" onclick="deleteBeneficiario('${b.numeroId}')">
-                      <i class="fas fa-trash"></i>
                   </button>
               </td>
           `;
@@ -2585,10 +2847,11 @@ function setFechaActual() {
       ].filter(nombre => nombre.trim() !== '').join(' ');
 
       const row = document.createElement('tr');
+      const isActive = (String(titular.activo || 'SI').toUpperCase() === 'SI');
       row.innerHTML = `
           <td>${titular.numeroId}</td>
           <td>${nombreCompleto}</td>
-          <td>${titular.activo}</td>
+          <td><span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span></td>
           <td>${titular.direccion}</td>
           <td>${titular.celular || ''}</td>
           <td>${titular.correo || ''}</td>
@@ -2596,9 +2859,10 @@ function setFechaActual() {
               <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
                   <i class="fas fa-edit"></i>
               </button>
-              <button class="btn btn-small btn-danger" onclick="deleteTitular('${titular.numeroId}')">
-                  <i class="fas fa-trash"></i>
-              </button>
+              <label class="animated-toggle" data-id="${titular.numeroId}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                  <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTitularState('${titular.numeroId}')">
+                  <span class="toggle-slider"></span>
+              </label>
           </td>`;
       body.appendChild(row);
 
@@ -2611,6 +2875,157 @@ function setFechaActual() {
       if (typeof renderBeneficiariosDeTitular === 'function') {
           renderBeneficiariosDeTitular(titular.numeroId);
       }
+  }
+
+  // ========================================
+  // TOGGLE ACTIVAR/DESACTIVAR TITULAR
+  // ========================================
+
+  function toggleTitularState(numeroId) {
+      const titular = titularesData[numeroId];
+      if (!titular) return;
+      const estadoOriginal = (String(titular.activo || 'SI').toUpperCase() === 'SI');
+      // Cambiar en memoria usando SI/NO
+      titular.activo = estadoOriginal ? 'NO' : 'SI';
+      // Actualizar UI en tabla principal
+      const tableBody = document.getElementById('titularesTableBody');
+      if (tableBody) {
+          const rows = tableBody.querySelectorAll('tr');
+          for (let row of rows) {
+              const cells = row.querySelectorAll('td');
+              if (cells && cells[1] && cells[1].textContent.trim() === String(numeroId)) {
+                  const badge = row.querySelector('span.badge');
+                  const toggleEl = row.querySelector('.animated-toggle');
+                  const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                  const isActive = (String(titular.activo).toUpperCase() === 'SI');
+                  if (badge) {
+                      badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                      badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                  }
+                  if (toggleEl && toggleInput) {
+                      toggleInput.checked = isActive;
+                      toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                  }
+                  break;
+              }
+          }
+      }
+      // Actualizar UI en resultados de búsqueda si abiertos
+      const body = document.getElementById('searchResultsTableBody');
+      if (body) {
+          const rows = body.querySelectorAll('tr');
+          rows.forEach(r => {
+              const firstCell = r.querySelector('td');
+              if (firstCell && firstCell.textContent.trim() === String(numeroId)) {
+                  const badge = r.querySelector('span.badge');
+                  const toggleEl = r.querySelector('.animated-toggle');
+                  const toggleInput = r.querySelector('.animated-toggle input[type="checkbox"]');
+              const isActive = (String(titular.activo).toUpperCase() === 'SI');
+                  if (badge) {
+                      badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                  badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                  }
+                  if (toggleEl && toggleInput) {
+                      toggleInput.checked = isActive;
+                      toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                  }
+              }
+          });
+      }
+      // Mostrar confirmación
+      showConfirmToggleTitularModal(numeroId, estadoOriginal);
+  }
+
+  function showConfirmToggleTitularModal(numeroId, estadoOriginal) {
+      window.tempToggleTitularId = numeroId;
+      window.tempToggleTitularPrev = estadoOriginal;
+      const modal = document.getElementById('confirmToggleTitularModal');
+      const titular = titularesData[numeroId];
+      if (modal && titular) {
+          const actionText = estadoOriginal ? 'desactivar' : 'activar';
+          const titleElement = modal.querySelector('.modal-title');
+          const messageElement = modal.querySelector('.modal-message');
+          if (titleElement) titleElement.textContent = `${actionText.toUpperCase()} TITULAR`;
+          if (messageElement) messageElement.textContent = `¿Está seguro de que desea ${actionText} el titular ${titular.numeroId}?`;
+          modal.classList.add('show');
+          document.body.style.overflow = 'hidden';
+      }
+  }
+
+  function cancelToggleTitular() {
+      const numeroId = window.tempToggleTitularId;
+      const prev = window.tempToggleTitularPrev;
+      if (numeroId != null) {
+          const titular = titularesData[numeroId];
+          if (titular) {
+              titular.activo = prev ? 'SI' : 'NO';
+              // Revertir UI reutilizando la función de toggle para actualizar visual (sin cambiar estado de nuevo)
+              const isActive = (String(titular.activo).toUpperCase() === 'SI');
+              const tableBody = document.getElementById('titularesTableBody');
+              if (tableBody) {
+                  const rows = tableBody.querySelectorAll('tr');
+                  for (let row of rows) {
+                      const cells = row.querySelectorAll('td');
+                      if (cells && cells[1] && cells[1].textContent.trim() === String(numeroId)) {
+                          const badge = row.querySelector('span.badge');
+                          const toggleEl = row.querySelector('.animated-toggle');
+                          const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                          if (badge) {
+                              badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                              badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                          }
+                          if (toggleEl && toggleInput) {
+                              toggleInput.checked = isActive;
+                              toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                          }
+                          break;
+                      }
+                  }
+              }
+          }
+      }
+      const modal = document.getElementById('confirmToggleTitularModal');
+      if (modal) { modal.classList.remove('show'); document.body.style.overflow = 'auto'; }
+      window.tempToggleTitularId = null;
+      window.tempToggleTitularPrev = null;
+  }
+
+  function confirmToggleTitular() {
+      const numeroId = window.tempToggleTitularId;
+      if (numeroId != null) {
+          const titular = titularesData[numeroId];
+          if (titular) {
+              const city = getSelectedCityCode();
+              if (!titularesByCity[city]) titularesByCity[city] = {};
+              const toSave = { ...titular, ciudad: city };
+              titularesByCity[city][numeroId] = toSave;
+              persistTitularesByCity();
+              const confirmModal = document.getElementById('confirmToggleTitularModal');
+              if (confirmModal) confirmModal.classList.remove('show');
+              showSuccessToggleTitularModal(numeroId);
+          }
+      }
+      window.tempToggleTitularId = null;
+      window.tempToggleTitularPrev = null;
+  }
+
+  function showSuccessToggleTitularModal(numeroId) {
+      const modal = document.getElementById('successToggleTitularModal');
+      const titular = titularesData[numeroId];
+      if (modal && titular) {
+          const messageElement = modal.querySelector('.modal-message');
+          if (messageElement) {
+              const estado = (String(titular.activo).toUpperCase() === 'SI') ? 'activado' : 'desactivado';
+              messageElement.textContent = `El titular ${titular.numeroId} ha sido ${estado} exitosamente.`;
+          }
+          modal.classList.add('show');
+          document.body.style.overflow = 'hidden';
+      }
+  }
+
+  function closeSuccessToggleTitularModal() {
+      const modal = document.getElementById('successToggleTitularModal');
+      if (modal) { modal.classList.remove('show'); document.body.style.overflow = 'auto'; }
   }
   
   /**
@@ -2689,9 +3104,10 @@ function setFechaActual() {
               <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
                   <i class="fas fa-edit"></i>
               </button>
-              <button class="btn btn-small btn-danger" onclick="deleteBeneficiario('${beneficiario.numeroId}')">
-                  <i class="fas fa-trash"></i>
-              </button>
+              <label class="animated-toggle" data-id="${beneficiario.numeroId}" title="${(String(beneficiario.activo||'SI').toUpperCase()==='SI') ? 'Desactivar' : 'Activar'}">
+                  <input type="checkbox" ${(String(beneficiario.activo||'SI').toUpperCase()==='SI') ? 'checked' : ''} onchange="toggleBeneficiarioState('${beneficiario.numeroId}')">
+                  <span class="toggle-slider"></span>
+              </label>
           </td>
       `;
       body.appendChild(beneficiarioDataRow);
@@ -2805,7 +3221,7 @@ function loadTitularesForSelectedCity() {
         if (tableBody) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="no-data-message">
+                    <td colspan="9" class="no-data-message">
                         <div class="no-data-content">
                             <i class="fas fa-user-tie"></i>
                             <p>No existen registros de titulares</p>
@@ -2866,6 +3282,9 @@ titularIdToBeneficiarios['12345678'] = [beneficiarioEjemplo];
  */
 function deleteTitularFromData(identificacion) {
     delete titularesData[identificacion];
+    
+    // Persistir cambios en localStorage
+    try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
 }
 
 /**
@@ -2874,6 +3293,9 @@ function deleteTitularFromData(identificacion) {
  */
 function deleteBeneficiarioFromData(numeroId) {
     delete beneficiariosData[numeroId];
+    
+    // Persistir cambios en localStorage
+    try { localStorage.setItem('beneficiariosData', JSON.stringify(beneficiariosData)); } catch (e) {}
 }
 
     // ========================================
@@ -2901,10 +3323,6 @@ function deleteBeneficiarioFromData(numeroId) {
                     e.preventDefault();
                     const id = onclick.match(/editBeneficiario\('([^']+)'\)/)[1];
                     editBeneficiario(id);
-                } else if (onclick && onclick.includes('deleteBeneficiario')) {
-                    e.preventDefault();
-                    const id = onclick.match(/deleteBeneficiario\('([^']+)'\)/)[1];
-                    deleteBeneficiario(id);
                 }
             }
         });
@@ -2920,6 +3338,20 @@ window.hideCreateTitularModal = hideCreateTitularModal;
 window.showSearchTitularModal = showSearchTitularModal;
 window.hideSearchTitularModal = hideSearchTitularModal;
 window.showConfirmCreateTitularModal = showConfirmCreateTitularModal;
+
+// Asegurar que las funciones estén disponibles globalmente
+if (typeof hideCreateTitularModal === 'undefined') {
+    window.hideCreateTitularModal = function() {
+        console.log('🔍 Cerrando modal de titular...');
+        const createTitularModalOverlay = document.getElementById('createTitularModal');
+        if (createTitularModalOverlay) {
+            createTitularModalOverlay.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            console.log('✅ Modal de titular cerrado');
+            clearCreateTitularForm();
+        }
+    };
+}
 window.cancelCreateTitular = cancelCreateTitular;
 window.confirmCreateTitular = confirmCreateTitular;
 window.closeSuccessTitularModal = closeSuccessTitularModal;
@@ -3033,6 +3465,11 @@ window.deleteBeneficiario = deleteBeneficiario;
 window.setBeneficiario = setBeneficiario;
 window.setBeneficiarioActivo = setBeneficiarioActivo;
 window.addBeneficiarioForCurrentTitular = addBeneficiarioForCurrentTitular;
+// Toggle titulares global
+window.toggleTitularState = toggleTitularState;
+window.cancelToggleTitular = cancelToggleTitular;
+window.confirmToggleTitular = confirmToggleTitular;
+window.closeSuccessToggleTitularModal = closeSuccessToggleTitularModal;
 window.clearCreateBeneficiarioForm = clearCreateBeneficiarioForm;
 
 // Debug: verificar que las funciones estén disponibles
@@ -3304,7 +3741,7 @@ function closeSuccessDeleteBeneficiarioModal() {
     // Refrescar tablas de resultados después de cerrar el modal de éxito
     setTimeout(() => {
         console.log('🔄 Refrescando tablas después de cerrar modal de éxito de eliminar beneficiario');
-        forceRefreshAllResultsTables();
+        window.forceRefreshAllResultsTables();
     }, 200);
 }
 
