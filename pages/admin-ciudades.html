@@ -142,7 +142,7 @@
                     <a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Planes</a>
+                    <a href="admin-planes.html" class="top-nav-link">Planes</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Consecutivos</a>
@@ -291,7 +291,7 @@
 
     <!-- Modal de Crear Ciudad -->
     <div class="modal-overlay" id="createCityModal">
-        <div class="modal">
+        <div class="modal modal-large">
             <div class="modal-header">
                 <h3 class="modal-title" id="createCityTitle">CREAR CIUDAD</h3>
                 <button class="modal-close" onclick="hideCreateCityModal()">
@@ -299,25 +299,36 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="tCodigo" class="form-label">Código *</label>
-                    <input type="text" id="tCodigo" class="form-input" placeholder="Escribe Código de la ciudad">
+                <!-- Primera fila: Código, Nombre -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tCodigo" class="form-label">Código *</label>
+                        <input type="text" id="tCodigo" class="form-input" placeholder="Código de la ciudad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tNombre" class="form-label">Nombre *</label>
+                        <input type="text" id="tNombre" class="form-input" placeholder="Nombre de la ciudad" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="tNombre" class="form-label">Nombre *</label>
-                    <input type="text" id="tNombre" class="form-input" placeholder="Escribe Nombre de la ciudad">
+                
+                <!-- Segunda fila: Dirección -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tDireccion" class="form-label">Dirección *</label>
+                        <input type="text" id="tDireccion" class="form-input" placeholder="Dirección de la ciudad" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="tDireccion" class="form-label">Dirección *</label>
-                    <input type="text" id="tDireccion" class="form-input" placeholder="Dirección de la ciudad">
-                </div>
-                <div class="form-group">
-                    <label for="tTelefono" class="form-label">Teléfono *</label>
-                    <input type="text" id="tTelefono" class="form-input" placeholder="Teléfono">
-                </div>
-                <div class="form-group">
-                    <label for="tCorreo" class="form-label">Correo Electrónico *</label>
-                    <input type="email" id="tCorreo" class="form-input" placeholder="Escribe el correo electrónico">
+                
+                <!-- Tercera fila: Teléfono, Correo -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tTelefono" class="form-label">Teléfono *</label>
+                        <input type="text" id="tTelefono" class="form-input" placeholder="Número de teléfono" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tCorreo" class="form-label">Correo Electrónico *</label>
+                        <input type="email" id="tCorreo" class="form-input" placeholder="correo@ejemplo.com" required>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -664,6 +675,26 @@
             <div class="modal-body">
                 <p>Se ha eliminado con éxito la Filial!</p>
                 <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteBranchModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
             </div>
         </div>
     </div>

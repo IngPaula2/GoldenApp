@@ -125,7 +125,7 @@
                     <a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Planes</a>
+                    <a href="admin-planes.html" class="top-nav-link">Planes</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Consecutivos</a>
@@ -697,6 +697,22 @@
             <div class="modal-body">
                 <p>Se ha actualizado con éxito el Empleado!</p>
                 <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateEmpleadoModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
             </div>
         </div>
     </div>

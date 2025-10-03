@@ -142,7 +142,7 @@
                     <a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Planes</a>
+                    <a href="admin-planes.html" class="top-nav-link">Planes</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Consecutivos</a>
@@ -278,31 +278,33 @@
                 </button>
             </div>
             <div class="modal-body">
+                <!-- Primera fila: Tipo ID, Número ID, Primer Apellido -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cTipo_Id" class="form-label">Tipo ID *</label>
-                        <select id="cTipo_Id" class="form-input">
-                            <option value="">Seleccione el tipo de documento</option>
-                            <option value="CC">CÉDULA DE CIUDADANÍA</option>
-                            <option value="CE">CÉDULA DE EXTRANJERÍA</option>
-                            <option value="PA">PASAPORTE</option>
-                            <option value="TI">TARJETA DE IDENTIDAD</option>
-                            <option value="RC">REGISTRO CIVIL</option>
-                            <option value="NIT">NIT</option>
-                            <option value="RUT">RUT</option>
-                            <option value="PPT">PERMISO PERMANENTE</option>
-                            <option value="PEP">PERMISO ESPECIAL DE PERMANENCIA</option>
-                            <option value="DE">DOCUMENTO DE EXTRANJERÍA</option>
-                        </select>
+                        <div class="select-container">
+                            <select id="cTipo_Id" class="form-select" required>
+                                <option value="">Seleccione el tipo</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="PA">Pasaporte</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="tId" class="form-label">Número ID *</label>
-                        <input type="text" id="tId" class="form-input" placeholder="Digite el Numero">
+                        <input type="text" id="tId" class="form-input" placeholder="Número de identificación" required>
                     </div>
                     <div class="form-group">
                         <label for="tApellido1" class="form-label">Primer Apellido *</label>
                         <input type="text" id="tApellido1" name="tApellido1" class="form-input" placeholder="Primer apellido" required>
                     </div>
+                </div>
+                
+                <!-- Segunda fila: Segundo Apellido, Primer Nombre, Segundo Nombre -->
+                <div class="form-row">
                     <div class="form-group">
                         <label for="tApellido2" class="form-label">Segundo Apellido</label>
                         <input type="text" id="tApellido2" name="tApellido2" class="form-input" placeholder="Segundo apellido">
@@ -316,41 +318,51 @@
                         <input type="text" id="tNombre2" name="tNombre2" class="form-input" placeholder="Segundo nombre">
                     </div>
                 </div>
+                
+                <!-- Tercera fila: Dirección, Barrio, Celular -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tDireccion" class="form-label">Direccion *</label>
-                        <input type="text" id="tDireccion" class="form-input" placeholder="Digite la Direccion">
+                        <label for="tDireccion" class="form-label">Dirección *</label>
+                        <input type="text" id="tDireccion" class="form-input" placeholder="Dirección de residencia" required>
                     </div>
                     <div class="form-group">
                         <label for="tBarrioT" class="form-label">Barrio *</label>
-                        <input type="text" id="tBarrioT" class="form-input" placeholder="Digite el Barrio">
+                        <input type="text" id="tBarrioT" class="form-input" placeholder="Barrio" required>
                     </div>
                     <div class="form-group">
                         <label for="tCelular" class="form-label">Celular *</label>
-                        <input type="text" id="tCelular" class="form-input" placeholder="Digite el Celular">
-                    </div>
-                    <div class="form-group">
-                        <label for="tCorreo" class="form-label">Email *</label>
-                        <input type="email" id="tCorreo" class="form-input" placeholder="Digite el Email">
+                        <input type="text" id="tCelular" class="form-input" placeholder="Número de celular" required>
                     </div>
                 </div>
+                
+                <!-- Cuarta fila: Email, Fecha de Ingreso -->
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="tCorreo" class="form-label">Correo Electrónico *</label>
+                        <input type="email" id="tCorreo" class="form-input" placeholder="correo@ejemplo.com" required>
+                    </div>
+                    <div class="form-group">
                         <label for="tFecha_Ingreso" class="form-label">Fecha de Ingreso *</label>
-                        <input type="date" id="tFecha_Ingreso" class="form-input" value="">
+                        <input type="date" id="tFecha_Ingreso" class="form-input" required>
+                    </div>
+                </div>
+                
+                <!-- Quinta fila: Estado Activo, Beneficiario -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Estado Activo *</label>
+                        <div class="toggle-buttons">
+                            <button type="button" class="btn-toggle btn-toggle-yes" onclick="setTitularActivo('SI')">SI</button>
+                            <button type="button" class="btn-toggle btn-toggle-no" onclick="setTitularActivo('NO')">NO</button>
+                            <input type="hidden" id="cActivo" name="cActivo" value="SI" required>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="cActivo" class="form-label">Activo *</label>
-                        <input type="text" id="cActivo" class="form-input" placeholder="Si / No">
-                    </div>
-                    <div class="form-group">
-                        <label for="cBeneficiario" class="form-label">Beneficiario *</label>
-                        <div class="beneficiario-toggle">
-                            <input type="text" id="cBeneficiario" class="form-input" placeholder="Si / No" readonly>
-                            <div class="toggle-buttons">
-                                <button type="button" class="btn-toggle btn-toggle-yes" onclick="setBeneficiario('SI')">SI</button>
-                                <button type="button" class="btn-toggle btn-toggle-no" onclick="setBeneficiario('NO')">NO</button>
-                            </div>
+                        <label class="form-label">Beneficiario *</label>
+                        <div class="toggle-buttons">
+                            <button type="button" class="btn-toggle btn-toggle-yes" onclick="setBeneficiario('SI')">SI</button>
+                            <button type="button" class="btn-toggle btn-toggle-no" onclick="setBeneficiario('NO')">NO</button>
+                            <input type="hidden" id="cBeneficiario" name="cBeneficiario" value="NO" required>
                         </div>
                     </div>
                 </div>
@@ -788,6 +800,22 @@
             <div class="modal-body">
                 <p>Se ha eliminado con éxito el Beneficiario!</p>
                 <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteBeneficiarioModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
             </div>
         </div>
     </div>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<!--
+    DASHBOARD ADMINISTRATIVO - GOLDEN APP
+    
+    Este archivo contiene la página principal del panel administrativo de planes.
+    Incluye sidebar de navegación, barra superior, tablas de datos y modales.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2024
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Planes</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/reset.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/admin-ciudades.css">
+    <link rel="stylesheet" href="../assets/css/admin-planes.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page planes-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cogs nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item">
+                    <a href="admin-ciudades.html" class="top-nav-link">Ciudades</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-titulares.html" class="top-nav-link">Titulares</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-cargos.html" class="top-nav-link">Cargos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-empleados.html" class="top-nav-link">Empleados</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a>
+                </li>
+                <li class="top-nav-item active">
+                    <a href="#" class="top-nav-link">Planes</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link">Consecutivos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link">Control de Consecutivos</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Planes -->
+            <section class="plans-section">
+                <div class="section-header">
+                    <h2>Planes</h2>
+                    <div class="action-buttons">
+                        <button id="bBuscarPlan" class="btn btn-primary" onclick="showPlanSearchModal()">Buscar Plan</button>
+                        <button id="bCrearPlan" class="btn btn-primary" onclick="showCreatePlanModal()">Crear Plan</button>
+                        <button id="bReportePlanes" class="btn btn-primary" onclick="showReportePlanesModal()">Reporte</button>
+                    </div>
+                </div>
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Valor Total</th>
+                                <th>Cuota Inicial</th>
+                                <th># Cuotas</th>
+                                <th>Mensualidad</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planesTableBody">
+                            <tr>
+                                <td colspan="8" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-chart-line"></i>
+                                        <p>No existen registros de planes</p>
+                                        <small>Haz clic en "Crear Plan" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES
+         ======================================== -->
+
+    <!-- Modal de Búsqueda de Plan -->
+    <div id="planSearchModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Buscar Plan</h3>
+                <button class="modal-close" onclick="hidePlanSearchModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="searchPlanCodigo">Buscar Plan:</label>
+                    <input type="text" id="searchPlanCodigo" class="form-control" placeholder="Nombre del plan o palabras clave">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hidePlanSearchModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bBuscar">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear/Actualizar Plan -->
+    <div id="createPlanModal" class="modal-overlay">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title" id="createPlanTitle">CREAR PLAN</h3>
+                <button class="modal-close" onclick="hideCreatePlanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createPlanForm">
+                    <!-- Primera fila: Nombre del Plan, Valor Plan, Cuota Inicial -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pNombre" class="form-label">Nombre del Plan *</label>
+                            <input type="text" id="pNombre" class="form-input" placeholder="NOMBRE DEL PLAN" style="text-transform: uppercase;" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pValorPlan" class="form-label">Valor Plan *</label>
+                            <div class="price-input-container">
+                                <span class="currency-symbol">$</span>
+                                <input type="text" id="pValorPlan" class="form-input price-field" placeholder="0" maxlength="20" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pCuotaInicial" class="form-label">Cuota Inicial *</label>
+                            <div class="price-input-container">
+                                <span class="currency-symbol">$</span>
+                                <input type="text" id="pCuotaInicial" class="form-input price-field" placeholder="0" maxlength="20" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Segunda fila: # Cuotas, Mensualidad, Fecha Inicial -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pNumCuotas" class="form-label"># Cuotas *</label>
+                            <input type="text" id="pNumCuotas" class="form-input" placeholder="1" style="text-transform: uppercase;" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pMensualidad" class="form-label">Mensualidad *</label>
+                            <div class="price-input-container">
+                                <span class="currency-symbol">$</span>
+                                <input type="text" id="pMensualidad" class="form-input price-field" placeholder="0" maxlength="20" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pFechaInicial" class="form-label">Fecha Inicial *</label>
+                            <input type="date" id="pFechaInicial" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Tercera fila: # Meses Asesoría, # Usuarios que Aplican, # de Libros -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pMesesAsesoria" class="form-label"># Meses Asesoría *</label>
+                            <input type="text" id="pMesesAsesoria" class="form-input" maxlength="2" placeholder="0" style="text-transform: uppercase;" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pUsuariosAplican" class="form-label"># Usuarios que Aplican *</label>
+                            <input type="text" id="pUsuariosAplican" class="form-input" placeholder="1" style="text-transform: uppercase;" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pNumLibros" class="form-label"># de Libros *</label>
+                            <input type="text" id="pNumLibros" class="form-input" placeholder="0" style="text-transform: uppercase;" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Cuarta fila: Observaciones y Estado Activo -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pObservaciones" class="form-label">Observaciones</label>
+                            <textarea id="pObservaciones" class="form-input" placeholder="OBSERVACIONES DEL PLAN" rows="3" style="text-transform: uppercase;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estado Activo *</label>
+                            <div class="toggle-buttons">
+                                <button type="button" class="btn-toggle btn-toggle-yes" onclick="setPlanActivo('SI')">SI</button>
+                                <button type="button" class="btn-toggle btn-toggle-no" onclick="setPlanActivo('NO')">NO</button>
+                                <input type="hidden" id="pActivo" name="pActivo" value="SI" required>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreatePlanModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrear">Siguiente</button>
+                <button type="button" class="btn btn-primary" id="bActualizar" style="display:none;">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda -->
+    <div id="planResultsModal" class="modal-overlay">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">Resultados de Búsqueda</h3>
+                <button class="modal-close" onclick="hidePlanResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Valor Total</th>
+                                <th>Cuota Inicial</th>
+                                <th># Cuotas</th>
+                                <th>Mensualidad</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planSearchResultsBody">
+                            <!-- Los resultados se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hidePlanResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Escalas -->
+    <div class="modal-overlay" id="planEscalasModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="btn-back" onclick="volverAPlan()" title="Volver al formulario de plan">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3 id="planEscalasTitle">CREAR ESCALAS</h3>
+                <button class="modal-close" onclick="hidePlanEscalasModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario de escalas se llenará dinámicamente -->
+                <div id="planEscalasFormContent">
+                    <!-- Los campos de escalas se agregarán aquí dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hidePlanEscalasModal()">Cancelar</button>
+                <button id="bCrearEscalasSubmit" type="button" class="btn btn-primary" onclick="handleEscalasSubmit()">Crear Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Ciudad -->
+    <div id="selectPlanModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Seleccionar Ciudad</h3>
+                <button class="modal-close" onclick="hideSelectPlanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cId_Ciudad" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="cId_Ciudad" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSelectPlanModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bSeleccionarPlan">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Plan y Escalas -->
+    <div class="modal-overlay" id="confirmCreatePlanEscalasModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR CREACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreatePlanEscalas()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de crear este plan y sus escalas?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreatePlanEscalas()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreatePlanEscalas()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Actualizar Plan y Escalas -->
+    <div class="modal-overlay" id="confirmUpdatePlanEscalasModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR ACTUALIZACIÓN</h3>
+                <button class="modal-close" onclick="cancelUpdatePlanEscalas()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de actualizar este plan y sus escalas?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdatePlanEscalas()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdatePlanEscalas()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Plan y Escalas -->
+    <div id="successCreatePlanEscalasModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">¡Éxito!</h3>
+                <button class="modal-close" onclick="closeSuccessCreatePlanEscalasModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">Plan y escalas creados exitosamente</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCreatePlanEscalasModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar Plan y Escalas -->
+    <div id="successUpdatePlanEscalasModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">¡Actualizado!</h3>
+                <button class="modal-close" onclick="closeSuccessUpdatePlanEscalasModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">Plan y escalas actualizados exitosamente</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdatePlanEscalasModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles del Plan -->
+    <div id="planDetailsModal" class="modal-overlay">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">DETALLES DEL PLAN</h3>
+                <button class="modal-close" onclick="hidePlanDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Información del Plan -->
+                <div class="details-section">
+                    <h4>Información del Plan</h4>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <label>Código:</label>
+                            <span id="detailCodigo"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Nombre:</label>
+                            <span id="detailNombre"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Valor Plan:</label>
+                            <span id="detailValorPlan"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Cuota Inicial:</label>
+                            <span id="detailCuotaInicial"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label># Cuotas:</label>
+                            <span id="detailNumCuotas"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Mensualidad:</label>
+                            <span id="detailMensualidad"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Fecha Inicial:</label>
+                            <span id="detailFechaInicial"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Meses Asesoría:</label>
+                            <span id="detailMesesAsesoria"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Usuarios Aplican:</label>
+                            <span id="detailUsuariosAplican"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label># Libros:</label>
+                            <span id="detailNumLibros"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Estado:</label>
+                            <span id="detailActivo"></span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <label>Observaciones:</label>
+                            <span id="detailObservaciones"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Escalas del Plan -->
+                <div class="details-section">
+                    <h4>Escalas del Plan</h4>
+                    <div class="escalas-grid">
+                        <div class="escala-item">
+                            <label>Asesor:</label>
+                            <span id="detailAsesor"></span>
+                        </div>
+                        <div class="escala-item">
+                            <label>Supervisor:</label>
+                            <span id="detailSupervisor"></span>
+                        </div>
+                        <div class="escala-item">
+                            <label>Subgerente:</label>
+                            <span id="detailSubgerente"></span>
+                        </div>
+                        <div class="escala-item">
+                            <label>Gerente:</label>
+                            <span id="detailGerente"></span>
+                        </div>
+                        <div class="escala-item">
+                            <label>Director:</label>
+                            <span id="detailDirector"></span>
+                        </div>
+                        <div class="escala-item">
+                            <label>Subdirector Nacional:</label>
+                            <span id="detailSubdirectorNacional"></span>
+                        </div>
+                        <div class="escala-item">
+                            <label>Director Nacional:</label>
+                            <span id="detailDirectorNacional"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="hidePlanDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cambiar Estado del Plan -->
+    <div id="confirmTogglePlanModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR CAMBIO DE ESTADO</h3>
+                <button class="modal-close" onclick="cancelTogglePlan()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de cambiar el estado de este plan?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelTogglePlan()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmTogglePlan()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Cambiar Estado del Plan -->
+    <div id="successTogglePlanModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">¡Éxito!</h3>
+                <button class="modal-close" onclick="closeSuccessTogglePlanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">Estado del plan cambiado exitosamente</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessTogglePlanModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- Modal de Reporte de Planes -->
+    <div class="modal-overlay" id="reportePlanesModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">REPORTE DE PLANES</h3>
+                <button class="modal-close" onclick="hideReportePlanesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reporteCiudad" class="form-label">Ciudad *</label>
+                        <div class="select-container">
+                            <select id="reporteCiudad" class="form-select">
+                                <option value="">Seleccione la ciudad</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideReportePlanesModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bGenerarReportePlanes" onclick="handleGenerarReportePlanes()">Generar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../assets/js/admin-planes.js"></script>
+</body>
+</html>
+
+

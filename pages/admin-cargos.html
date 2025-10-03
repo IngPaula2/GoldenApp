@@ -156,7 +156,7 @@
                     <a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Planes</a>
+                    <a href="admin-planes.html" class="top-nav-link">Planes</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Consecutivos</a>
@@ -593,7 +593,7 @@
         Función: showCreateCargoModal() / showEditCargoModal() / closeCreateCargoModal()
     -->
     <div class="modal-overlay" id="createCargoModal">
-        <div class="modal">
+        <div class="modal modal-large">
             <div class="modal-header">
                 <h3 id="modalTitle">CREAR CARGO</h3>
                 <button class="modal-close" onclick="closeCreateCargoModal()">
@@ -601,67 +601,33 @@
                 </button>
             </div>
             <div class="modal-body">
-                <!-- 
-                    FORMULARIO DE CREAR/ACTUALIZAR CARGO
-                    ID: createCargoForm
-                    Objetos backend configurados:
-                -->
-                <div class="form-group">
-                    <!-- 
-                        CAMPO SECCIÓN
-                        - Label visible: "Sección"
-                        - ID: cargoSeccion
-                        - Name (objeto backend): bSeccion
-                        - Tipo: select (dropdown)
-                        - Requerido: Sí
-                    -->
-                    <label for="cargoSeccion" class="form-label">Sección *</label>
-                    <div class="select-container">
-                        <select id="cargoSeccion" name="bSeccion" class="form-select" required>
-                            <option value="">Seleccione la sección</option>
-                            <option value="administrativo">Administrativo</option>
-                            <option value="pyf">PYF</option>
-                            <option value="servicio">Servicio</option>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                <!-- Primera fila: Sección, Código, Nombre -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cargoSeccion" class="form-label">Sección *</label>
+                        <div class="select-container">
+                            <select id="cargoSeccion" name="bSeccion" class="form-select" required>
+                                <option value="">Seleccione la sección</option>
+                                <option value="administrativo">Administrativo</option>
+                                <option value="pyf">PYF</option>
+                                <option value="servicio">Servicio</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <!-- 
-                        CAMPO CÓDIGO
-                        - Label visible: "Código"
-                        - ID: cargoCodigo
-                        - Name (objeto backend): tId
-                        - Tipo: input text
-                        - Requerido: Sí
-                    -->
-                    <label for="cargoCodigo" class="form-label">Código *</label>
-                    <input type="text" id="cargoCodigo" name="tId" class="form-input" placeholder="Código del cargo" required>
-                </div>
-                
-                <div class="form-group">
-                    <!-- 
-                        CAMPO NOMBRE
-                        - Label visible: "Nombre"
-                        - ID: cargoNombre
-                        - Name (objeto backend): tNombre
-                        - Tipo: input text
-                        - Requerido: Sí
-                    -->
-                    <label for="cargoNombre" class="form-label">Nombre *</label>
-                    <input type="text" id="cargoNombre" name="tNombre" class="form-input" placeholder="Nombre del cargo" required>
+                    <div class="form-group">
+                        <label for="cargoCodigo" class="form-label">Código *</label>
+                        <input type="text" id="cargoCodigo" name="tId" class="form-input" placeholder="Código del cargo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cargoNombre" class="form-label">Nombre *</label>
+                        <input type="text" id="cargoNombre" name="tNombre" class="form-input" placeholder="Nombre del cargo" required>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeCreateCargoModal()">Cancelar</button>
-                                 <!-- 
-                     BOTÓN CREAR/ACTUALIZAR (SUBMIT)
-                     - ID: bCrearSubmit
-                     - Función: handleCreateCargo() / handleUpdateCargo()
-                     - Objeto backend: bCrear
-                 -->
-                 <button id="bCrearSubmit" type="button" class="btn btn-primary" onclick="handleCreateCargo()">Crear</button>
+                <button id="bCrearSubmit" type="button" class="btn btn-primary" onclick="handleCreateCargo()">Crear</button>
             </div>
         </div>
     </div>
@@ -809,6 +775,22 @@
             <div class="modal-body">
                 <p>Se ha eliminado con éxito el Cargo!</p>
                 <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteCargoModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
             </div>
         </div>
     </div>

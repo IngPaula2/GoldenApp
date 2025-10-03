@@ -1,0 +1,1794 @@
+/* Estilos acoplados a organizaciones */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+}
+
+.page-header h2 { font-weight: 700; margin: 0; font-size: 22px; }
+
+.action-buttons { display: flex; gap: 12px; }
+
+.btn.btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.4);
+}
+
+.plans-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.data-table { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.table thead { background: #f8f9fa; }
+.table th { padding: 18px 12px; text-align: left; font-weight: 700; font-size: 15px; text-transform: uppercase; }
+.table td { padding: 18px 12px; font-size: 15px; border-bottom: 1px solid #e9ecef; text-transform: uppercase; }
+.table tbody tr:hover { background: #f8f9fa; }
+
+.no-data-message { text-align: center; padding: 32px 16px; }
+
+.no-data-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.no-data-icon {
+    font-size: 48px;
+    color: #6c757d;
+    opacity: 0.6;
+}
+
+.no-data-content p {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.no-data-content small {
+    font-size: 14px;
+    color: #6c757d;
+        margin: 0;
+    }
+    
+/* Radio buttons - Estilo simple como en empleados */
+.form-radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 0.5rem;
+    width: 16px;
+    height: 16px;
+    accent-color: #DEB448;
+}
+
+.radio-label {
+    font-size: 0.9rem;
+    color: #495057;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+/* Estilos para textarea */
+.form-control[type="textarea"] {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Estilos para campos decimales */
+.form-control[type="number"][step="0.01"] {
+    text-align: right;
+}
+
+/* Form Groups - Estilo empleados */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label,
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+    text-transform: none !important;
+}
+
+/* Form Rows - 3 columnas como empleados */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Form Inputs - Estilo empleados */
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+    background-color: white;
+    text-transform: none !important;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+/* Estilos específicos para inputs - como empleados */
+.form-input[type="number"] {
+    text-align: right;
+    text-transform: none !important;
+}
+
+.form-input[type="date"] {
+    text-transform: none !important;
+}
+
+.form-input[type="email"] {
+    text-transform: lowercase !important;
+}
+
+.form-input[type="textarea"] {
+    text-transform: none !important;
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Botones del modal - Copiado de empleados */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 0 0 0;
+    border-top: 1px solid #e9ecef;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+}
+
+.btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+/* Columna estado/opciones centradas */
+.plans-section .table th:nth-child(7),
+.plans-section .table td:nth-child(7),
+.plans-section .table th:nth-child(8),
+.plans-section .table td:nth-child(8) { text-align: center; }
+
+/* Estilo específico para la columna de opciones - centrar contenido */
+.plans-section .table th:nth-child(8) {
+    text-align: center;
+    position: relative;
+}
+
+.plans-section .table td:nth-child(8) {
+    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+/* Toggle estilo base (reutilizable) - Estilo de la imagen */
+.animated-toggle { 
+    position: relative; 
+    display: block; 
+    width: 70px; 
+    height: 30px; 
+    margin-left: 0; 
+    flex-shrink: 0;     /* no se reduce */
+}
+
+.animated-toggle input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
+}
+
+.toggle-slider { 
+    position: absolute; 
+    cursor: pointer; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    background: #f44336; 
+    transition: .3s; 
+    border-radius: 15px; 
+    box-shadow: 
+        0 4px 8px rgba(244, 67, 54, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toggle-slider:before { 
+    content: ""; 
+    position: absolute; 
+    height: 24px; 
+    width: 24px; 
+    left: 3px; 
+    top: 3px; 
+    background: #fff; 
+    border-radius: 50%; 
+    transition: .3s; 
+    box-shadow: 0 2px 4px rgba(0,0,0,.2); 
+}
+
+.toggle-slider:after {
+    content: "OFF";
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.animated-toggle input:checked + .toggle-slider { 
+    background: linear-gradient(135deg, #2ed573, #1dd1a1);
+    box-shadow: 
+        0 4px 8px rgba(46, 213, 115, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.animated-toggle input:checked + .toggle-slider:before { 
+    transform: translateX(40px); 
+}
+
+.animated-toggle input:checked + .toggle-slider:after {
+    content: "ON";
+    left: 8px;
+    right: auto;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn-toggle {
+    padding: 0.75rem 0.8rem;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-toggle:hover::before {
+    left: 100%;
+}
+
+.btn-toggle:hover {
+    background: #e9ecef;
+    color: #495057;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-toggle.active {
+    background: #DEB448 !important;
+    color: #1a1a1a !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3) !important;
+}
+
+#createPlanModal .btn-toggle-yes.active {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4) !important;
+}
+
+#createPlanModal .btn-toggle-no.active {
+    background: linear-gradient(135deg, #dc3545, #fd7e14) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4) !important;
+}
+
+/* Badge ON/OFF como organizaciones */
+.toggle-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    padding: 0 10px;
+    margin-right: 8px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: #dc3545; /* OFF por defecto */
+}
+.toggle-badge.on { background: #28a745; }
+
+/* Botón editar dorado cuadrado */
+.btn-edit {
+    background: #DEB448;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4);
+}
+
+.btn-edit i {
+    color: white;
+    font-size: 14px;
+}
+
+/* ==============================
+   MODALES DE CONFIRMACIÓN
+   ============================== */
+
+/* Modal de confirmación para cerrar sesión */
+#confirmLogoutModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 520px;
+    width: 95%;
+    border: 1px solid #dbcd7a;
+}
+
+/* Modal de confirmación para crear plan - más estrecho */
+#confirmCreatePlanEscalasModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid #dbcd7a;
+}
+
+#confirmLogoutModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#confirmLogoutModal .modal-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+}
+
+#confirmLogoutModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#confirmLogoutModal .modal-message {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+}
+
+#confirmLogoutModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 10px;
+        justify-content: center;
+    }
+
+/* Estilos específicos para el modal de confirmación de plan */
+#confirmCreatePlanEscalasModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#confirmCreatePlanEscalasModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-align: center;
+    flex: 1;
+}
+
+#confirmCreatePlanEscalasModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#confirmCreatePlanEscalasModal .modal-body p {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+}
+
+#confirmCreatePlanEscalasModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Modal de éxito para crear plan y escalas */
+#successCreatePlanEscalasModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid #dbcd7a;
+}
+
+#successCreatePlanEscalasModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#successCreatePlanEscalasModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-align: center;
+    flex: 1;
+}
+
+#successCreatePlanEscalasModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#successCreatePlanEscalasModal .modal-message {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+}
+
+#successCreatePlanEscalasModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Botón de editar más grande */
+.btn-edit-large {
+    padding: 8px 12px !important;
+    font-size: 16px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+}
+
+/* Contenedor para el botón de editar - ajustado para mejor alineación */
+.btn-container {
+    width: 40px;        /* ancho ajustado para el botón */
+    height: 32px;       /* alto del señalamiento rojo */
+    display: flex;      /* flexbox para centrar */
+    justify-content: center; /* centra horizontal */
+    align-items: center;     /* centra vertical */
+    flex-shrink: 0;     /* no se reduce */
+}
+
+/* Estilos específicos para el botón de editar en la tabla - tamaño fijo compacto */
+.plans-section .table .btn-small,
+.plans-section .table td .btn-small {
+    background: #DEB448 !important;
+    color: #1a1a1a !important;
+    border: none !important;
+    border-radius: 4px !important;
+    width: 32px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 0 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3) !important;
+    transition: all 0.3s ease !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+}
+
+.plans-section .table .btn-small:hover,
+.plans-section .table td .btn-small:hover {
+    background: #c9a43a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4) !important;
+}
+
+.plans-section .table .btn-small i,
+.plans-section .table td .btn-small i {
+    color: #1a1a1a !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Modal de confirmación para cambiar estado del plan */
+#confirmTogglePlanModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid #dbcd7a;
+}
+
+#confirmTogglePlanModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#confirmTogglePlanModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-align: center;
+    flex: 1;
+}
+
+#confirmTogglePlanModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#confirmTogglePlanModal .modal-body p {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+}
+
+#confirmTogglePlanModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Modal de confirmación para actualizar plan - más estrecho */
+#confirmUpdatePlanEscalasModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 350px;
+    width: 80%;
+    border: 1px solid #dbcd7a;
+}
+
+#confirmUpdatePlanEscalasModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#confirmUpdatePlanEscalasModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-align: center;
+    flex: 1;
+}
+
+#confirmUpdatePlanEscalasModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#confirmUpdatePlanEscalasModal .modal-body p {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+    text-align: center;
+}
+
+#confirmUpdatePlanEscalasModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Modal de éxito para actualizar plan - más estrecho */
+#successUpdatePlanEscalasModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 350px;
+    width: 80%;
+    border: 1px solid #dbcd7a;
+}
+
+#successUpdatePlanEscalasModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#successUpdatePlanEscalasModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-align: center;
+    flex: 1;
+}
+
+#successUpdatePlanEscalasModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#successUpdatePlanEscalasModal .modal-body p {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+    text-align: center;
+}
+
+#successUpdatePlanEscalasModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Modal de detalles del plan */
+#planDetailsModal .modal {
+    max-width: 1000px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.details-section {
+    margin-bottom: 30px;
+}
+
+.details-section h4 {
+    color: #1a1a1a;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #dbcd7a;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.detail-item label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+.detail-item span {
+    color: #1a1a1a;
+    font-size: 16px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.escalas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.escala-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.escala-item label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+.escala-item span {
+    color: #1a1a1a;
+    font-size: 16px;
+    padding: 8px 12px;
+    background-color: #e8f5e8;
+    border-radius: 6px;
+    border: 1px solid #c3e6c3;
+    font-weight: 500;
+}
+
+
+/* Modal de resultados de búsqueda */
+#planResultsModal .modal {
+    max-width: 1400px;
+    width: 98%;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+#planResultsModal {
+    z-index: 1000;
+}
+
+/* Modal de crear/actualizar plan debe estar por encima */
+#createPlanModal {
+    z-index: 1500;
+}
+
+#createPlanModal .modal {
+    z-index: 1500;
+}
+
+#planResultsModal .modal-header {
+    background: #f8f9fa;
+    color: #1a1a1a;
+    border-bottom: 1px solid #dee2e6;
+    padding: 20px;
+}
+
+#planResultsModal .modal-body {
+    padding: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+#planResultsModal .table {
+    margin-bottom: 0;
+}
+
+#planResultsModal .table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    padding: 15px 12px;
+    text-align: center;
+}
+
+#planResultsModal .table td {
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+}
+
+#planResultsModal .btn-action {
+    padding: 0;
+    margin: 0 2px;
+    font-size: 0;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 32px;
+    max-width: 32px;
+    width: 32px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+#planResultsModal .btn-view {
+    background-color: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3);
+}
+
+#planResultsModal .btn-view:hover {
+    background-color: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4);
+}
+
+#planResultsModal .btn-view i {
+    color: #1a1a1a;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+#planResultsModal .btn-edit {
+    background-color: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3);
+}
+
+#planResultsModal .btn-edit:hover {
+    background-color: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4);
+}
+
+#planResultsModal .btn-edit i {
+    color: #1a1a1a;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor de opciones en la tabla de resultados */
+#planResultsModal .options-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+#planResultsModal .buttons-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+#planResultsModal .toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+}
+
+/* Toggle igual al de la interfaz principal */
+#planResultsModal .btn-toggle {
+    position: relative;
+    width: 70px;
+    height: 30px;
+    background-color: #f44336;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    box-shadow: 
+        0 4px 8px rgba(244, 67, 54, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+#planResultsModal .btn-toggle.active {
+    background: linear-gradient(135deg, #2ed573, #1dd1a1);
+    box-shadow: 
+        0 4px 8px rgba(46, 213, 115, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+#planResultsModal .btn-toggle .toggle-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#planResultsModal .btn-toggle.active .toggle-slider {
+    transform: translateX(40px);
+}
+
+/* Modal de éxito para cambiar estado del plan */
+#successTogglePlanModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid #dbcd7a;
+}
+
+#successTogglePlanModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#successTogglePlanModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-align: center;
+    flex: 1;
+}
+
+#successTogglePlanModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#successTogglePlanModal .modal-message {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+}
+
+#successTogglePlanModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+    
+#confirmLogoutModal .btn {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#confirmLogoutModal .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.4);
+}
+
+#confirmLogoutModal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(222, 180, 72, 0.45);
+}
+
+#confirmLogoutModal .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+#confirmLogoutModal .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+}
+
+/* Modales base */
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    background-color: rgba(0, 0, 0, 0.5); 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 2000; 
+    backdrop-filter: blur(5px);
+    margin: 0;
+    padding: 0;
+}
+
+.modal-overlay.show { 
+    display: flex; 
+}
+
+.modal { 
+    background: rgba(229, 227, 227, 0.925); 
+    border-radius: 12px; 
+    padding: 30px; 
+    max-width: 800px; 
+    width: 95%; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+    border: 1px solid #dbcd7a; 
+    margin: 0 auto; 
+    position: relative; 
+    left: 0; 
+    right: 0;
+}
+
+.modal-large { 
+    max-width: 800px; 
+    width: 95%; 
+}
+
+/* Modal de búsqueda - más pequeño y centrado */
+#planSearchModal .modal {
+    max-width: 400px;
+    width: 80%;
+    padding: 25px;
+}
+
+#planSearchModal .modal-header {
+    margin-bottom: 20px;
+}
+
+#planSearchModal .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+}
+
+#planSearchModal .form-group {
+    margin-bottom: 20px;
+}
+
+#planSearchModal .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+#planSearchModal .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+#planSearchModal .form-control:focus {
+    outline: none;
+    border-color: #dbcd7a;
+    box-shadow: 0 0 0 3px rgba(219, 205, 122, 0.1);
+}
+
+#planSearchModal .modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.modal-header { 
+    margin-bottom: 25px; 
+    text-align: center; 
+    position: relative; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+}
+
+.modal-close { 
+    background: none; 
+    border: none; 
+    font-size: 18px; 
+    color: #666; 
+    cursor: pointer; 
+    padding: 5px; 
+    border-radius: 50%; 
+    width: 30px; 
+    height: 30px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+.modal-body { 
+    margin-bottom: 25px; 
+}
+
+.modal-footer { 
+    text-align: center; 
+    display: flex; 
+    gap: 10px; 
+    justify-content: center;
+}
+
+/* Estilos de botones del modal */
+.btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+.btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.3);
+}
+
+.btn-primary:hover {
+    background: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
+}
+
+/* Estilos para toggle buttons - como empleados */
+.toggle-buttons {
+    display: inline-flex;
+    gap: 0.5rem;
+    background: #f8f9fa;
+    padding: 0.25rem;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    width: fit-content;
+    max-width: fit-content;
+}
+
+.toggle-buttons:hover {
+    border-color: #DEB448;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.2);
+}
+
+.btn-toggle {
+    padding: 0.75rem 0.8rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 50px;
+    text-align: center;
+}
+
+.btn-toggle-yes {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-toggle-yes.active {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+}
+
+.btn-toggle-no {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-toggle-no.active {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+}
+
+/* Estilos específicos para el campo Observaciones */
+#pObservaciones {
+    width: 100%;
+    height: 100px; /* Altura fija como se muestra en la imagen */
+    resize: none; /* Deshabilitar redimensionamiento */
+    min-height: 100px;
+    max-height: 100px;
+}
+
+/* Quitar flechas de campos numéricos */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Contenedor para campos de precio con símbolo $ */
+.price-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Estilos para campos de precio con formato */
+.price-field {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    padding-left: 30px; /* Espacio para el símbolo $ */
+    width: 100%;
+}
+
+/* Layout específico para la fila de Observaciones y Estado Activo */
+.form-row:has(#pObservaciones) {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Observaciones ocupa más espacio, Estado Activo menos */
+    gap: 1rem;
+    align-items: start;
+}
+
+/* Estilos para el grupo de campos de escalas */
+.escalas-field-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.escalas-field-group input:first-child {
+    flex: 1;
+}
+
+.escalas-field-group input:last-child {
+    flex: 2;
+}
+
+/* Botón de regreso en el header */
+.btn-back {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333;
+    padding: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-back:hover {
+    background-color: #f8f9fa;
+}
+
+/* Ajuste para el toggle de Estado Activo en la misma fila que Observaciones */
+.form-row:has(#pObservaciones) .form-group:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* Estilos duplicados eliminados - se usan los estilos principales definidos arriba */
+
+/* Estilos responsivos para el formulario */
+@media (max-width: 768px) {
+    .modal {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    /* En móviles, la fila de Observaciones y Estado Activo se apila */
+    .form-row:has(#pObservaciones) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .modal-large {
+        width: 98%;
+        max-width: none;
+        margin: 5px;
+        padding: 12px;
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: 10px 0;
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 10px 0;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-input {
+        font-size: 16px; /* Previene zoom en iOS */
+        padding: 10px;
+    }
+    
+    .modal-footer {
+        padding: 10px 0 0 0;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    /* Form rows responsivos */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .toggle-buttons {
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .btn-toggle {
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .modal {
+        margin: 5px;
+        padding: 10px;
+    }
+    
+    .modal-large {
+        margin: 2px;
+        padding: 8px;
+    }
+    
+    .form-input {
+        padding: 8px;
+        font-size: 16px;
+    }
+    
+    .btn-toggle {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+}
+
+/* Modal de Reporte de Planes */
+#reportePlanesModal .modal {
+    max-width: 400px;
+    width: 85%;
+    padding: 35px;
+    text-align: center;
+}
+
+#reportePlanesModal .modal-body {
+    text-align: center;
+}
+
+#reportePlanesModal .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+#reportePlanesModal .form-label {
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+#reportePlanesModal .select-container {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto 15px auto;
+    display: flex;
+    justify-content: center;
+}
+
+#reportePlanesModal .modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 25px;
+    padding-top: 20px;
+}
+
+#reportePlanesModal .form-select {
+    text-transform: uppercase;
+    font-weight: 500;
+    width: 100% !important;
+    text-align: center;
+    padding: 15px 3px !important;
+    max-width: 200% !important;
+    margin: 0 auto !important;
+}
+
+#reportePlanesModal .form-select option {
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* ==============================
+   MODAL DE SELECCIÓN DE CIUDAD
+   ============================== */
+
+/* Modal de selección de ciudad - mismo tamaño que organizaciones */
+#selectPlanModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 520px;
+    width: 95%;
+    border: 1px solid #dbcd7a;
+}
+
+#selectPlanModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#selectPlanModal .modal-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+}
+
+#selectPlanModal .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#selectPlanModal .modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+#selectPlanModal .modal-body {
+    margin-bottom: 25px;
+}
+
+#selectPlanModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#selectPlanModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#selectPlanModal .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+#selectPlanModal .select-container {
+    position: relative;
+}
+
+#selectPlanModal .form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+    background: #fff;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+#selectPlanModal .form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+#selectPlanModal .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+
+#selectPlanModal .btn {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#selectPlanModal .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.4);
+}
+
+#selectPlanModal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(222, 180, 72, 0.45);
+}
+
+#selectPlanModal .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+#selectPlanModal .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+}
+
+/* Responsive para el modal de selección de ciudad */
+@media (max-width: 768px) {
+    #selectPlanModal .modal {
+        padding: 20px;
+        width: 90%;
+    }
+}
+
+/* ==============================
+   MODAL DE REPORTE - MISMO ESTILO QUE SELECCIÓN DE CIUDAD
+   ============================== */
+
+/* Aplicar el mismo estilo del select de selección de ciudad al modal de reporte */
+#reportePlanesModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#reportePlanesModal .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+#reportePlanesModal .select-container {
+    position: relative;
+    width: 100%;
+    min-width: 300px;
+}
+
+/* Estilos específicos para el select de ciudad en el modal de reporte */
+#reporteCiudad {
+    width: 100% !important;
+    min-width: 300px !important;
+    padding: 0.75rem !important;
+    border: 2px solid #e9ecef !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+    transition: border-color 0.3s ease !important;
+    background: #fff !important;
+    text-transform: uppercase !important;
+    box-sizing: border-box !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+}
+
+#reporteCiudad:focus {
+    outline: none !important;
+    border-color: #DEB448 !important;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1) !important;
+}
+
+#reportePlanesModal .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+
+#reporteCiudad option {
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+}
+
+
+

@@ -859,6 +859,87 @@
 
 
 /* ========================================
+   MODAL DE CONFIRMACIÓN PARA CERRAR SESIÓN
+   ======================================== */
+
+/* Modal de confirmación para cerrar sesión */
+#confirmLogoutModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 520px;
+    width: 95%;
+    border: 1px solid #dbcd7a;
+}
+
+#confirmLogoutModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#confirmLogoutModal .modal-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+}
+
+#confirmLogoutModal .modal-body {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#confirmLogoutModal .modal-message {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+    margin: 0;
+}
+
+#confirmLogoutModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#confirmLogoutModal .btn {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#confirmLogoutModal .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.4);
+}
+
+#confirmLogoutModal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(222, 180, 72, 0.45);
+}
+
+#confirmLogoutModal .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+#confirmLogoutModal .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+}
+
+/* ========================================
    ESTILOS RESPONSIVOS PARA EMPLEADOS
    ======================================== */
 

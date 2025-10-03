@@ -142,7 +142,7 @@
                     <a href="#" class="top-nav-link">Organizaciones</a>
                 </li>
                 <li class="top-nav-item">
-                    <a href="#" class="top-nav-link">Planes</a>
+                    <a href="admin-planes.html" class="top-nav-link">Planes</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="#" class="top-nav-link">Consecutivos</a>
@@ -247,7 +247,7 @@
 
     <!-- Modal de Crear/Actualizar Organización -->
     <div id="createOrgModal" class="modal-overlay">
-        <div class="modal">
+        <div class="modal modal-large">
             <div class="modal-header">
                 <h3 class="modal-title" id="createOrgTitle">CREAR ORGANIZACIÓN</h3>
                 <button class="modal-close" onclick="hideCreateOrgModal()">
@@ -256,14 +256,15 @@
             </div>
             <div class="modal-body">
                 <form id="createOrgForm">
+                    <!-- Primera fila: Código, Nombre -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="tId">Código *</label>
-                            <input type="text" id="tId" class="form-control" placeholder="CÓDIGO DE LA ORGANIZACIÓN" required>
+                            <label for="tId" class="form-label">Código *</label>
+                            <input type="text" id="tId" class="form-input" placeholder="Código de la organización" required>
                         </div>
                         <div class="form-group">
-                            <label for="tNombre">Nombre *</label>
-                            <input type="text" id="tNombre" class="form-control" placeholder="NOMBRE DE LA ORGANIZACIÓN" required>
+                            <label for="tNombre" class="form-label">Nombre *</label>
+                            <input type="text" id="tNombre" class="form-input" placeholder="Nombre de la organización" required>
                         </div>
                     </div>
                 </form>
@@ -405,6 +406,22 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteOrgModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
             </div>
         </div>
     </div>

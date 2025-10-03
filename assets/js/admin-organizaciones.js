@@ -491,14 +491,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 
                 if (this.classList.contains('logout-item')) {
-                    // Funcionalidad de cerrar sesión
-                    sessionStorage.removeItem('isAuthenticated');
-                    sessionStorage.removeItem('username');
-                    window.location.href = '../index.html';
+                    // Mostrar modal de confirmación para cerrar sesión
+                    showConfirmLogoutModal();
                 } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
                     // Navegar a administración de usuarios
-                    console.log('Navegando a administrar usuarios');
-                    // Agregar navegación a página de administración de usuarios aquí
+                    alert('Funcionalidad de administrar usuarios en desarrollo');
                 }
                 
                 // Cerrar dropdown después del clic
@@ -510,6 +507,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ========================================
+    // FUNCIONES DE MODAL DE CERRAR SESIÓN
+    // ========================================
+
+    window.showConfirmLogoutModal = function() {
+        const modal = document.getElementById('confirmLogoutModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+    }
+
+    window.cancelLogout = function() {
+        const modal = document.getElementById('confirmLogoutModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    window.confirmLogout = function() {
+        // Limpiar datos de sesión
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        sessionStorage.clear();
+        
+        // Redirigir al index
+        window.location.href = '../index.html';
+    }
+
     // MANEJADORES DE BOTONES
     // ========================================
     
