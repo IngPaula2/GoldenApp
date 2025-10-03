@@ -867,13 +867,15 @@ textarea {
    ======================================== */
 
 .toggle-buttons {
-    display: flex;
+    display: inline-flex;
     gap: 0.5rem;
     background: #f8f9fa;
-    padding: 0.25rem;
+    padding: 0;
     border-radius: 8px;
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
+    width: fit-content;
+    max-width: fit-content;
 }
 
 .toggle-buttons:hover {

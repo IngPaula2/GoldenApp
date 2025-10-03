@@ -615,7 +615,7 @@ function validateMesesAsesoria(value) {
 document.addEventListener('DOMContentLoaded', () => {
     // Siempre mostrar selección de ciudad al entrar
     console.log('Mostrando modal de selección de ciudad');
-    showSelectPlanModal();
+    // showSelectPlanModal(); // Comentado para eliminar el aviso automático
     
     // Corregir planes existentes sin escalas
     fixPlansWithoutEscalas();
@@ -882,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mostrar modal de selección de ciudad al cargar la página (simulando login)
     // Esto mostrará el modal automáticamente cuando se cargue la página
     // Mostrar SIEMPRE el selector de ciudad al cargar esta interfaz
-    setTimeout(() => { try { forceShowSelectPlanModal(); } catch (e) { try { showSelectPlanModal(); } catch (e2) {} } }, 500);
+    // setTimeout(() => { try { forceShowSelectPlanModal(); } catch (e) { try { showSelectPlanModal(); } catch (e2) {} } }, 500); // Comentado para eliminar el aviso automático
 
 });
 

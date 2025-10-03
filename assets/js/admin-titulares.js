@@ -10,6 +10,432 @@
  */
 
 // ========================================
+// VARIABLES GLOBALES
+// ========================================
+
+// DATOS EN MEMORIA
+const titularesData = {}; // Solo bucket activo en la UI
+const beneficiariosData = {}; // Solo bucket activo en la UI
+// Mapa de relación: titularId -> array de beneficiarios
+const titularIdToBeneficiarios = {};
+// Último titular buscado (para "Añadir Beneficiario")
+let currentSearchedTitularId = null;
+
+// ========================================
+// FUNCIONES GLOBALES DE MODALES
+// ========================================
+
+/**
+ * Oculta el modal de crear titular y limpia el formulario
+ */
+function hideCreateTitularModal() {
+    console.log('🔍 Cerrando modal de titular...');
+    const createTitularModalOverlay = document.getElementById('createTitularModal');
+    if (createTitularModalOverlay) {
+        createTitularModalOverlay.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        console.log('✅ Modal de titular cerrado');
+        // Limpiar campos del formulario
+        if (typeof clearCreateTitularForm === 'function') {
+            clearCreateTitularForm();
+        }
+    } else {
+        console.log('⚠️ Modal createTitularModal no encontrado - posiblemente no estamos en la página correcta');
+    }
+}
+
+/**
+ * Muestra el modal de confirmación para crear titular
+ */
+function showConfirmCreateTitularModal() {
+    console.log('🔍 Mostrando modal de confirmación para titular...');
+    const modal = document.getElementById('confirmCreateTitularModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        console.log('✅ Modal de confirmación para titular mostrado');
+    } else {
+        console.error('❌ No se encontró el modal confirmCreateTitularModal');
+    }
+}
+
+/**
+ * Cancela la creación del titular
+ */
+function cancelCreateTitular() {
+    const modal = document.getElementById('confirmCreateTitularModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Limpiar datos temporales
+    window.tempTitularData = null;
+}
+
+/**
+ * Confirma la creación del titular
+ */
+function confirmCreateTitular() {
+    // Cerrar modal de confirmación
+    const confirmModal = document.getElementById('confirmCreateTitularModal');
+    if (confirmModal) {
+        confirmModal.classList.remove('show');
+    }
+    
+    // Obtener datos temporales
+    const titularData = window.tempTitularData;
+    
+    if (!titularData) {
+        console.error('No se encontraron datos del titular para crear');
+        return;
+    }
+    
+    console.log('Datos del titular a crear:', titularData);
+    
+    // ========================================
+    // 🔗 CONEXIÓN BACKEND - CREAR TITULAR
+    // ========================================
+    // Endpoint: POST /api/titulares
+    // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, beneficiario }
+    
+    // TODO: Aquí se enviarían los datos al backend
+    // Por ahora solo guardamos en memoria
+    
+    // Verificar si el titular tiene beneficiario
+    if (titularData.beneficiario && titularData.beneficiario.toUpperCase() === 'SI') {
+        // Si tiene beneficiario, guardar datos temporalmente y abrir modal de beneficiario
+        sessionStorage.setItem('tempTitular', JSON.stringify(titularData));
+        hideCreateTitularModal();
+        if (typeof showCreateBeneficiarioModal === 'function') {
+            showCreateBeneficiarioModal();
+        }
+    } else {
+        // Si no tiene beneficiario, crear el titular directamente
+        // Guardar por ciudad y persistir
+        const city = getSelectedCityCode();
+        if (!city) { 
+            if (typeof showNotification === 'function') {
+                showNotification('Seleccione una ciudad primero', 'warning');
+            }
+            return; 
+        }
+        if (!titularesByCity[city]) titularesByCity[city] = {};
+        const toSave = { ...titularData, ciudad: city };
+        titularesByCity[city][titularData.numeroId] = toSave;
+        if (typeof persistTitularesByCity === 'function') {
+            persistTitularesByCity();
+        }
+        // También reflejar en memoria y UI actual
+        titularesData[titularData.numeroId] = toSave;
+        
+        // Persistir en localStorage
+        try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
+        
+        // Cerrar modal de creación y limpiar formulario
+        hideCreateTitularModal();
+        
+        // Agregar el titular a la tabla
+        if (typeof addTitularToTable === 'function') {
+            addTitularToTable(titularData);
+        }
+        
+        // Mostrar modal de éxito
+        if (typeof showSuccessCreateTitularModal === 'function') {
+            showSuccessCreateTitularModal();
+        }
+    }
+    
+    // Limpiar datos temporales
+    window.tempTitularData = null;
+}
+
+/**
+ * Cierra el modal de éxito de titular
+ */
+function closeSuccessTitularModal() {
+    const modal = document.getElementById('successCreateTitularModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+/**
+ * Muestra el modal de éxito para crear titular
+ */
+function showSuccessCreateTitularModal() {
+    const modal = document.getElementById('successCreateTitularModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Limpia todos los campos del formulario de crear titular
+ */
+function clearCreateTitularForm() {
+    document.getElementById('cTipo_Id').value = '';
+    document.getElementById('tId').value = '';
+    document.getElementById('tApellido1').value = '';
+    document.getElementById('tApellido2').value = '';
+    document.getElementById('tNombre1').value = '';
+    document.getElementById('tNombre2').value = '';
+    document.getElementById('tDireccion').value = '';
+    document.getElementById('tBarrioT').value = '';
+    document.getElementById('tCelular').value = '';
+    document.getElementById('tCorreo').value = '';
+    document.getElementById('tFecha_Ingreso').value = '';
+    document.getElementById('cActivo').value = '';
+    document.getElementById('cBeneficiario').value = '';
+    
+    // Limpiar estado de botones toggle
+    const toggleButtons = document.querySelectorAll('.btn-toggle');
+    toggleButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Limpiar atributo de ID original
+    document.getElementById('tId').removeAttribute('data-original-id');
+    
+    // Restaurar modo "crear" (título y botón)
+    document.getElementById('createTitularTitle').textContent = 'CREAR TITULAR';
+    document.getElementById('bCrear').textContent = 'Crear';
+}
+
+/**
+ * Agrega un nuevo titular a la tabla o actualiza uno existente
+ * @param {Object} titular - Objeto con los datos del titular
+ * @param {boolean} replaceIfExists - Si es true, actualiza la fila existente
+ */
+function addTitularToTable(titular, replaceIfExists = false) {
+    const tableBody = document.getElementById('titularesTableBody');
+    const noDataRow = tableBody.querySelector('.no-data-message');
+    
+    if (noDataRow) {
+        noDataRow.remove();
+    }
+    
+    // Si existe, y se solicita reemplazar, actualizar la fila
+    const allRows = Array.from(tableBody.querySelectorAll('tr'));
+    const existingRow = allRows.find(r => {
+        const idCell = r.querySelector('td:nth-child(2)');
+        if (!idCell) return false;
+        // Verificar que no sea una fila de "no-data-message"
+        if (idCell.hasAttribute('colspan') || r.querySelector('.no-data-message')) return false;
+        return idCell.textContent.trim() === titular.numeroId.trim();
+    });
+    
+    // Concatenar nombre completo
+    const nombreCompleto = [
+        titular.apellido1 || '',
+        titular.apellido2 || '',
+        titular.nombre1 || '',
+        titular.nombre2 || ''
+    ].filter(nombre => nombre.trim() !== '').join(' ');
+    
+    const isActive = (String(titular.activo || 'SI').toUpperCase() === 'SI');
+    const rowHtml = `
+        <td>${titular.tipoId || ''}</td>
+        <td>${titular.numeroId}</td>
+        <td>${nombreCompleto}</td>
+        <td>${titular.direccion || ''}</td>
+        <td>${titular.barrio || ''}</td>
+        <td>${titular.celular || titular.telefono || ''}</td>
+        <td>${titular.correo || titular.email || ''}</td>
+        <td>
+            <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+        </td>
+        <td>
+            <div class="options-inline" style="display:flex; align-items:center; gap:12px;">
+                <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <label class="animated-toggle" data-id="${titular.numeroId}" title="${isActive ? 'Desactivar' : 'Activar'}" style="display:inline-flex;">
+                    <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTitularState('${titular.numeroId}')">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </td>
+    `;
+    
+    if (existingRow && replaceIfExists) {
+        // Actualizar fila existente
+        existingRow.innerHTML = rowHtml;
+    } else if (!existingRow) {
+        // Crear nueva fila solo si no existe
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = rowHtml;
+        tableBody.appendChild(newRow);
+        
+        // Agregar efectos hover a la nueva fila
+        newRow.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+        });
+        
+        newRow.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    }
+    // Si existe pero no se debe reemplazar, no hacer nada
+}
+
+/**
+ * Muestra el modal de confirmación para crear beneficiario
+ */
+function showConfirmCreateBeneficiarioModal() {
+    console.log('🔍 Intentando mostrar modal de confirmación de creación');
+    const modal = document.getElementById('confirmCreateBeneficiarioModal');
+    if (modal) {
+        console.log('✅ Modal de creación encontrado, mostrando...');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('❌ No se encontró el modal confirmCreateBeneficiarioModal');
+    }
+}
+
+/**
+ * Cancela la creación del beneficiario
+ */
+function cancelCreateBeneficiario() {
+    const modal = document.getElementById('confirmCreateBeneficiarioModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Limpiar datos temporales
+    window.tempBeneficiarioData = null;
+}
+
+/**
+ * Confirma la creación del beneficiario
+ */
+function confirmCreateBeneficiario() {
+    // Cerrar modal de confirmación
+    const confirmModal = document.getElementById('confirmCreateBeneficiarioModal');
+    if (confirmModal) {
+        confirmModal.classList.remove('show');
+    }
+    
+    // Obtener datos temporales
+    const beneficiarioData = window.tempBeneficiarioData;
+    
+    if (!beneficiarioData) {
+        console.error('No se encontraron datos del beneficiario para crear');
+        return;
+    }
+    
+    console.log('Datos del beneficiario a crear:', beneficiarioData);
+    
+    // ========================================
+    // 🔗 CONEXIÓN BACKEND - CREAR BENEFICIARIO
+    // ========================================
+    // Endpoint: POST /api/beneficiarios
+    // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, titularId, parentesco }
+    
+    // Verificar si viene del modal de titular
+    const tempTitular = sessionStorage.getItem('tempTitular');
+    
+    if (tempTitular) {
+        console.log('🔍 Creando titular y beneficiario juntos...');
+        // Si viene del modal de titular, crear tanto titular como beneficiario
+        const titular = JSON.parse(tempTitular);
+        
+        // Persistir titular en memoria y tabla
+        titularesData[titular.numeroId] = titular;
+        
+        // Persistir en localStorage
+        try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
+        
+        if (typeof addTitularToTable === 'function') {
+            addTitularToTable(titular, true);
+        }
+        
+        // Persistir beneficiario y asociarlo al titular (actualiza/insert)
+        if (typeof updateBeneficiarioInTable === 'function') {
+            updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
+        }
+        if (!titularIdToBeneficiarios[titular.numeroId]) {
+            titularIdToBeneficiarios[titular.numeroId] = [];
+        }
+        titularIdToBeneficiarios[titular.numeroId].push(beneficiarioData);
+        
+        // Persistir relaciones en localStorage
+        try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
+        
+        // Limpiar datos temporales
+        sessionStorage.removeItem('tempTitular');
+        
+        // Cerrar modal de creación
+        if (typeof hideCreateBeneficiarioModal === 'function') {
+            hideCreateBeneficiarioModal();
+        }
+        
+        // Mostrar modal de éxito específico para titular y beneficiario
+        if (typeof showSuccessCreateTitularBeneficiarioModal === 'function') {
+            showSuccessCreateTitularBeneficiarioModal();
+        }
+    } else {
+        // Verificar si viene desde "Añadir Beneficiario" en resultados de titular
+        const titularFromResults = sessionStorage.getItem('currentSearchedTitularId');
+        
+        if (titularFromResults) {
+            console.log('🔍 Creando beneficiario para titular desde resultados:', titularFromResults);
+            
+            // Actualizar o agregar beneficiario en la tabla principal
+            if (typeof updateBeneficiarioInTable === 'function') {
+                updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
+            }
+            
+            // Asociar el beneficiario al titular - SIGUIENDO EL PATRÓN DE CIUDADES
+            if (!titularIdToBeneficiarios[titularFromResults]) {
+                titularIdToBeneficiarios[titularFromResults] = [];
+            }
+            titularIdToBeneficiarios[titularFromResults].push(beneficiarioData);
+            
+            // Persistir relaciones en localStorage
+            try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
+            
+            // Re-renderizar la tabla de resultados de titular
+            if (typeof renderBeneficiariosDeTitular === 'function') {
+                renderBeneficiariosDeTitular(titularFromResults);
+            }
+            
+            // Cerrar modal de creación
+            if (typeof hideCreateBeneficiarioModal === 'function') {
+                hideCreateBeneficiarioModal();
+            }
+            
+            // Mostrar modal de éxito
+            if (typeof showSuccessCreateBeneficiarioModal === 'function') {
+                showSuccessCreateBeneficiarioModal();
+            }
+            
+            console.log('✅ Beneficiario creado y asociado al titular:', titularFromResults);
+        } else {
+            // Si no viene del modal de titular ni de resultados, actualizar/insertar beneficiario
+            if (typeof updateBeneficiarioInTable === 'function') {
+                updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
+            }
+            
+            // Cerrar modal de creación
+            if (typeof hideCreateBeneficiarioModal === 'function') {
+                hideCreateBeneficiarioModal();
+            }
+            
+            // Mostrar modal de éxito
+            if (typeof showSuccessCreateBeneficiarioModal === 'function') {
+                showSuccessCreateBeneficiarioModal();
+            }
+        }
+    }
+    
+    // Limpiar datos temporales
+    window.tempBeneficiarioData = null;
+}
+
+// ========================================
 // PERFIL DE USUARIO Y DROPDOWN
 // ========================================
 
@@ -149,6 +575,12 @@ document.addEventListener('DOMContentLoaded', function() {
      const modalOverlay = document.querySelector('.modal-overlay');
      const createTitularModal = document.getElementById('createTitularModal');
      const createTitularModalOverlay = document.querySelector('#createTitularModal.modal-overlay');
+     
+     // Verificar si los elementos existen antes de continuar
+     if (!createTitularModal) {
+         console.log('⚠️ Modal createTitularModal no encontrado - posiblemente no estamos en la página correcta');
+         return;
+     }
      const createBeneficiarioModal = document.getElementById('createBeneficiarioModal');
      const createBeneficiarioModalOverlay = document.querySelector('#createBeneficiarioModal.modal-overlay');
      const searchTitularModal = document.getElementById('searchTitularModal');
@@ -189,52 +621,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Las funciones de modales ahora están definidas globalmente fuera del scope
     
-    /**
-     * Oculta el modal de crear titular y limpia el formulario
-     */
-    function hideCreateTitularModal() {
-        console.log('🔍 Cerrando modal de titular...');
-        const createTitularModalOverlay = document.getElementById('createTitularModal');
-        if (createTitularModalOverlay) {
-            createTitularModalOverlay.classList.remove('show');
-        document.body.style.overflow = 'auto';
-            console.log('✅ Modal de titular cerrado');
-        // Limpiar campos del formulario
-        clearCreateTitularForm();
-        }
-    }
     
          // Las funciones de modales ahora están definidas globalmente fuera del scope
     
-    /**
-     * Limpia todos los campos del formulario de crear titular
-     */
-    function clearCreateTitularForm() {
-        document.getElementById('cTipo_Id').value = '';
-        document.getElementById('tId').value = '';
-        document.getElementById('tApellido1').value = '';
-        document.getElementById('tApellido2').value = '';
-        document.getElementById('tNombre1').value = '';
-        document.getElementById('tNombre2').value = '';
-        document.getElementById('tDireccion').value = '';
-        document.getElementById('tBarrioT').value = '';
-        document.getElementById('tCelular').value = '';
-        document.getElementById('tCorreo').value = '';
-        document.getElementById('tFecha_Ingreso').value = '';
-        document.getElementById('cActivo').value = '';
-        document.getElementById('cBeneficiario').value = '';
-        
-        // Limpiar estado de botones toggle
-        const toggleButtons = document.querySelectorAll('.btn-toggle');
-        toggleButtons.forEach(btn => btn.classList.remove('active'));
-        
-        // Limpiar atributo de ID original
-        document.getElementById('tId').removeAttribute('data-original-id');
-        
-        // Restaurar modo "crear" (título y botón)
-        document.getElementById('createTitularTitle').textContent = 'CREAR TITULAR';
-        document.getElementById('bCrear').textContent = 'Crear';
-    }
     
     // Las funciones de modales ahora están definidas globalmente fuera del scope
     
@@ -326,117 +715,22 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Muestra el modal de confirmación para crear titular
      */
-    function showConfirmCreateTitularModal() {
-        console.log('🔍 Mostrando modal de confirmación para titular...');
-        const modal = document.getElementById('confirmCreateTitularModal');
-        if (modal) {
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-            console.log('✅ Modal de confirmación para titular mostrado');
-        } else {
-            console.error('❌ No se encontró el modal confirmCreateTitularModal');
-        }
-    }
     
     /**
      * Cancela la creación del titular
      */
-    function cancelCreateTitular() {
-        const modal = document.getElementById('confirmCreateTitularModal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
-        
-        // Limpiar datos temporales
-        window.tempTitularData = null;
-    }
     
     /**
      * Confirma la creación del titular
      */
-    function confirmCreateTitular() {
-        // Cerrar modal de confirmación
-        const confirmModal = document.getElementById('confirmCreateTitularModal');
-        if (confirmModal) {
-            confirmModal.classList.remove('show');
-        }
-        
-        // Obtener datos temporales
-        const titularData = window.tempTitularData;
-        
-        if (!titularData) {
-            console.error('No se encontraron datos del titular para crear');
-            return;
-        }
-        
-        console.log('Datos del titular a crear:', titularData);
-        
-        // ========================================
-        // 🔗 CONEXIÓN BACKEND - CREAR TITULAR
-        // ========================================
-        // Endpoint: POST /api/titulares
-        // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, beneficiario }
-        
-        // TODO: Aquí se enviarían los datos al backend
-        // Por ahora solo guardamos en memoria
-        
-        // Verificar si el titular tiene beneficiario
-        if (titularData.beneficiario && titularData.beneficiario.toUpperCase() === 'SI') {
-            // Si tiene beneficiario, guardar datos temporalmente y abrir modal de beneficiario
-            sessionStorage.setItem('tempTitular', JSON.stringify(titularData));
-            hideCreateTitularModal();
-            showCreateBeneficiarioModal();
-        } else {
-            // Si no tiene beneficiario, crear el titular directamente
-            // Guardar por ciudad y persistir
-            const city = getSelectedCityCode();
-            if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
-            if (!titularesByCity[city]) titularesByCity[city] = {};
-            const toSave = { ...titularData, ciudad: city };
-            titularesByCity[city][titularData.numeroId] = toSave;
-            persistTitularesByCity();
-            // También reflejar en memoria y UI actual
-            titularesData[titularData.numeroId] = toSave;
-            
-            // Persistir en localStorage
-            try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
-            
-            // Cerrar modal de creación y limpiar formulario
-            hideCreateTitularModal();
-            
-            // Agregar el titular a la tabla
-            addTitularToTable(titularData);
-            
-            // Mostrar modal de éxito
-            showSuccessCreateTitularModal();
-        }
-        
-        // Limpiar datos temporales
-        window.tempTitularData = null;
-    }
     
     /**
      * Muestra el modal de éxito para crear titular
      */
-    function showSuccessCreateTitularModal() {
-        const modal = document.getElementById('successCreateTitularModal');
-        if (modal) {
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-    }
     
     /**
      * Cierra el modal de éxito de titular
      */
-    function closeSuccessTitularModal() {
-        const modal = document.getElementById('successCreateTitularModal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
-    }
     
     // Exponer funciones globalmente
     window.cancelCreateTitular = cancelCreateTitular;
@@ -598,136 +892,14 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Muestra el modal de confirmación para crear beneficiario
      */
-    function showConfirmCreateBeneficiarioModal() {
-        console.log('🔍 Intentando mostrar modal de confirmación de creación');
-        const modal = document.getElementById('confirmCreateBeneficiarioModal');
-        if (modal) {
-            console.log('✅ Modal de creación encontrado, mostrando...');
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-        } else {
-            console.error('❌ No se encontró el modal confirmCreateBeneficiarioModal');
-        }
-    }
     
     /**
      * Cancela la creación del beneficiario
      */
-    function cancelCreateBeneficiario() {
-        const modal = document.getElementById('confirmCreateBeneficiarioModal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
-        
-        // Limpiar datos temporales
-        window.tempBeneficiarioData = null;
-    }
     
     /**
      * Confirma la creación del beneficiario
      */
-    function confirmCreateBeneficiario() {
-        // Cerrar modal de confirmación
-        const confirmModal = document.getElementById('confirmCreateBeneficiarioModal');
-        if (confirmModal) {
-            confirmModal.classList.remove('show');
-        }
-        
-        // Obtener datos temporales
-        const beneficiarioData = window.tempBeneficiarioData;
-        
-        if (!beneficiarioData) {
-            console.error('No se encontraron datos del beneficiario para crear');
-            return;
-        }
-        
-        console.log('Datos del beneficiario a crear:', beneficiarioData);
-        
-        // ========================================
-        // 🔗 CONEXIÓN BACKEND - CREAR BENEFICIARIO
-        // ========================================
-        // Endpoint: POST /api/beneficiarios
-        // Datos: { numeroId, tipoId, apellido1, apellido2, nombre1, nombre2, direccion, barrio, celular, correo, fechaIngreso, activo, titularId, parentesco }
-        
-        // Verificar si viene del modal de titular
-        const tempTitular = sessionStorage.getItem('tempTitular');
-        
-        if (tempTitular) {
-            console.log('🔍 Creando titular y beneficiario juntos...');
-            // Si viene del modal de titular, crear tanto titular como beneficiario
-            const titular = JSON.parse(tempTitular);
-            
-            // Persistir titular en memoria y tabla
-            titularesData[titular.numeroId] = titular;
-            
-            // Persistir en localStorage
-            try { localStorage.setItem('titularesData', JSON.stringify(titularesData)); } catch (e) {}
-            
-            addTitularToTable(titular, true);
-            
-            // Persistir beneficiario y asociarlo al titular (actualiza/insert)
-            updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
-            if (!titularIdToBeneficiarios[titular.numeroId]) {
-                titularIdToBeneficiarios[titular.numeroId] = [];
-            }
-            titularIdToBeneficiarios[titular.numeroId].push(beneficiarioData);
-            
-            // Persistir relaciones en localStorage
-            try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
-            
-            // Limpiar datos temporales
-            sessionStorage.removeItem('tempTitular');
-            
-            // Cerrar modal de creación
-            hideCreateBeneficiarioModal();
-            
-            // Mostrar modal de éxito específico para titular y beneficiario
-            showSuccessCreateTitularBeneficiarioModal();
-        } else {
-            // Verificar si viene desde "Añadir Beneficiario" en resultados de titular
-            const titularFromResults = sessionStorage.getItem('currentSearchedTitularId');
-            
-            if (titularFromResults) {
-                console.log('🔍 Creando beneficiario para titular desde resultados:', titularFromResults);
-                
-                // Actualizar o agregar beneficiario en la tabla principal
-                updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
-                
-                // Asociar el beneficiario al titular - SIGUIENDO EL PATRÓN DE CIUDADES
-                if (!titularIdToBeneficiarios[titularFromResults]) {
-                    titularIdToBeneficiarios[titularFromResults] = [];
-                }
-                titularIdToBeneficiarios[titularFromResults].push(beneficiarioData);
-                
-                // Persistir relaciones en localStorage
-                try { localStorage.setItem('titularIdToBeneficiarios', JSON.stringify(titularIdToBeneficiarios)); } catch (e) {}
-                
-                // Re-renderizar la tabla de resultados de titular
-                renderBeneficiariosDeTitular(titularFromResults);
-                
-                // Cerrar modal de creación
-                hideCreateBeneficiarioModal();
-                
-                // Mostrar modal de éxito
-                showSuccessCreateBeneficiarioModal();
-                
-                console.log('✅ Beneficiario creado y asociado al titular:', titularFromResults);
-            } else {
-                // Si no viene del modal de titular ni de resultados, actualizar/insertar beneficiario
-                updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
-                
-                // Cerrar modal de creación
-                hideCreateBeneficiarioModal();
-                
-                // Mostrar modal de éxito
-                showSuccessCreateBeneficiarioModal();
-            }
-        }
-        
-        // Limpiar datos temporales
-        window.tempBeneficiarioData = null;
-    }
     
     /**
      * Muestra el modal de éxito para crear beneficiario
@@ -1850,10 +2022,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Obtener valores del formulario
             const tipoId = document.getElementById('bTipoId').value.trim();
             const numeroId = document.getElementById('bNumeroId').value.trim();
-            const apellido1 = document.getElementById('bApellido1').value.trim();
-            const apellido2 = document.getElementById('bApellido2').value.trim();
-            const nombre1 = document.getElementById('bNombre1').value.trim();
-            const nombre2 = document.getElementById('bNombre2').value.trim();
+            const apellido1 = document.getElementById('beneficiarioApellido1').value.trim();
+            const apellido2 = document.getElementById('beneficiarioApellido2').value.trim();
+            const nombre1 = document.getElementById('beneficiarioNombre1').value.trim();
+            const nombre2 = document.getElementById('beneficiarioNombre2').value.trim();
             const direccion = document.getElementById('bDireccion').value.trim();
             const telefono = document.getElementById('bTelefono').value.trim();
             const email = document.getElementById('bEmail').value.trim();
@@ -2058,82 +2230,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // FUNCIONES DE GESTIÓN DE TITULARES
     // ========================================
     
-    /**
-     * Agrega un nuevo titular a la tabla o actualiza uno existente
-     * @param {Object} titular - Objeto con los datos del titular
-     * @param {boolean} replaceIfExists - Si es true, actualiza la fila existente
-     */
-    function addTitularToTable(titular, replaceIfExists = false) {
-        const tableBody = document.getElementById('titularesTableBody');
-        const noDataRow = tableBody.querySelector('.no-data-message');
-        
-        if (noDataRow) {
-            noDataRow.remove();
-        }
-        
-        // Si existe, y se solicita reemplazar, actualizar la fila
-        const allRows = Array.from(tableBody.querySelectorAll('tr'));
-        const existingRow = allRows.find(r => {
-            const idCell = r.querySelector('td:nth-child(2)');
-            if (!idCell) return false;
-            // Verificar que no sea una fila de "no-data-message"
-            if (idCell.hasAttribute('colspan') || r.querySelector('.no-data-message')) return false;
-            return idCell.textContent.trim() === titular.numeroId.trim();
-        });
-        
-        // Concatenar nombre completo
-        const nombreCompleto = [
-            titular.apellido1 || '',
-            titular.apellido2 || '',
-            titular.nombre1 || '',
-            titular.nombre2 || ''
-        ].filter(nombre => nombre.trim() !== '').join(' ');
-        
-        const isActive = (String(titular.activo || 'SI').toUpperCase() === 'SI');
-        const rowHtml = `
-            <td>${titular.tipoId || ''}</td>
-            <td>${titular.numeroId}</td>
-            <td>${nombreCompleto}</td>
-            <td>${titular.direccion || ''}</td>
-            <td>${titular.barrio || ''}</td>
-            <td>${titular.celular || titular.telefono || ''}</td>
-            <td>${titular.correo || titular.email || ''}</td>
-            <td>
-                <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
-            </td>
-            <td>
-                <div class="options-inline" style="display:flex; align-items:center; gap:12px;">
-                    <button class="btn btn-small" onclick="editTitular('${titular.numeroId}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <label class="animated-toggle" data-id="${titular.numeroId}" title="${isActive ? 'Desactivar' : 'Activar'}" style="display:inline-flex;">
-                        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTitularState('${titular.numeroId}')">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </td>
-        `;
-        
-        if (existingRow && replaceIfExists) {
-            // Actualizar fila existente
-            existingRow.innerHTML = rowHtml;
-        } else if (!existingRow) {
-            // Crear nueva fila solo si no existe
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = rowHtml;
-            tableBody.appendChild(newRow);
-            
-            // Agregar efectos hover a la nueva fila
-            newRow.addEventListener('mouseenter', function() {
-                this.style.backgroundColor = '#f8f9fa';
-            });
-            
-            newRow.addEventListener('mouseleave', function() {
-                this.style.backgroundColor = '';
-            });
-        }
-        // Si existe pero no se debe reemplazar, no hacer nada
-    }
     
     /**
      * Agrega un nuevo beneficiario a la tabla
@@ -2271,6 +2367,9 @@ function hideCreateBeneficiarioModal() {
 function showCreateTitularModal() {
     const createTitularModalOverlay = document.getElementById('createTitularModal');
     if (createTitularModalOverlay) {
+        // Limpiar el formulario antes de mostrar el modal
+        clearCreateTitularForm();
+        
         createTitularModalOverlay.classList.add('show');
         document.body.style.overflow = 'hidden';
         console.log('✅ Modal de crear titular abierto correctamente');
@@ -2404,10 +2503,10 @@ function hideBeneficiarioResultsModal() {
 function clearCreateBeneficiarioForm() {
     const bTipoId = document.getElementById('bTipoId');
     const bNumeroId = document.getElementById('bNumeroId');
-    const bApellido1 = document.getElementById('bApellido1');
-    const bApellido2 = document.getElementById('bApellido2');
-    const bNombre1 = document.getElementById('bNombre1');
-    const bNombre2 = document.getElementById('bNombre2');
+    const beneficiarioApellido1 = document.getElementById('beneficiarioApellido1');
+    const beneficiarioApellido2 = document.getElementById('beneficiarioApellido2');
+    const beneficiarioNombre1 = document.getElementById('beneficiarioNombre1');
+    const beneficiarioNombre2 = document.getElementById('beneficiarioNombre2');
     const bDireccion = document.getElementById('bDireccion');
     const bTelefono = document.getElementById('bTelefono');
     const bEmail = document.getElementById('bEmail');
@@ -2415,10 +2514,10 @@ function clearCreateBeneficiarioForm() {
     
     if (bTipoId) bTipoId.value = '';
     if (bNumeroId) bNumeroId.value = '';
-    if (bApellido1) bApellido1.value = '';
-    if (bApellido2) bApellido2.value = '';
-    if (bNombre1) bNombre1.value = '';
-    if (bNombre2) bNombre2.value = '';
+    if (beneficiarioApellido1) beneficiarioApellido1.value = '';
+    if (beneficiarioApellido2) beneficiarioApellido2.value = '';
+    if (beneficiarioNombre1) beneficiarioNombre1.value = '';
+    if (beneficiarioNombre2) beneficiarioNombre2.value = '';
     if (bDireccion) bDireccion.value = '';
     if (bTelefono) bTelefono.value = '';
     if (bEmail) bEmail.value = '';
@@ -2614,9 +2713,12 @@ function setBeneficiario(valor) {
         hiddenInput.value = valor;
     }
     
-    // Activar el botón correspondiente
-    const yesButton = document.querySelector('#createTitularModal .btn-toggle-yes');
-    const noButton = document.querySelector('#createTitularModal .btn-toggle-no');
+    // Activar el botón correspondiente - buscar específicamente los botones de beneficiario
+    // Buscar el contenedor que contiene el input cBeneficiario
+    const beneficiarioInput = document.getElementById('cBeneficiario');
+    const toggleContainer = beneficiarioInput ? beneficiarioInput.closest('.form-group').querySelector('.toggle-buttons') : null;
+    const yesButton = toggleContainer ? toggleContainer.querySelector('.btn-toggle-yes') : null;
+    const noButton = toggleContainer ? toggleContainer.querySelector('.btn-toggle-no') : null;
     
     if (yesButton && noButton) {
         if (valor === 'SI') {
@@ -2677,9 +2779,15 @@ function setBeneficiarioActivo(valor) {
     
     // Activar el botón correspondiente
     if (valor === 'SI') {
-        document.querySelector('#createBeneficiarioModal .btn-toggle-yes').classList.add('active');
+        const yesButton = document.querySelector('#createBeneficiarioModal .btn-toggle-yes');
+        if (yesButton) {
+            yesButton.classList.add('active');
+        }
     } else if (valor === 'NO') {
-        document.querySelector('#createBeneficiarioModal .btn-toggle-no').classList.add('active');
+        const noButton = document.querySelector('#createBeneficiarioModal .btn-toggle-no');
+        if (noButton) {
+            noButton.classList.add('active');
+        }
     }
 }
 
@@ -3246,12 +3354,6 @@ function setFechaActual() {
 // ========================================
 // DATOS EN MEMORIA
 // ========================================
-const titularesData = {}; // Solo bucket activo en la UI
-const beneficiariosData = {}; // Solo bucket activo en la UI
-// Mapa de relación: titularId -> array de beneficiarios
-const titularIdToBeneficiarios = {};
-// Último titular buscado (para "Añadir Beneficiario")
-let currentSearchedTitularId = null;
 
 /**
  * Almacén persistente por ciudad para titulares
@@ -3447,29 +3549,35 @@ if (typeof hideCreateTitularModal === 'undefined') {
             createTitularModalOverlay.classList.remove('show');
             document.body.style.overflow = 'auto';
             console.log('✅ Modal de titular cerrado');
-            clearCreateTitularForm();
+        } else {
+            console.log('⚠️ Modal createTitularModal no encontrado - posiblemente no estamos en la página correcta');
         }
     };
 }
+// Asignaciones globales - solo las que están definidas globalmente
 window.cancelCreateTitular = cancelCreateTitular;
 window.confirmCreateTitular = confirmCreateTitular;
 window.closeSuccessTitularModal = closeSuccessTitularModal;
-window.showCreateTitularModal = showCreateTitularModal;
-window.showCreateBeneficiarioModal = showCreateBeneficiarioModal;
-window.hideCreateBeneficiarioModal = hideCreateBeneficiarioModal;
+window.showConfirmCreateTitularModal = showConfirmCreateTitularModal;
 window.showConfirmCreateBeneficiarioModal = showConfirmCreateBeneficiarioModal;
 window.cancelCreateBeneficiario = cancelCreateBeneficiario;
 window.confirmCreateBeneficiario = confirmCreateBeneficiario;
-window.closeSuccessBeneficiarioModal = closeSuccessBeneficiarioModal;
-window.showSearchBeneficiarioModal = showSearchBeneficiarioModal;
-window.hideSearchBeneficiarioModal = hideSearchBeneficiarioModal;
-window.showTitularResultsModal = showTitularResultsModal;
-window.hideTitularResultsModal = hideTitularResultsModal;
-window.showBeneficiarioResultsModal = showBeneficiarioResultsModal;
-window.hideBeneficiarioResultsModal = hideBeneficiarioResultsModal;
-window.refreshTitularResultsTable = refreshTitularResultsTable;
-window.refreshBeneficiarioResultsTable = refreshBeneficiarioResultsTable;
-window.refreshBeneficiariosInTitularResults = refreshBeneficiariosInTitularResults;
+
+// Funciones que aún están dentro de DOMContentLoaded - comentadas temporalmente
+// window.showCreateTitularModal = showCreateTitularModal;
+// window.showCreateBeneficiarioModal = showCreateBeneficiarioModal;
+// window.hideCreateBeneficiarioModal = hideCreateBeneficiarioModal;
+// window.closeSuccessBeneficiarioModal = closeSuccessBeneficiarioModal;
+// Funciones que aún están dentro de DOMContentLoaded - comentadas temporalmente
+// window.showSearchBeneficiarioModal = showSearchBeneficiarioModal;
+// window.hideSearchBeneficiarioModal = hideSearchBeneficiarioModal;
+// window.showTitularResultsModal = showTitularResultsModal;
+// window.hideTitularResultsModal = hideTitularResultsModal;
+// window.showBeneficiarioResultsModal = showBeneficiarioResultsModal;
+// window.hideBeneficiarioResultsModal = hideBeneficiarioResultsModal;
+// window.refreshTitularResultsTable = refreshTitularResultsTable;
+// window.refreshBeneficiarioResultsTable = refreshBeneficiarioResultsTable;
+// window.refreshBeneficiariosInTitularResults = refreshBeneficiariosInTitularResults;
 
 // Función específica para probar la actualización de beneficiarios en el modal de resultados
 window.testBeneficiariosUpdate = function() {
@@ -3560,7 +3668,7 @@ window.forceRefreshAllResultsTables = function() {
 window.editTitular = editTitular;
 window.editBeneficiario = editBeneficiario;
 window.deleteTitular = deleteTitular;
-window.deleteBeneficiario = deleteBeneficiario;
+// window.deleteBeneficiario = deleteBeneficiario; // Comentado porque está definida dentro de DOMContentLoaded
 window.setBeneficiario = setBeneficiario;
 window.setBeneficiarioActivo = setBeneficiarioActivo;
 window.addBeneficiarioForCurrentTitular = addBeneficiarioForCurrentTitular;
