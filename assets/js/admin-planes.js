@@ -1,4 +1,32 @@
-// Lógica acoplada a organizaciones para Planes
+/**
+ * MÓDULO DE ADMINISTRACIÓN DE PLANES
+ * 
+ * Este archivo contiene toda la lógica del frontend para la gestión de planes.
+ * Incluye funciones para crear, leer, actualizar y eliminar planes, así como
+ * la gestión de escalas y reportes.
+ * 
+ * FUNCIONALIDADES PRINCIPALES:
+ * - CRUD completo de planes
+ * - Gestión de escalas por plan
+ * - Búsqueda y filtrado de planes
+ * - Generación de reportes
+ * - Validación de formularios
+ * - Persistencia en localStorage
+ * 
+ * BACKEND INTEGRATION:
+ * - Las funciones de API deben implementarse en el backend
+ * - Endpoints requeridos: /api/planes, /api/planes/{id}, /api/planes/{id}/escalas
+ * - Métodos HTTP: GET, POST, PUT, DELETE
+ * - Autenticación requerida para todas las operaciones
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2025
+ */
+
+// ========================================
+// VARIABLES GLOBALES Y CONFIGURACIÓN
+// ========================================
 
 // Ciudad actual (tomada de sessionStorage; sin valor por defecto)
 let ciudadActual = sessionStorage.getItem('selectedCity') || '';
@@ -8,6 +36,18 @@ function getSelectedCity() {
     return sessionStorage.getItem('selectedCity') || '';
 }
 
+/**
+ * STORE DE PLANES
+ * 
+ * Maneja la persistencia local de los datos de planes.
+ * En producción, estos datos deben sincronizarse con el backend.
+ * 
+ * BACKEND INTEGRATION:
+ * - GET /api/planes - Obtener todos los planes
+ * - POST /api/planes - Crear nuevo plan
+ * - PUT /api/planes/{id} - Actualizar plan existente
+ * - DELETE /api/planes/{id} - Eliminar plan
+ */
 const planesStore = (() => {
     // Cargar datos existentes del localStorage
     try {
@@ -154,6 +194,17 @@ if (userInfo && dropdown) {
     });
 }
 
+/**
+ * PERSISTENCIA DE DATOS
+ * 
+ * Guarda los datos de planes en localStorage.
+ * En producción, debe enviar los datos al backend.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/planes - Para planes nuevos
+ * - PUT /api/planes/{id} - Para planes actualizados
+ * - Manejar errores de red y reintentos
+ */
 function persistPlanes() {
     try { 
         console.log('Guardando planes en localStorage...');
@@ -193,8 +244,18 @@ function persistPlanes() {
 }
 
 // ========================================
-// FUNCIONES DE MODAL DE CERRAR SESIÓN
+// GESTIÓN DE MODALES
 // ========================================
+
+/**
+ * MODALES DE CONFIRMACIÓN
+ * 
+ * Maneja los modales de confirmación para cerrar sesión y operaciones críticas.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/auth/logout - Para cerrar sesión
+ * - Validar token de autenticación antes de cerrar
+ */
 
 window.showConfirmLogoutModal = function() {
     const modal = document.getElementById('confirmLogoutModal');
@@ -274,7 +335,36 @@ function loadTable() {
 }
 
 function showPlanSearchModal() { const m = document.getElementById('planSearchModal'); if (m) { m.classList.add('show'); document.body.style.overflow='hidden'; } }
-function hidePlanSearchModal() { const m = document.getElementById('planSearchModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
+/**
+ * MODALES DE PLANES
+ * 
+ * Gestiona la apertura y cierre de modales para operaciones de planes.
+ * Incluye validación de formularios y preparación de datos.
+ * 
+ * BACKEND INTEGRATION:
+ * - GET /api/planes/search - Para búsqueda de planes
+ * - POST /api/planes - Para crear nuevos planes
+ * - PUT /api/planes/{id} - Para actualizar planes existentes
+ */
+
+function hidePlanSearchModal() { 
+    const m = document.getElementById('planSearchModal'); 
+    if (m) { 
+        m.classList.remove('show'); 
+        document.body.style.overflow='auto'; 
+    } 
+}
+
+/**
+ * MODAL DE CREAR PLAN
+ * 
+ * Abre el modal para crear un nuevo plan.
+ * Resetea el formulario y configura los campos por defecto.
+ * 
+ * BACKEND INTEGRATION:
+ * - Preparar datos para POST /api/planes
+ * - Validar campos obligatorios antes de enviar
+ */
 function showCreatePlanModal() {
     const m = document.getElementById('createPlanModal');
     if (m) {
@@ -291,15 +381,15 @@ function showCreatePlanModal() {
         }
         
         // reset form
-        document.getElementById('pNombre').value = '';
-        document.getElementById('pValorPlan').value = '';
-        document.getElementById('pCuotaInicial').value = '';
-        document.getElementById('pNumCuotas').value = '';
-        document.getElementById('pMensualidad').value = '';
-        document.getElementById('pFechaInicial').value = '';
-        document.getElementById('pMesesAsesoria').value = '';
-        document.getElementById('pUsuariosAplican').value = '';
-        document.getElementById('pNumLibros').value = '';
+        document.getElementById('tNombre').value = '';
+        document.getElementById('tValor').value = '';
+        document.getElementById('tCuota_Inicial').value = '';
+        document.getElementById('tCuotas').value = '';
+        document.getElementById('tMensualidad').value = '';
+        document.getElementById('tFecha_Inicial').value = '';
+        document.getElementById('tMeses_Asesoria').value = '';
+        document.getElementById('tUsuarios').value = '';
+        document.getElementById('tLibros').value = '';
         setPlanActivo('SI'); // Reset to SI
         document.getElementById('pObservaciones').value = '';
         document.getElementById('createPlanTitle').textContent = 'CREAR PLAN';
@@ -311,6 +401,18 @@ function showCreatePlanModal() {
 function hideCreatePlanModal() { const m = document.getElementById('createPlanModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
 function hidePlanResultsModal() { const m = document.getElementById('planResultsModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
 
+/**
+ * CREAR O ACTUALIZAR PLAN
+ * 
+ * Función principal que maneja la creación y actualización de planes.
+ * Valida los datos del formulario y prepara la estructura del plan.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/planes - Para crear nuevos planes
+ * - PUT /api/planes/{id} - Para actualizar planes existentes
+ * - Validar datos en el backend antes de guardar
+ * - Manejar errores de validación y red
+ */
 function createOrUpdateFromForm() {
     // Determinar si es creación o actualización
     const isUpdate = window.currentEditPlanCode;
@@ -323,17 +425,17 @@ function createOrUpdateFromForm() {
     console.log('Tipo de isUpdate:', typeof isUpdate);
     console.log('¿isUpdate es truthy?', !!isUpdate);
     
-    const nombre = document.getElementById('pNombre').value.trim();
-    const valorPlan = parseFloat(cleanNumber(document.getElementById('pValorPlan').value || '0'));
-    const cuotaInicial = parseFloat(cleanNumber(document.getElementById('pCuotaInicial').value || '0'));
-    const numCuotas = parseInt(document.getElementById('pNumCuotas').value || '0', 10);
-    const mensualidad = parseFloat(cleanNumber(document.getElementById('pMensualidad').value || '0'));
+    const nombre = document.getElementById('tNombre').value.trim();
+    const valorPlan = parseFloat(cleanNumber(document.getElementById('tValor').value || '0'));
+    const cuotaInicial = parseFloat(cleanNumber(document.getElementById('tCuota_Inicial').value || '0'));
+    const numCuotas = parseInt(document.getElementById('tCuotas').value || '0', 10);
+    const mensualidad = parseFloat(cleanNumber(document.getElementById('tMensualidad').value || '0'));
     
-    const fechaInicial = document.getElementById('pFechaInicial').value;
-    const mesesAsesoria = parseInt(document.getElementById('pMesesAsesoria').value || '0', 10);
-    const usuariosAplican = parseInt(document.getElementById('pUsuariosAplican').value || '0', 10);
-    const numLibros = parseInt(document.getElementById('pNumLibros').value || '0', 10);
-    const activo = document.getElementById('pActivo').value === 'SI';
+    const fechaInicial = document.getElementById('tFecha_Inicial').value;
+    const mesesAsesoria = parseInt(document.getElementById('tMeses_Asesoria').value || '0', 10);
+    const usuariosAplican = parseInt(document.getElementById('tUsuarios').value || '0', 10);
+    const numLibros = parseInt(document.getElementById('tLibros').value || '0', 10);
+    const activo = document.getElementById('cActivo').value === 'SI';
     const observaciones = document.getElementById('pObservaciones').value.trim();
     
     if (!nombre || valorPlan <= 0 || cuotaInicial <= 0 || numCuotas < 0 || mensualidad <= 0 || !fechaInicial || usuariosAplican <= 0) { 
@@ -391,7 +493,7 @@ function createOrUpdateFromForm() {
 
 // Función para manejar el toggle del estado activo
 function setPlanActivo(value) {
-    const hiddenInput = document.getElementById('pActivo');
+    const hiddenInput = document.getElementById('cActivo');
     const yesButton = document.querySelector('#createPlanModal .btn-toggle-yes');
     const noButton = document.querySelector('#createPlanModal .btn-toggle-no');
     
@@ -784,7 +886,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// Funciones para el modal de escalas
+/**
+ * GESTIÓN DE ESCALAS
+ * 
+ * Maneja la creación y actualización de escalas para cada plan.
+ * Las escalas definen los porcentajes de comisión por nivel jerárquico.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/planes/{id}/escalas - Para crear escalas de un plan
+ * - PUT /api/planes/{id}/escalas - Para actualizar escalas existentes
+ * - GET /api/planes/{id}/escalas - Para obtener escalas de un plan
+ * - Validar que la suma de escalas no exceda el 100%
+ */
 function showPlanEscalasModal() {
     const modal = document.getElementById('planEscalasModal');
     if (modal) {
@@ -1700,6 +1813,18 @@ function hideReportePlanesModal() {
 /**
  * Maneja la generación del reporte de planes
  */
+/**
+ * GENERACIÓN DE REPORTES
+ * 
+ * Maneja la generación de reportes de planes por ciudad.
+ * Permite exportar los datos en diferentes formatos.
+ * 
+ * BACKEND INTEGRATION:
+ * - GET /api/planes/reporte?ciudad={ciudad} - Para obtener datos del reporte
+ * - GET /api/planes/export/excel?ciudad={ciudad} - Para exportar a Excel
+ * - GET /api/planes/export/pdf?ciudad={ciudad} - Para exportar a PDF
+ * - GET /api/planes/export/word?ciudad={ciudad} - Para exportar a Word
+ */
 function handleGenerarReportePlanes() {
     const ciudad = document.getElementById('reporteCiudad').value;
     
@@ -2036,17 +2161,17 @@ function editPlan(codigo) {
         
         // Llenar los campos con los datos del plan
         const codigoField = document.getElementById('pCodigo');
-        const nombreField = document.getElementById('pNombre');
-        const valorPlanField = document.getElementById('pValorPlan');
-        const cuotaInicialField = document.getElementById('pCuotaInicial');
-        const numCuotasField = document.getElementById('pNumCuotas');
-        const mensualidadField = document.getElementById('pMensualidad');
-        const fechaInicialField = document.getElementById('pFechaInicial');
-        const mesesAsesoriaField = document.getElementById('pMesesAsesoria');
-        const usuariosAplicanField = document.getElementById('pUsuariosAplican');
-        const numLibrosField = document.getElementById('pNumLibros');
+        const nombreField = document.getElementById('tNombre');
+        const valorPlanField = document.getElementById('tValor');
+        const cuotaInicialField = document.getElementById('tCuota_Inicial');
+        const numCuotasField = document.getElementById('tCuotas');
+        const mensualidadField = document.getElementById('tMensualidad');
+        const fechaInicialField = document.getElementById('tFecha_Inicial');
+        const mesesAsesoriaField = document.getElementById('tMeses_Asesoria');
+        const usuariosAplicanField = document.getElementById('tUsuarios');
+        const numLibrosField = document.getElementById('tLibros');
         const observacionesField = document.getElementById('pObservaciones');
-        const activoField = document.getElementById('pActivo');
+        const activoField = document.getElementById('cActivo');
         
         if (codigoField) codigoField.value = plan.codigo;
         if (nombreField) nombreField.value = plan.nombre;

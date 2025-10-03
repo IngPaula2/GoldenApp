@@ -234,21 +234,21 @@
                     <!-- Primera fila: Nombre del Plan, Valor Plan, Cuota Inicial -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="pNombre" class="form-label">Nombre del Plan *</label>
-                            <input type="text" id="pNombre" class="form-input" placeholder="NOMBRE DEL PLAN" style="text-transform: uppercase;" required>
+                            <label for="tNombre" class="form-label">Nombre del Plan *</label>
+                            <input type="text" id="tNombre" class="form-input" placeholder="NOMBRE DEL PLAN" style="text-transform: uppercase;" required>
                         </div>
                         <div class="form-group">
-                            <label for="pValorPlan" class="form-label">Valor Plan *</label>
+                            <label for="tValor" class="form-label">Valor Plan *</label>
                             <div class="price-input-container">
                                 <span class="currency-symbol">$</span>
-                                <input type="text" id="pValorPlan" class="form-input price-field" placeholder="0" maxlength="20" required>
+                                <input type="text" id="tValor" class="form-input price-field" placeholder="0" maxlength="20" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="pCuotaInicial" class="form-label">Cuota Inicial *</label>
+                            <label for="tCuota_Inicial" class="form-label">Cuota Inicial *</label>
                             <div class="price-input-container">
                                 <span class="currency-symbol">$</span>
-                                <input type="text" id="pCuotaInicial" class="form-input price-field" placeholder="0" maxlength="20" required>
+                                <input type="text" id="tCuota_Inicial" class="form-input price-field" placeholder="0" maxlength="20" required>
                             </div>
                         </div>
                     </div>
@@ -256,35 +256,35 @@
                     <!-- Segunda fila: # Cuotas, Mensualidad, Fecha Inicial -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="pNumCuotas" class="form-label"># Cuotas *</label>
-                            <input type="text" id="pNumCuotas" class="form-input" placeholder="1" style="text-transform: uppercase;" required>
+                            <label for="tCuotas" class="form-label"># Cuotas *</label>
+                            <input type="text" id="tCuotas" class="form-input" placeholder="1" style="text-transform: uppercase;" required>
                         </div>
                         <div class="form-group">
-                            <label for="pMensualidad" class="form-label">Mensualidad *</label>
+                            <label for="tMensualidad" class="form-label">Mensualidad *</label>
                             <div class="price-input-container">
                                 <span class="currency-symbol">$</span>
-                                <input type="text" id="pMensualidad" class="form-input price-field" placeholder="0" maxlength="20" required>
+                                <input type="text" id="tMensualidad" class="form-input price-field" placeholder="0" maxlength="20" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="pFechaInicial" class="form-label">Fecha Inicial *</label>
-                            <input type="date" id="pFechaInicial" class="form-input" required>
+                            <label for="tFecha_Inicial" class="form-label">Fecha Inicial *</label>
+                            <input type="date" id="tFecha_Inicial" class="form-input" required>
                         </div>
                     </div>
                     
                     <!-- Tercera fila: # Meses Asesoría, # Usuarios que Aplican, # de Libros -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="pMesesAsesoria" class="form-label"># Meses Asesoría *</label>
-                            <input type="text" id="pMesesAsesoria" class="form-input" maxlength="2" placeholder="0" style="text-transform: uppercase;" required>
+                            <label for="tMeses_Asesoria" class="form-label"># Meses Asesoría *</label>
+                            <input type="text" id="tMeses_Asesoria" class="form-input" maxlength="2" placeholder="0" style="text-transform: uppercase;" required>
                         </div>
                         <div class="form-group">
-                            <label for="pUsuariosAplican" class="form-label"># Usuarios que Aplican *</label>
-                            <input type="text" id="pUsuariosAplican" class="form-input" placeholder="1" style="text-transform: uppercase;" required>
+                            <label for="tUsuarios" class="form-label"># Usuarios que Aplican *</label>
+                            <input type="text" id="tUsuarios" class="form-input" placeholder="1" style="text-transform: uppercase;" required>
                         </div>
                         <div class="form-group">
-                            <label for="pNumLibros" class="form-label"># de Libros *</label>
-                            <input type="text" id="pNumLibros" class="form-input" placeholder="0" style="text-transform: uppercase;" required>
+                            <label for="tLibros" class="form-label"># de Libros *</label>
+                            <input type="text" id="tLibros" class="form-input" placeholder="0" style="text-transform: uppercase;" required>
                         </div>
                     </div>
                     
@@ -299,7 +299,7 @@
                             <div class="toggle-buttons">
                                 <button type="button" class="btn-toggle btn-toggle-yes" onclick="setPlanActivo('SI')">SI</button>
                                 <button type="button" class="btn-toggle btn-toggle-no" onclick="setPlanActivo('NO')">NO</button>
-                                <input type="hidden" id="pActivo" name="pActivo" value="SI" required>
+                                <input type="hidden" id="cActivo" name="cActivo" value="SI" required>
                             </div>
                         </div>
                     </div>

@@ -1,17 +1,63 @@
-// JavaScript para el reporte de planes
-// Funciones principales
+/**
+ * MÓDULO DE REPORTE DE PLANES
+ * 
+ * Este archivo maneja la visualización y exportación de reportes de planes.
+ * Incluye funciones de paginación, búsqueda, zoom y exportación a diferentes formatos.
+ * 
+ * FUNCIONALIDADES:
+ * - Visualización de datos de planes
+ * - Paginación y controles de navegación
+ * - Zoom in/out para mejor visualización
+ * - Exportación a Excel, Word y PDF
+ * - Búsqueda y filtrado de datos
+ * - Sincronización con datos del sistema principal
+ * 
+ * BACKEND INTEGRATION:
+ * - GET /api/planes/reporte?ciudad={ciudad} - Obtener datos del reporte
+ * - GET /api/planes/export/excel - Exportar a Excel
+ * - GET /api/planes/export/word - Exportar a Word
+ * - GET /api/planes/export/pdf - Exportar a PDF
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2025
+ */
 
-// Global variables for report state
-window.__rows = [];
-window.__page = 1;
-window.__pageSize = 20;
-window.__zoom = 1;
+// ========================================
+// VARIABLES GLOBALES DEL REPORTE
+// ========================================
 
+// Variables de estado para paginación y visualización
+window.__rows = [];        // Datos del reporte
+window.__page = 1;         // Página actual
+window.__pageSize = 20;    // Elementos por página
+window.__zoom = 1;         // Nivel de zoom
+
+/**
+ * OBTENER PARÁMETROS DE URL
+ * 
+ * Extrae los parámetros de la URL para determinar la ciudad del reporte.
+ * 
+ * BACKEND INTEGRATION:
+ * - Los parámetros deben validarse en el backend
+ * - Verificar permisos de acceso por ciudad
+ */
 function parseQuery(){
     const p=new URLSearchParams(location.search);
     return { ciudad:p.get('ciudad')||'' };
 }
 
+/**
+ * OBTENER DATOS DE PLANES
+ * 
+ * Recupera los datos de planes desde localStorage o ventana padre.
+ * En producción, debe obtener los datos desde el backend.
+ * 
+ * BACKEND INTEGRATION:
+ * - GET /api/planes?ciudad={ciudad} - Obtener planes por ciudad
+ * - Implementar caché y sincronización
+ * - Manejar errores de red y timeouts
+ */
 function getPlanes(ciudad){
     console.log('Buscando planes para ciudad:', ciudad);
     
@@ -293,6 +339,17 @@ function setZoom(delta){
     refreshTable(); 
 }
 
+/**
+ * EXPORTACIÓN A EXCEL
+ * 
+ * Genera y descarga un archivo Excel con los datos del reporte.
+ * Utiliza formato HTML para compatibilidad con Excel.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/planes/export/excel - Enviar datos para generar Excel
+ * - GET /api/planes/export/excel/download - Descargar archivo generado
+ * - Manejar archivos grandes y compresión
+ */
 function exportCSV(){
     const {ciudad} = parseQuery();
     const rows = window.__rows||[];
@@ -394,6 +451,17 @@ function exportCSV(){
     const a = document.createElement('a'); a.href=url; a.download='reporte-planes.xls'; a.click(); URL.revokeObjectURL(url);
 }
 
+/**
+ * EXPORTACIÓN A WORD
+ * 
+ * Genera y descarga un archivo Word con los datos del reporte.
+ * Utiliza formato HTML para compatibilidad con Word.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/planes/export/word - Enviar datos para generar Word
+ * - GET /api/planes/export/word/download - Descargar archivo generado
+ * - Aplicar plantillas y formato corporativo
+ */
 function exportDOC(){
     const cleanHTML = generarHTMLLimpio();
     const blob = new Blob([`
@@ -456,6 +524,18 @@ function exportDOC(){
     const a = document.createElement('a'); a.href=url; a.download='reporte-planes.doc'; a.click(); URL.revokeObjectURL(url);
 }
 
+/**
+ * EXPORTACIÓN A PDF
+ * 
+ * Abre el diálogo de impresión del navegador para generar PDF.
+ * En producción, debe usar un servicio de generación de PDF.
+ * 
+ * BACKEND INTEGRATION:
+ * - POST /api/planes/export/pdf - Enviar datos para generar PDF
+ * - GET /api/planes/export/pdf/download - Descargar archivo generado
+ * - Usar librerías como Puppeteer o wkhtmltopdf
+ * - Aplicar estilos corporativos y marca
+ */
 function exportPDF(){
     // Abrir directamente el diálogo de impresión del navegador
     window.print();
