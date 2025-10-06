@@ -1,0 +1,607 @@
+/**
+ * 📊 ESTILOS DEL DASHBOARD ADMINISTRATIVO - CONSECUTIVOS - GOLDEN APP
+ * 
+ * Este archivo contiene todos los estilos específicos para el panel
+ * administrativo de consecutivos, incluyendo formularios, tablas y responsive design.
+ * 
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2024
+ */
+
+/* ========================================
+   ESTILOS ESPECÍFICOS PARA SECCIÓN DE CONSECUTIVOS
+   ======================================== */
+
+/* Section title con información de ciudad */
+.section-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.section-title h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.current-city-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.current-city-info i {
+    color: #DEB448;
+    font-size: 0.8rem;
+}
+
+.current-city-info span {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Sección de consecutivos */
+.consecutivos-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+/* Formulario de consecutivos */
+.consecutivos-form {
+    background: #fff8e1; /* Fondo amarillo claro como en la imagen */
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-container {
+    max-width: 100%;
+}
+
+/* Form Rows para consecutivos - 2 columnas */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Form Groups específicos para consecutivos */
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group label,
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    transition: border-color 0.3s ease;
+    text-transform: uppercase;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.form-input::placeholder {
+    color: #adb5bd;
+    text-transform: none;
+}
+
+/* Form Actions - Botones de acción */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Botones específicos para consecutivos */
+.btn-warning {
+    background: #ffc107;
+    color: #1a1a1a;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+/* ========================================
+   ESTILOS PARA TABLA DE CONSECUTIVOS
+   ======================================== */
+
+/* Tabla de consecutivos */
+.consecutivos-section .data-table {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+}
+
+.consecutivos-section .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.consecutivos-section .table thead {
+    background: #f8f9fa;
+}
+
+.consecutivos-section .table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #1a1a1a;
+    border-bottom: 2px solid #e9ecef;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.consecutivos-section .table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    text-transform: uppercase;
+}
+
+.consecutivos-section .table tbody tr:hover {
+    background: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.consecutivos-section .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========================================
+   ESTILOS PARA MODALES DE CONSECUTIVOS
+   ======================================== */
+
+/* Modal específico para consecutivos */
+#createConsecutivoModal .modal,
+#updateConsecutivoModal .modal {
+    max-width: 520px; /* más compacto */
+    width: 92%;
+}
+
+#createConsecutivoModal .form-row,
+#updateConsecutivoModal .form-row,
+#consecutivoSearchModal .form-row {
+    display: grid;
+    grid-template-columns: 1fr; /* una sola columna */
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+#createConsecutivoModal .form-group,
+#updateConsecutivoModal .form-group {
+    margin-bottom: 0;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN PARA CONSECUTIVOS
+   ======================================== */
+
+/* Tablets (768px - 1199px) */
+@media (max-width: 1199px) {
+    .consecutivos-form {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-actions {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .form-actions .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+/* Tablets pequeñas (768px - 991px) */
+@media (max-width: 991px) {
+    .consecutivos-form {
+        padding: 1.25rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        padding: 12px 20px;
+    }
+    
+    .consecutivos-section .table {
+        font-size: 0.8rem;
+    }
+    
+    .consecutivos-section .table th,
+    .consecutivos-section .table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+/* Móviles grandes (576px - 767px) */
+@media (max-width: 767px) {
+    .consecutivos-form {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .consecutivos-section .data-table {
+        overflow-x: auto;
+    }
+    
+    .consecutivos-section .table {
+        min-width: 600px;
+        font-size: 0.75rem;
+    }
+    
+    .consecutivos-section .table th,
+    .consecutivos-section .table td {
+        padding: 0.5rem 0.25rem;
+        min-width: 80px;
+    }
+    
+    /* Ocultar columnas menos importantes en móvil */
+    .consecutivos-section .table th:nth-child(6),
+    .consecutivos-section .table td:nth-child(6) {
+        display: none;
+    }
+}
+
+/* Móviles pequeños (320px - 575px) */
+@media (max-width: 575px) {
+    .consecutivos-form {
+        padding: 0.75rem;
+    }
+    
+    .form-row {
+        gap: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-label {
+        font-size: 0.75rem;
+    }
+    
+    .form-input {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    
+    .form-actions {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+    
+    .form-actions .btn {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .consecutivos-section .table {
+        font-size: 0.7rem;
+        min-width: 500px;
+    }
+    
+    .consecutivos-section .table th,
+    .consecutivos-section .table td {
+        padding: 0.4rem 0.2rem;
+        min-width: 70px;
+    }
+    
+    /* Ocultar más columnas en pantallas muy pequeñas */
+    .consecutivos-section .table th:nth-child(4),
+    .consecutivos-section .table td:nth-child(4),
+    .consecutivos-section .table th:nth-child(5),
+    .consecutivos-section .table td:nth-child(5) {
+        display: none;
+    }
+}
+
+/* Móviles muy pequeños (menos de 360px) */
+@media (max-width: 359px) {
+    .consecutivos-form {
+        padding: 0.5rem;
+    }
+    
+    .form-label {
+        font-size: 0.7rem;
+    }
+    
+    .form-input {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .form-actions .btn {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .consecutivos-section .table {
+        font-size: 0.65rem;
+        min-width: 400px;
+    }
+    
+    .consecutivos-section .table th,
+    .consecutivos-section .table td {
+        padding: 0.3rem 0.1rem;
+        min-width: 60px;
+    }
+}
+
+/* ========================================
+   ESTILOS PARA MODALES RESPONSIVOS
+   ======================================== */
+
+/* Modal de actualización responsivo */
+@media (max-width: 768px) {
+    #updateConsecutivoModal .modal {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    #updateConsecutivoModal .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    #updateConsecutivoModal .form-group {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ========================================
+   ESTILOS PARA ESTADOS DE VALIDACIÓN
+   ======================================== */
+
+/* Campos con error */
+.form-input.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Campos con éxito */
+.form-input.success {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+/* Mensajes de validación */
+.validation-message {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.validation-message.error {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.validation-message.success {
+    color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+/* ========================================
+   ANIMACIONES Y TRANSICIONES
+   ======================================== */
+
+/* Animación para formulario */
+.consecutivos-form {
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animación para botones */
+.form-actions .btn {
+    transition: all 0.3s ease;
+}
+
+.form-actions .btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Animación para tabla */
+.consecutivos-section .data-table {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   ESTILOS PARA ESTADOS DE CARGA
+   ======================================== */
+
+/* Botón en estado de carga */
+.btn.loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   ESTILOS PARA ACCESIBILIDAD
+   ======================================== */
+
+/* Focus visible para navegación por teclado */
+.form-input:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid #DEB448;
+    outline-offset: 2px;
+}
+
+/* Contraste mejorado para texto */
+.form-label {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+/* Indicadores de campos requeridos */
+.form-label.required::after {
+    content: ' *';
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* ========================================
+   ESTILOS PARA IMPRESIÓN
+   ======================================== */
+
+@media print {
+    .consecutivos-form {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .form-actions {
+        display: none !important;
+    }
+    
+    .consecutivos-section .data-table {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+}

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<!--
+    DASHBOARD ADMINISTRATIVO - CONSECUTIVOS - GOLDEN APP
+    
+    Este archivo contiene la página del panel administrativo de consecutivos.
+    Incluye sidebar de navegación, barra superior, formulario de consecutivos y tabla de datos.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2024
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Consecutivos</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/reset.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/admin-ciudades.css">
+    <link rel="stylesheet" href="../assets/css/admin-consecutivos.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cogs nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item">
+                    <a href="admin-ciudades.html" class="top-nav-link">Ciudades</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-titulares.html" class="top-nav-link">Titulares</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-cargos.html" class="top-nav-link">Cargos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-empleados.html" class="top-nav-link">Empleados</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="admin-planes.html" class="top-nav-link">Planes</a>
+                </li>
+                <li class="top-nav-item active">
+                    <a href="#" class="top-nav-link">Consecutivos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link">Control de Consecutivos</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Consecutivos -->
+            <section class="consecutivos-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Consecutivos</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="bCambiarCiudad" class="btn btn-primary" onclick="showSelectCityModal()">Cambiar Ciudad</button>
+                        <button id="bBuscar" class="btn btn-primary" onclick="showConsecutivoSearchModal()">Buscar</button>
+                        <button id="bCrear" class="btn btn-primary">Crear</button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Consecutivos -->
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ingreso Caja</th>
+                                <th>Ingreso Banco</th>
+                                <th>Facturas</th>
+                                <th>Notas Débito</th>
+                                <th>Notas Crédito</th>
+                                <th>Nombre</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consecutivosTableBody">
+                            <tr>
+                                <td colspan="7" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-list-ol"></i>
+                                        <p>No existen registros de consecutivos</p>
+                                        <small>Haz clic en "Crear" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES DE INTERACCIÓN
+         ======================================== -->
+    
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Consecutivo -->
+    <div class="modal-overlay" id="consecutivoSearchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR CONSECUTIVO</h3>
+                <button class="modal-close" onclick="hideConsecutivoSearchModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="searchConsecutivoCiudad" class="form-label">Ciudad *</label>
+                        <div class="select-container">
+                            <select id="searchConsecutivoCiudad" class="form-select">
+                                <option value="">Seleccione la ciudad</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchConsecutivoTipo" class="form-label">Tipo de Consecutivo *</label>
+                        <div class="select-container">
+                            <select id="searchConsecutivoTipo" class="form-select">
+                                <option value="">Seleccione el tipo</option>
+                                <option value="ingresoCaja">Ingreso a Caja</option>
+                                <option value="ingresoBanco">Ingreso a Bancos</option>
+                                <option value="facturas">Facturas</option>
+                                <option value="debitoCartera">Notas Débito</option>
+                                <option value="creditoCartera">Notas Crédito</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideConsecutivoSearchModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarConsecutivo">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Consecutivo -->
+    <div class="modal-overlay" id="consecutivoResultsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA</h3>
+                <button class="modal-close" onclick="hideConsecutivoResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="results-info" id="consecutivoResultsInfo"></div>
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Consecutivo</th>
+                                <th>Ciudad</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consecutivoResultsTableBody">
+                            <tr>
+                                <td colspan="3" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>Sin resultados</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Consecutivo -->
+    <div class="modal-overlay" id="createConsecutivoModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR CONSECUTIVO</h3>
+                <button class="modal-close" onclick="hideCreateConsecutivoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Primera fila: Ingreso a Caja -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tIngreso_Caja" class="form-label">Ingreso a Caja - Consecutivo Inicial *</label>
+                        <input type="text" id="tIngreso_Caja" class="form-input" placeholder="Ej: 1010000007" required>
+                    </div>
+                </div>
+
+                <!-- Segunda fila: Ingreso a Bancos -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tIngreso_Banco" class="form-label">Ingreso a Bancos - Consecutivo Inicial *</label>
+                        <input type="text" id="tIngreso_Banco" class="form-input" placeholder="Ej: 1010000002" required>
+                    </div>
+                </div>
+
+                <!-- Tercera fila: Facturas -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tFactura" class="form-label">Facturas - Consecutivo Inicial *</label>
+                        <input type="text" id="tFactura" class="form-input" placeholder="Ej: 1" required>
+                    </div>
+                </div>
+
+                <!-- Cuarta fila: Notas Débito -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tDebito_Cartera" class="form-label">Notas Débito - Consecutivo Inicial *</label>
+                        <input type="text" id="tDebito_Cartera" class="form-input" placeholder="Ej: 0" required>
+                    </div>
+                </div>
+
+                <!-- Quinta fila: Notas Crédito -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tCredito_Cartera" class="form-label">Notas Crédito - Consecutivo Inicial *</label>
+                        <input type="text" id="tCredito_Cartera" class="form-input" placeholder="Ej: 0" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideCreateConsecutivoModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bCrearModal">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Actualización de Consecutivo -->
+    <div class="modal-overlay" id="updateConsecutivoModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">ACTUALIZAR CONSECUTIVO</h3>
+                <button class="modal-close" onclick="hideUpdateConsecutivoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="uIngresoCajaInicial" class="form-label">Ingreso a Caja - Consecutivo Inicial</label>
+                        <input type="text" id="uIngresoCajaInicial" class="form-input" placeholder="Ej: 1010000007">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="uIngresoBancoInicial" class="form-label">Ingreso a Bancos - Consecutivo Inicial</label>
+                        <input type="text" id="uIngresoBancoInicial" class="form-input" placeholder="Ej: 1010000002">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="uFacturasInicial" class="form-label">Facturas - Consecutivo Inicial</label>
+                        <input type="text" id="uFacturasInicial" class="form-input" placeholder="Ej: 1">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="uDebitoCarteraInicial" class="form-label">Notas Débito - Consecutivo Inicial</label>
+                        <input type="text" id="uDebitoCarteraInicial" class="form-input" placeholder="Ej: 0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="uCreditoCarteraInicial" class="form-label">Notas Crédito - Consecutivo Inicial</label>
+                        <input type="text" id="uCreditoCarteraInicial" class="form-input" placeholder="Ej: 0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideUpdateConsecutivoModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bActualizarConsecutivo">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+    
+    <!-- Modal de confirmación para crear consecutivo -->
+    <div class="modal-overlay" id="confirmCreateConsecutivoModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere crear este Consecutivo?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateConsecutivo()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateConsecutivo()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para crear consecutivo -->
+    <div class="modal-overlay" id="successCreateConsecutivoModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito el Consecutivo!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessConsecutivoModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para actualizar consecutivo -->
+    <div class="modal-overlay" id="confirmUpdateConsecutivoModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Está segur@ que quiere actualizar este Consecutivo?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateConsecutivo()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateConsecutivo()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para actualizar consecutivo -->
+    <div class="modal-overlay" id="successUpdateConsecutivoModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito el Consecutivo!</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateConsecutivoModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- JavaScript -->
+    <script src="../assets/js/admin-consecutivos.js"></script>
+</body>
+</html>

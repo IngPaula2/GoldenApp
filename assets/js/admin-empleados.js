@@ -256,13 +256,10 @@ function getSelectedCity() {
 
 // Fallback: modal local de selección de ciudad si el global no existe
 function promptForCitySelection() {
-    if (typeof window.showSelectCityModal === 'function') {
-        window.showSelectCityModal();
-        return;
-    }
-    // Inyectar un modal con misma estructura/ids para heredar estilos de ciudades
+    // Usar el modal existente en HTML si está, o inyectarlo si no existe
     let container = document.getElementById('selectCityModal');
     if (!container) {
+        // Inyectar un modal con la misma estructura/ids para heredar estilos de ciudades
         container = document.createElement('div');
         container.id = 'selectCityModal';
         container.className = 'modal-overlay';
@@ -291,36 +288,36 @@ function promptForCitySelection() {
                 </div>
             </div>`;
         document.body.appendChild(container);
-        // Cerrar al hacer clic fuera
+        // Cerrar al hacer clic fuera (solo para el modal inyectado)
         container.addEventListener('click', (e) => { if (e.target === container) { container.style.display = 'none'; document.body.style.overflow = 'auto'; } });
-        // Botones
+        // Botón aceptar del modal inyectado (si existe)
         const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
-        bSeleccionar.addEventListener('click', () => {
-            const sel = container.querySelector('#citySelect');
-            const value = sel.value;
-            if (!value) { try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch(e) { alert('Por favor, seleccione una ciudad'); } return; }
-            sessionStorage.setItem('selectedCity', value);
-            ciudadActual = value;
-            container.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            // Cargar empleados de la ciudad seleccionada
-            loadEmpleadosForSelectedCity();
-            try { showNotification('Ciudad seleccionada: ' + value, 'success'); } catch(e) {}
-        });
-        // Exponer funciones si no existen
-        if (typeof window.showSelectCityModal !== 'function') {
-            window.showSelectCityModal = function() {
-                populateCitySelectOptions();
-                container.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            };
-        }
-        if (typeof window.hideSelectCityModal !== 'function') {
-            window.hideSelectCityModal = function() {
+        if (bSeleccionar) {
+            bSeleccionar.addEventListener('click', () => {
+                const sel = container.querySelector('#citySelect');
+                const value = sel ? sel.value : '';
+                if (!value) { try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch(e) { alert('Por favor, seleccione una ciudad'); } return; }
+                sessionStorage.setItem('selectedCity', value);
+                ciudadActual = value;
                 container.style.display = 'none';
                 document.body.style.overflow = 'auto';
-            };
+                // Cargar empleados de la ciudad seleccionada
+                loadEmpleadosForSelectedCity();
+                try { showNotification('Ciudad seleccionada: ' + value, 'success'); } catch(e) {}
+            });
         }
+    }
+    // Exponer funciones SIEMPRE (exista o no desde antes), usando el contenedor actual
+    if (container) {
+        window.showSelectCityModal = function() {
+            populateCitySelectOptions();
+            container.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+        window.hideSelectCityModal = function() {
+            container.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
     }
     function populateCitySelectOptions() {
         const sel = document.getElementById('citySelect');
@@ -358,7 +355,9 @@ function promptForCitySelection() {
     // Suscribirse a cambios desde Ciudades para reflejar nuevas ciudades inmediatamente
     try { window.addEventListener('ciudades:updated', populateCitySelectOptions); } catch (e) {}
     populateCitySelectOptions();
-    window.showSelectCityModal();
+    if (typeof window.showSelectCityModal === 'function') {
+        window.showSelectCityModal();
+    }
 }
 
 // ========================================

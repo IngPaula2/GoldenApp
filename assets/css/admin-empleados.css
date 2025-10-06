@@ -760,6 +760,13 @@
     box-shadow: 0 4px 12px rgba(222, 180, 72, 0.4);
 }
 
+/* Modal de Selección de Ciudad: más compacto */
+#selectCityModal .modal {
+    max-width: 520px !important;
+    width: 90% !important;
+    padding: 20px !important;
+}
+
 /* Modal */
 .modal-overlay {
     position: fixed;
