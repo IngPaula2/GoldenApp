@@ -757,6 +757,58 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación para cambiar estado de titular -->
+    <div class="modal-overlay" id="confirmToggleTitularModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CAMBIAR ESTADO TITULAR</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cambiar el estado del titular?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelToggleTitular()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmToggleTitular()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para cambiar estado de titular -->
+    <div class="modal-overlay" id="successToggleTitularModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p class="modal-message">El titular ha sido actualizado exitosamente.</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessToggleTitularModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para cambiar estado de beneficiario -->
+    <div class="modal-overlay" id="confirmToggleBeneficiarioModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CAMBIAR ESTADO BENEFICIARIO</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cambiar el estado del beneficiario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelToggleBeneficiario()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmToggleBeneficiario()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito para cambiar estado de beneficiario -->
+    <div class="modal-overlay" id="successToggleBeneficiarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p class="modal-message">El beneficiario ha sido actualizado exitosamente.</p>
+                <button type="button" class="btn btn-primary" onclick="closeSuccessToggleBeneficiarioModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========================================
          SCRIPTS
          ======================================== -->
