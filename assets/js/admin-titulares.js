@@ -336,6 +336,7 @@ function confirmCreateBeneficiario() {
     
     // Verificar si viene del modal de titular
     const tempTitular = sessionStorage.getItem('tempTitular');
+    console.log('🔍 Verificando tempTitular:', tempTitular);
     
     if (tempTitular) {
         console.log('🔍 Creando titular y beneficiario juntos...');
@@ -379,6 +380,7 @@ function confirmCreateBeneficiario() {
     } else {
         // Verificar si viene desde "Añadir Beneficiario" en resultados de titular
         const titularFromResults = sessionStorage.getItem('currentSearchedTitularId');
+        console.log('🔍 Verificando titularFromResults:', titularFromResults);
         
         if (titularFromResults) {
             console.log('🔍 Creando beneficiario para titular desde resultados:', titularFromResults);
@@ -414,9 +416,13 @@ function confirmCreateBeneficiario() {
             
             console.log('✅ Beneficiario creado y asociado al titular:', titularFromResults);
         } else {
+            console.log('🔍 Creando beneficiario independiente (sin titular asociado)');
             // Si no viene del modal de titular ni de resultados, actualizar/insertar beneficiario
             if (typeof updateBeneficiarioInTable === 'function') {
+                console.log('🔍 Llamando updateBeneficiarioInTable...');
                 updateBeneficiarioInTable(beneficiarioData, beneficiarioData.numeroId);
+            } else {
+                console.error('❌ updateBeneficiarioInTable no está disponible');
             }
             
             // Cerrar modal de creación
@@ -697,20 +703,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('bCrear').textContent = 'Crear';
     }
     
-    // Función simplificada siguiendo el patrón de ciudades
-    function refreshTitularResultsTable() {
-        const modal = document.getElementById('titularResultsModal');
-        if (modal && modal.classList.contains('show')) {
-            const currentTitularId = sessionStorage.getItem('currentSearchedTitularId');
-            if (currentTitularId) {
-                const titular = titularesData[currentTitularId];
-                if (titular) {
-                    renderTitularSearchResults(titular);
-                    renderBeneficiariosDeTitular(currentTitularId);
-                }
-            }
-        }
-    }
     
     /**
      * Muestra el modal de confirmación para crear titular
@@ -1309,124 +1301,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try { refreshBeneficiarioResultsTable(); } catch (e) {}
     }
     
-    // Función simplificada siguiendo el patrón de ciudades
-    function refreshBeneficiarioResultsTable() {
-        const modal = document.getElementById('beneficiarioResultsModal');
-        if (modal && modal.classList.contains('show')) {
-            const currentBeneficiarioId = sessionStorage.getItem('currentSearchedBeneficiarioId');
-            if (currentBeneficiarioId) {
-                const beneficiario = beneficiariosData[currentBeneficiarioId];
-                if (beneficiario) {
-                    // Buscar el titular asociado
-                    let titularAsociado = null;
-                    for (const [titularId, beneficiarios] of Object.entries(titularIdToBeneficiarios)) {
-                        const found = beneficiarios.find(b => b.numeroId === currentBeneficiarioId);
-                        if (found) {
-                            titularAsociado = titularesData[titularId];
-                            break;
-                        }
-                    }
-                    renderBeneficiarioSearchResults(beneficiario, titularAsociado);
-                }
-            }
-        }
-    }
     
-    /**
-     * Actualiza un beneficiario existente en la tabla
-     * @param {Object} beneficiario - Objeto con los datos actualizados del beneficiario
-     * @param {string} originalId - ID original del beneficiario (si cambió)
-     */
-    function updateBeneficiarioInTable(beneficiario, originalId) {
-        const tableBody = document.getElementById('beneficiariosTableBody');
-        if (!tableBody) {
-            return;
-        }
-        
-        const rows = tableBody.querySelectorAll('tr');
-        
-        // Buscar la fila a actualizar
-    let updated = false;
-        for (let row of rows) {
-            const cells = row.querySelectorAll('td');
-            if (cells.length >= 2) {
-                const rowId = cells[1].textContent; // ID está en la segunda columna
-                
-                // Si el ID cambió, buscar por el ID original
-                const searchId = originalId || beneficiario.numeroId;
-                
-                if (rowId === searchId) {
-                    // Concatenar nombre completo
-                    const nombreCompleto = [
-                        beneficiario.apellido1 || '',
-                        beneficiario.apellido2 || '',
-                        beneficiario.nombre1 || '',
-                        beneficiario.nombre2 || ''
-                    ].filter(nombre => nombre.trim() !== '').join(' ');
-
-                    // Actualizar el contenido de la fila
-                    row.innerHTML = `
-                        <td>${beneficiario.tipoId}</td>
-                        <td>${beneficiario.numeroId}</td>
-                        <td>${nombreCompleto}</td>
-                        <td>${beneficiario.direccion}</td>
-                        <td>${beneficiario.telefono}</td>
-                        <td>${beneficiario.email}</td>
-                        <td>${String(beneficiario.activo || '').toUpperCase()}</td>
-                        <td>
-                            <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                    `;
-                    
-                    // Re-agregar efectos hover
-                    row.addEventListener('mouseenter', function() {
-                        this.style.backgroundColor = '#f8f9fa';
-                    });
-                    
-                    row.addEventListener('mouseleave', function() {
-                        this.style.backgroundColor = '';
-                    });
-                    
-                updated = true;
-                break;
-                }
-            }
-        }
-    if (!updated) {
-        // Si no existía, agregar como nueva fila
-        try {
-            if (tableBody.querySelector('.no-data-message')) {
-                tableBody.querySelector('.no-data-message').parentElement?.remove();
-            }
-        } catch (e) {}
-        const nombreCompleto = [
-            beneficiario.apellido1 || '',
-            beneficiario.apellido2 || '',
-            beneficiario.nombre1 || '',
-            beneficiario.nombre2 || ''
-        ].filter(nombre => nombre.trim() !== '').join(' ');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>${beneficiario.tipoId}</td>
-            <td>${beneficiario.numeroId}</td>
-            <td>${nombreCompleto}</td>
-            <td>${beneficiario.direccion}</td>
-            <td>${beneficiario.telefono}</td>
-            <td>${beneficiario.email}</td>
-            <td>${String(beneficiario.activo || '').toUpperCase()}</td>
-            <td>
-                <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(newRow);
-    }
-    // Persistir
-    try { beneficiariosData[beneficiario.numeroId] = beneficiario; } catch (e) {}
-    }
     
     
     // Exponer funciones globalmente
@@ -2231,33 +2106,96 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     
     
-    /**
-     * Agrega un nuevo beneficiario a la tabla
-     * @param {Object} beneficiario - Objeto con los datos del beneficiario
-     */
-    function addBeneficiarioToTable(beneficiario) {
-        // Guardar en beneficiariosData (estructura principal)
-        beneficiariosData[beneficiario.numeroId] = beneficiario;
-        
-        // Persistir en localStorage
-        try { localStorage.setItem('beneficiariosData', JSON.stringify(beneficiariosData)); } catch (e) {}
-        
-        const tableBody = document.getElementById('beneficiariosTableBody');
-        const noDataRow = tableBody.querySelector('.no-data-message');
-        
-        if (noDataRow) {
-            noDataRow.remove();
+
+}); 
+
+// ========================================
+// FUNCIONES GLOBALES DE GESTIÓN DE BENEFICIARIOS
+// ========================================
+
+/**
+ * Actualiza un beneficiario existente en la tabla
+ * @param {Object} beneficiario - Objeto con los datos actualizados del beneficiario
+ * @param {string} originalId - ID original del beneficiario (si cambió)
+ */
+function updateBeneficiarioInTable(beneficiario, originalId) {
+    console.log('🔍 updateBeneficiarioInTable llamada con:', { beneficiario, originalId });
+    const tableBody = document.getElementById('beneficiariosTableBody');
+    if (!tableBody) {
+        console.error('❌ No se encontró el elemento beneficiariosTableBody');
+        return;
+    }
+    console.log('✅ Elemento beneficiariosTableBody encontrado');
+    
+    const rows = tableBody.querySelectorAll('tr');
+    console.log('📊 Filas encontradas en la tabla:', rows.length);
+    
+    // Buscar la fila a actualizar
+    let updated = false;
+    for (let row of rows) {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 2) {
+            const rowId = cells[1].textContent; // ID está en la segunda columna
+            
+            // Si el ID cambió, buscar por el ID original
+            const searchId = originalId || beneficiario.numeroId;
+            console.log('🔍 Comparando rowId:', rowId, 'con searchId:', searchId);
+            
+            if (rowId === searchId) {
+                console.log('✅ Fila encontrada, actualizando...');
+                // Concatenar nombre completo
+                const nombreCompleto = [
+                    beneficiario.apellido1 || '',
+                    beneficiario.apellido2 || '',
+                    beneficiario.nombre1 || '',
+                    beneficiario.nombre2 || ''
+                ].filter(nombre => nombre.trim() !== '').join(' ');
+
+                // Actualizar el contenido de la fila
+                row.innerHTML = `
+                    <td>${beneficiario.tipoId}</td>
+                    <td>${beneficiario.numeroId}</td>
+                    <td>${nombreCompleto}</td>
+                    <td>${beneficiario.direccion}</td>
+                    <td>${beneficiario.telefono}</td>
+                    <td>${beneficiario.email}</td>
+                    <td>${String(beneficiario.activo || '').toUpperCase()}</td>
+                    <td>
+                        <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                
+                // Re-agregar efectos hover
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+                
+                updated = true;
+                break;
+            }
         }
-        
-        const newRow = document.createElement('tr');
-        // Concatenar nombre completo
+    }
+    if (!updated) {
+        console.log('🆕 No se encontró fila existente, creando nueva fila...');
+        // Si no existía, agregar como nueva fila
+        try {
+            if (tableBody.querySelector('.no-data-message')) {
+                tableBody.querySelector('.no-data-message').parentElement?.remove();
+            }
+        } catch (e) {}
         const nombreCompleto = [
             beneficiario.apellido1 || '',
             beneficiario.apellido2 || '',
             beneficiario.nombre1 || '',
             beneficiario.nombre2 || ''
         ].filter(nombre => nombre.trim() !== '').join(' ');
-
+        const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td>${beneficiario.tipoId}</td>
             <td>${beneficiario.numeroId}</td>
@@ -2272,20 +2210,117 @@ document.addEventListener('DOMContentLoaded', function() {
                 </button>
             </td>
         `;
-        
         tableBody.appendChild(newRow);
-        
-        // Agregar efectos hover a la nueva fila
-        newRow.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = '#f8f9fa';
-        });
-        
-        newRow.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
+        console.log('✅ Nueva fila agregada a la tabla');
     }
+    // Persistir
+    try { beneficiariosData[beneficiario.numeroId] = beneficiario; } catch (e) {}
+    console.log('✅ updateBeneficiarioInTable completada');
+}
 
-}); 
+/**
+ * Agrega un nuevo beneficiario a la tabla
+ * @param {Object} beneficiario - Objeto con los datos del beneficiario
+ */
+function addBeneficiarioToTable(beneficiario) {
+    console.log('🔍 addBeneficiarioToTable llamada con:', beneficiario);
+    // Guardar en beneficiariosData (estructura principal)
+    beneficiariosData[beneficiario.numeroId] = beneficiario;
+    
+    // Persistir en localStorage
+    try { localStorage.setItem('beneficiariosData', JSON.stringify(beneficiariosData)); } catch (e) {}
+    
+    const tableBody = document.getElementById('beneficiariosTableBody');
+    if (!tableBody) {
+        console.error('❌ No se encontró el elemento beneficiariosTableBody en addBeneficiarioToTable');
+        return;
+    }
+    console.log('✅ Elemento beneficiariosTableBody encontrado en addBeneficiarioToTable');
+    const noDataRow = tableBody.querySelector('.no-data-message');
+    
+    if (noDataRow) {
+        noDataRow.remove();
+    }
+    
+    const newRow = document.createElement('tr');
+    // Concatenar nombre completo
+    const nombreCompleto = [
+        beneficiario.apellido1 || '',
+        beneficiario.apellido2 || '',
+        beneficiario.nombre1 || '',
+        beneficiario.nombre2 || ''
+    ].filter(nombre => nombre.trim() !== '').join(' ');
+
+    newRow.innerHTML = `
+        <td>${beneficiario.tipoId}</td>
+        <td>${beneficiario.numeroId}</td>
+        <td>${nombreCompleto}</td>
+        <td>${beneficiario.direccion}</td>
+        <td>${beneficiario.telefono}</td>
+        <td>${beneficiario.email}</td>
+        <td>${String(beneficiario.activo || '').toUpperCase()}</td>
+        <td>
+            <button class="btn btn-small" onclick="editBeneficiario('${beneficiario.numeroId}')">
+                <i class="fas fa-edit"></i>
+            </button>
+        </td>
+    `;
+    
+    tableBody.appendChild(newRow);
+    
+    // Agregar efectos hover a la nueva fila
+    newRow.addEventListener('mouseenter', function() {
+        this.style.backgroundColor = '#f8f9fa';
+    });
+    
+    newRow.addEventListener('mouseleave', function() {
+        this.style.backgroundColor = '';
+    });
+    
+    console.log('✅ addBeneficiarioToTable completada - fila agregada');
+}
+
+/**
+ * Función simplificada siguiendo el patrón de ciudades
+ */
+function refreshTitularResultsTable() {
+    const modal = document.getElementById('titularResultsModal');
+    if (modal && modal.classList.contains('show')) {
+        const currentTitularId = sessionStorage.getItem('currentSearchedTitularId');
+        if (currentTitularId) {
+            const titular = titularesData[currentTitularId];
+            if (titular) {
+                renderTitularSearchResults(titular);
+                renderBeneficiariosDeTitular(currentTitularId);
+            }
+        }
+    }
+}
+
+/**
+ * Función simplificada siguiendo el patrón de ciudades
+ */
+function refreshBeneficiarioResultsTable() {
+    const modal = document.getElementById('beneficiarioResultsModal');
+    if (modal && modal.classList.contains('show')) {
+        const currentBeneficiarioId = sessionStorage.getItem('currentSearchedBeneficiarioId');
+        if (currentBeneficiarioId) {
+            const beneficiario = beneficiariosData[currentBeneficiarioId];
+            if (beneficiario) {
+                // Buscar el titular asociado
+                let titularAsociado = null;
+                for (const [titularId, beneficiarios] of Object.entries(titularIdToBeneficiarios)) {
+                    const found = beneficiarios.find(b => b.numeroId === currentBeneficiarioId);
+                    if (found) {
+                        titularAsociado = titularesData[titularId];
+                        break;
+                    }
+                }
+                renderBeneficiarioSearchResults(beneficiario, titularAsociado);
+            }
+        }
+    }
+}
 
 // ========================================
 // FUNCIONES GLOBALES DE MODALES
@@ -3159,6 +3194,146 @@ function setFechaActual() {
       }
   }
 
+  // ========================================
+  // TOGGLE ACTIVAR/DESACTIVAR BENEFICIARIO
+  // ========================================
+
+  function toggleBeneficiarioState(numeroId) {
+      const beneficiario = beneficiariosData[numeroId];
+      if (!beneficiario) return;
+      const estadoOriginal = (String(beneficiario.activo || 'SI').toUpperCase() === 'SI');
+      // Cambiar en memoria usando SI/NO
+      beneficiario.activo = estadoOriginal ? 'NO' : 'SI';
+      
+      // Actualizar UI en tabla de beneficiarios
+      const tableBody = document.getElementById('beneficiariosTableBody');
+      if (tableBody) {
+          const rows = tableBody.querySelectorAll('tr');
+          for (let row of rows) {
+              const cells = row.querySelectorAll('td');
+              if (cells && cells[0] && cells[0].textContent.trim() === String(numeroId)) {
+                  const badge = row.querySelector('span.badge');
+                  const toggleEl = row.querySelector('.animated-toggle');
+                  const toggleInput = row.querySelector('.animated-toggle input[type="checkbox"]');
+                  const isActive = (String(beneficiario.activo).toUpperCase() === 'SI');
+                  if (badge) {
+                      badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                      badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                  }
+                  if (toggleEl && toggleInput) {
+                      toggleInput.checked = isActive;
+                      toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                  }
+                  break;
+              }
+          }
+      }
+      
+      // Actualizar UI en resultados de búsqueda si abiertos
+      const body = document.getElementById('searchResultsTableBody');
+      if (body) {
+          const rows = body.querySelectorAll('tr');
+          rows.forEach(r => {
+              const firstCell = r.querySelector('td');
+              if (firstCell && firstCell.textContent.trim() === String(numeroId)) {
+                  const badge = r.querySelector('span.badge');
+                  const toggleEl = r.querySelector('.animated-toggle');
+                  const toggleInput = r.querySelector('.animated-toggle input[type="checkbox"]');
+                  const isActive = (String(beneficiario.activo).toUpperCase() === 'SI');
+                  if (badge) {
+                      badge.className = `badge ${isActive ? 'badge-success' : 'badge-secondary'}`;
+                      badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+                  }
+                  if (toggleEl && toggleInput) {
+                      toggleInput.checked = isActive;
+                      toggleEl.title = isActive ? 'Desactivar' : 'Activar';
+                  }
+              }
+          });
+      }
+      
+      // Persistir cambios en localStorage
+      try { 
+          localStorage.setItem('beneficiariosData', JSON.stringify(beneficiariosData)); 
+      } catch (e) {
+          console.error('Error guardando cambios de beneficiario:', e);
+      }
+      
+      // Mostrar confirmación
+      showConfirmToggleBeneficiarioModal(numeroId, estadoOriginal);
+  }
+
+  function showConfirmToggleBeneficiarioModal(numeroId, estadoOriginal) {
+      window.tempToggleBeneficiarioId = numeroId;
+      window.tempToggleBeneficiarioPrev = estadoOriginal;
+      const modal = document.getElementById('confirmToggleBeneficiarioModal');
+      const beneficiario = beneficiariosData[numeroId];
+      if (modal && beneficiario) {
+          const actionText = estadoOriginal ? 'desactivar' : 'activar';
+          const titleElement = modal.querySelector('.modal-title');
+          const messageElement = modal.querySelector('.modal-message');
+          if (titleElement) titleElement.textContent = `${actionText.toUpperCase()} BENEFICIARIO`;
+          if (messageElement) messageElement.textContent = `¿Está seguro de que desea ${actionText} el beneficiario ${beneficiario.numeroId}?`;
+          modal.classList.add('show');
+          document.body.style.overflow = 'hidden';
+      }
+  }
+
+  function cancelToggleBeneficiario() {
+      const numeroId = window.tempToggleBeneficiarioId;
+      const prev = window.tempToggleBeneficiarioPrev;
+      if (numeroId != null) {
+          const beneficiario = beneficiariosData[numeroId];
+          if (beneficiario) {
+              beneficiario.activo = prev ? 'SI' : 'NO';
+              // Revertir UI reutilizando la función de toggle para actualizar visual (sin cambiar estado de nuevo)
+              const estadoOriginal = (String(beneficiario.activo || 'SI').toUpperCase() === 'SI');
+              beneficiario.activo = estadoOriginal ? 'NO' : 'SI';
+              toggleBeneficiarioState(numeroId);
+              beneficiario.activo = prev ? 'SI' : 'NO';
+          }
+      }
+      const modal = document.getElementById('confirmToggleBeneficiarioModal');
+      if (modal) {
+          modal.classList.remove('show');
+          document.body.style.overflow = '';
+      }
+  }
+
+  function confirmToggleBeneficiario() {
+      const numeroId = window.tempToggleBeneficiarioId;
+      if (numeroId != null) {
+          const beneficiario = beneficiariosData[numeroId];
+          if (beneficiario) {
+              // El estado ya fue cambiado en toggleBeneficiarioState, solo confirmamos
+              console.log(`Beneficiario ${numeroId} ${beneficiario.activo === 'SI' ? 'activado' : 'desactivado'} correctamente`);
+          }
+      }
+      const modal = document.getElementById('confirmToggleBeneficiarioModal');
+      if (modal) {
+          modal.classList.remove('show');
+          document.body.style.overflow = '';
+      }
+      // Mostrar modal de éxito
+      showSuccessToggleBeneficiarioModal();
+  }
+
+  function showSuccessToggleBeneficiarioModal() {
+      const modal = document.getElementById('successToggleBeneficiarioModal');
+      if (modal) {
+          modal.classList.add('show');
+          document.body.style.overflow = 'hidden';
+      }
+  }
+
+  function closeSuccessToggleBeneficiarioModal() {
+      const modal = document.getElementById('successToggleBeneficiarioModal');
+      if (modal) {
+          modal.classList.remove('show');
+          document.body.style.overflow = '';
+      }
+  }
+
   function cancelToggleTitular() {
       const numeroId = window.tempToggleTitularId;
       const prev = window.tempToggleTitularPrev;
@@ -3662,8 +3837,18 @@ window.debugResultsTables = function() {
 
 // Función simplificada siguiendo el patrón de ciudades
 window.forceRefreshAllResultsTables = function() {
-    refreshTitularResultsTable();
-    refreshBeneficiarioResultsTable();
+    // Verificar si las funciones están disponibles antes de llamarlas
+    if (typeof window.refreshTitularResultsTable === 'function') {
+        window.refreshTitularResultsTable();
+    } else {
+        console.warn('refreshTitularResultsTable no está disponible');
+    }
+    
+    if (typeof window.refreshBeneficiarioResultsTable === 'function') {
+        window.refreshBeneficiarioResultsTable();
+    } else {
+        console.warn('refreshBeneficiarioResultsTable no está disponible');
+    }
 };
 window.editTitular = editTitular;
 window.editBeneficiario = editBeneficiario;
@@ -3677,6 +3862,14 @@ window.toggleTitularState = toggleTitularState;
 window.cancelToggleTitular = cancelToggleTitular;
 window.confirmToggleTitular = confirmToggleTitular;
 window.closeSuccessToggleTitularModal = closeSuccessToggleTitularModal;
+// Toggle beneficiarios global
+window.toggleBeneficiarioState = toggleBeneficiarioState;
+window.cancelToggleBeneficiario = cancelToggleBeneficiario;
+window.confirmToggleBeneficiario = confirmToggleBeneficiario;
+window.closeSuccessToggleBeneficiarioModal = closeSuccessToggleBeneficiarioModal;
+// Funciones de gestión de beneficiarios global
+window.updateBeneficiarioInTable = updateBeneficiarioInTable;
+window.addBeneficiarioToTable = addBeneficiarioToTable;
 window.clearCreateBeneficiarioForm = clearCreateBeneficiarioForm;
 
 // Debug: verificar que las funciones estén disponibles
@@ -3685,7 +3878,11 @@ console.log('Funciones expuestas:', {
     editBeneficiario: typeof window.editBeneficiario,
     deleteTitular: typeof window.deleteTitular,
     deleteBeneficiario: typeof window.deleteBeneficiario,
-    addBeneficiarioForCurrentTitular: typeof window.addBeneficiarioForCurrentTitular
+    addBeneficiarioForCurrentTitular: typeof window.addBeneficiarioForCurrentTitular,
+    toggleTitularState: typeof window.toggleTitularState,
+    toggleBeneficiarioState: typeof window.toggleBeneficiarioState,
+    updateBeneficiarioInTable: typeof window.updateBeneficiarioInTable,
+    addBeneficiarioToTable: typeof window.addBeneficiarioToTable
 });
 
 // Verificar que la función esté disponible
@@ -3693,6 +3890,27 @@ if (typeof window.addBeneficiarioForCurrentTitular === 'function') {
     console.log('✅ Función addBeneficiarioForCurrentTitular está disponible globalmente');
 } else {
     console.log('❌ ERROR: Función addBeneficiarioForCurrentTitular NO está disponible');
+}
+
+// Verificar que la función toggleBeneficiarioState esté disponible
+if (typeof window.toggleBeneficiarioState === 'function') {
+    console.log('✅ Función toggleBeneficiarioState está disponible globalmente');
+} else {
+    console.log('❌ ERROR: Función toggleBeneficiarioState NO está disponible');
+}
+
+// Verificar que la función updateBeneficiarioInTable esté disponible
+if (typeof window.updateBeneficiarioInTable === 'function') {
+    console.log('✅ Función updateBeneficiarioInTable está disponible globalmente');
+} else {
+    console.log('❌ ERROR: Función updateBeneficiarioInTable NO está disponible');
+}
+
+// Verificar que la función addBeneficiarioToTable esté disponible
+if (typeof window.addBeneficiarioToTable === 'function') {
+    console.log('✅ Función addBeneficiarioToTable está disponible globalmente');
+} else {
+    console.log('❌ ERROR: Función addBeneficiarioToTable NO está disponible');
 }
 
 // Función para verificar el estado de los modales

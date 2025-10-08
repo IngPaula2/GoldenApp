@@ -1,0 +1,167 @@
+/* CONTROL DE CONSECUTIVOS - Estilos específicos de la vista */
+
+/* Encabezado y acciones */
+.consecutivos-section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.consecutivos-section .section-title h2 {
+    margin: 0;
+    font-weight: 600;
+}
+
+#cc_currentCityInfo, .current-city-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    color: #6b7280;
+}
+
+.action-buttons .btn {
+    margin-left: 8px;
+}
+
+/* Tabla */
+#cc_tableBody .no-data-message {
+    text-align: center;
+}
+
+.no-data-content {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+}
+
+.no-data-content i {
+    font-size: 24px;
+    color: #9ca3af;
+}
+
+/* Modales */
+#cc_selectCityModal.show,
+#cc_createModal.show,
+#cc_confirmCreateModal.show,
+#cc_updateModal.show,
+#cc_confirmUpdateModal.show {
+    display: flex;
+}
+
+/* Inputs */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.form-row.two-col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.section-label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group .form-label {
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+}
+
+/* Modal de resultados más ancho y compacto */
+.modal-results {
+    max-width: 900px !important;
+    width: 90% !important;
+    min-height: auto !important;
+    max-height: 70vh !important;
+}
+
+.modal-results .table {
+    width: 100%;
+    font-size: 14px;
+}
+
+.modal-results .table th,
+.modal-results .table td {
+    padding: 12px 15px;
+    white-space: nowrap;
+}
+
+.modal-results .table th:last-child,
+.modal-results .table td:last-child {
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Footer del modal de resultados - solo botón */
+.modal-results .modal-footer {
+    padding: 15px 30px;
+    background: transparent;
+    border: none;
+    display: flex;
+    justify-content: center;
+}
+
+.modal-results .modal-footer .btn {
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Z-index para modales superpuestos */
+#cc_updateSpecificModal {
+    z-index: 10001 !important;
+}
+
+#cc_confirmUpdateSpecificModal {
+    z-index: 10002 !important;
+}
+
+#cc_resultsModal {
+    z-index: 10000 !important;
+}
+
+#cc_successModal {
+    z-index: 10003 !important;
+}
+
+#cc_successCreateModal {
+    z-index: 10004 !important;
+}
+
+/* Estilos para el modal de éxito */
+.modal-success {
+    max-width: 400px;
+    text-align: center;
+    padding: 30px;
+}
+
+.modal-success .modal-body {
+    padding: 0;
+}
+
+.modal-success p {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.4;
+}
+
+/* El botón usa los estilos globales de .btn-primary */
+
+/* Respetar el tema global para botones: no sobreescribir .btn-primary */
+
+

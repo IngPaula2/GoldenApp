@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<!--
+    DASHBOARD ADMINISTRATIVO - CONTROL DE CONSECUTIVOS - GOLDEN APP
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Control de Consecutivos</title>
+
+    <link rel="stylesheet" href="../assets/css/reset.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/admin-ciudades.css">
+    <link rel="stylesheet" href="../assets/css/admin-consecutivos.css">
+    <link rel="stylesheet" href="../assets/css/admin-control-consecutivos.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cogs nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item"><a href="admin-ciudades.html" class="top-nav-link">Ciudades</a></li>
+                <li class="top-nav-item"><a href="admin-titulares.html" class="top-nav-link">Titulares</a></li>
+                <li class="top-nav-item"><a href="admin-cargos.html" class="top-nav-link">Cargos</a></li>
+                <li class="top-nav-item"><a href="admin-empleados.html" class="top-nav-link">Empleados</a></li>
+                <li class="top-nav-item"><a href="admin-organizaciones.html" class="top-nav-link">Organizaciones</a></li>
+                <li class="top-nav-item"><a href="admin-planes.html" class="top-nav-link">Planes</a></li>
+                <li class="top-nav-item"><a href="admin-consecutivos.html" class="top-nav-link">Consecutivos</a></li>
+                <li class="top-nav-item active"><a href="#" class="top-nav-link">Control de Consecutivos</a></li>
+            </ul>
+        </nav>
+
+        <div class="content-area">
+            <section class="consecutivos-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Control de Consecutivos</h2>
+                        <div class="current-city-info" id="cc_currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="cc_currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <!-- No hay botón de cambiar ciudad. -->
+                        <button id="cc_bBuscar" class="btn btn-primary" onclick="showControlSearchModal()">Buscar</button>
+                        <button id="cc_bCrear" class="btn btn-primary">Crear</button>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Contratos</th>
+                                <th>Recibos Oficiales</th>
+                                <th>Récord de Producción</th>
+                                <th>Recibos de Inscripción</th>
+                                <th>Ciudad</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cc_tableBody">
+                            <tr>
+                                <td colspan="6" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-list-ol"></i>
+                                        <p>No existen registros</p>
+                                        <small>Haz clic en "Crear" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Selección de Ciudad (Inicial) -->
+    <div class="modal-overlay" id="cc_selectCityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideControlSelectCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cc_citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="cc_citySelect" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="cc_bSeleccionarCiudad" onclick="handleControlSelectCity()">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear -->
+    <div class="modal-overlay" id="cc_createModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR CONTROL DE CONSECUTIVOS</h3>
+                <button class="modal-close" onclick="hideControlCreateModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row full-width">
+                    <div class="form-group full-width">
+                        <div class="section-label">Contratos</div>
+                    </div>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="cc_tContratosInicial" class="form-label">Consecutivo Inicial *</label>
+                        <input type="text" id="cc_tContratosInicial" class="form-input" placeholder="Ej: 5001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cc_tContratosFinal" class="form-label">Consecutivo Final *</label>
+                        <input type="text" id="cc_tContratosFinal" class="form-input" placeholder="Ej: 5999" required>
+                    </div>
+                </div>
+                <div class="form-row full-width">
+                    <div class="form-group full-width">
+                        <div class="section-label">Recibos Oficiales</div>
+                    </div>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="cc_tRecibosOficialesInicial" class="form-label">Consecutivo Inicial *</label>
+                        <input type="text" id="cc_tRecibosOficialesInicial" class="form-input" placeholder="Ej: 10001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cc_tRecibosOficialesFinal" class="form-label">Consecutivo Final *</label>
+                        <input type="text" id="cc_tRecibosOficialesFinal" class="form-input" placeholder="Ej: 19999" required>
+                    </div>
+                </div>
+                <div class="form-row full-width">
+                    <div class="form-group full-width">
+                        <div class="section-label">Récord de Producción</div>
+                    </div>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="cc_tRecordProduccionInicial" class="form-label">Consecutivo Inicial *</label>
+                        <input type="text" id="cc_tRecordProduccionInicial" class="form-input" placeholder="Ej: 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cc_tRecordProduccionFinal" class="form-label">Consecutivo Final *</label>
+                        <input type="text" id="cc_tRecordProduccionFinal" class="form-input" placeholder="Ej: 9999" required>
+                    </div>
+                </div>
+                <div class="form-row full-width">
+                    <div class="form-group full-width">
+                        <div class="section-label">Recibos de Inscripción</div>
+                    </div>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="cc_tRecibosInscripcionInicial" class="form-label">Consecutivo Inicial *</label>
+                        <input type="text" id="cc_tRecibosInscripcionInicial" class="form-input" placeholder="Ej: 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cc_tRecibosInscripcionFinal" class="form-label">Consecutivo Final *</label>
+                        <input type="text" id="cc_tRecibosInscripcionFinal" class="form-input" placeholder="Ej: 9999" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideControlCreateModal()">Cancelar</button>
+                <button class="btn btn-primary" id="cc_bCrearModal" onclick="handleControlCreateButtonClick()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmar Crear -->
+    <div class="modal-overlay" id="cc_confirmCreateModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header"><h3>Confirmación</h3></div>
+            <div class="modal-body"><p>¿Está segur@ que quiere crear los consecutivos?</p></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelControlCreate()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmControlCreate()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Actualizar Específico (desde resultados) -->
+    <div class="modal-overlay" id="cc_updateSpecificModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ACTUALIZAR CONSECUTIVO</h3>
+                <button class="modal-close" onclick="hideControlUpdateSpecificModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cc_specificTipo" class="form-label">Tipo de Consecutivo</label>
+                    <input type="text" id="cc_specificTipo" class="form-input" readonly>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="cc_specificInicial" class="form-label">Consecutivo Inicial *</label>
+                        <input type="text" id="cc_specificInicial" class="form-input" placeholder="Ej: 5001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cc_specificFinal" class="form-label">Consecutivo Final *</label>
+                        <input type="text" id="cc_specificFinal" class="form-input" placeholder="Ej: 5999" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideControlUpdateSpecificModal()">Cancelar</button>
+                <button class="btn btn-primary" id="cc_bActualizarSpecific" onclick="handleControlUpdateSpecific()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Actualizar -->
+    <div class="modal-overlay" id="cc_updateModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">ACTUALIZAR CONTROL DE CONSECUTIVOS</h3>
+                <button class="modal-close" onclick="hideControlUpdateModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row full-width"><div class="form-group full-width"><div class="section-label">Contratos</div></div></div>
+                <div class="form-row two-col"><div class="form-group">
+                    <label for="cc_uContratosInicial" class="form-label">Consecutivo Inicial</label>
+                    <input type="text" id="cc_uContratosInicial" class="form-input" placeholder="Ej: 5001">
+                </div><div class="form-group">
+                    <label for="cc_uContratosFinal" class="form-label">Consecutivo Final</label>
+                    <input type="text" id="cc_uContratosFinal" class="form-input" placeholder="Ej: 5999">
+                </div></div>
+                <div class="form-row full-width"><div class="form-group full-width"><div class="section-label">Recibos Oficiales</div></div></div>
+                <div class="form-row two-col"><div class="form-group">
+                    <label for="cc_uRecibosOficialesInicial" class="form-label">Consecutivo Inicial</label>
+                    <input type="text" id="cc_uRecibosOficialesInicial" class="form-input" placeholder="Ej: 10001">
+                </div><div class="form-group">
+                    <label for="cc_uRecibosOficialesFinal" class="form-label">Consecutivo Final</label>
+                    <input type="text" id="cc_uRecibosOficialesFinal" class="form-input" placeholder="Ej: 19999">
+                </div></div>
+                <div class="form-row full-width"><div class="form-group full-width"><div class="section-label">Récord de Producción</div></div></div>
+                <div class="form-row two-col"><div class="form-group">
+                    <label for="cc_uRecordProduccionInicial" class="form-label">Consecutivo Inicial</label>
+                    <input type="text" id="cc_uRecordProduccionInicial" class="form-input" placeholder="Ej: 1">
+                </div><div class="form-group">
+                    <label for="cc_uRecordProduccionFinal" class="form-label">Consecutivo Final</label>
+                    <input type="text" id="cc_uRecordProduccionFinal" class="form-input" placeholder="Ej: 9999">
+                </div></div>
+                <div class="form-row full-width"><div class="form-group full-width"><div class="section-label">Recibos de Inscripción</div></div></div>
+                <div class="form-row two-col"><div class="form-group">
+                    <label for="cc_uRecibosInscripcionInicial" class="form-label">Consecutivo Inicial</label>
+                    <input type="text" id="cc_uRecibosInscripcionInicial" class="form-input" placeholder="Ej: 1">
+                </div><div class="form-group">
+                    <label for="cc_uRecibosInscripcionFinal" class="form-label">Consecutivo Final</label>
+                    <input type="text" id="cc_uRecibosInscripcionFinal" class="form-input" placeholder="Ej: 9999">
+                </div></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideControlUpdateModal()">Cancelar</button>
+                <button class="btn btn-primary" id="cc_bActualizar" onclick="handleControlUpdate()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda -->
+    <div class="modal-overlay" id="cc_searchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR CONTROL DE CONSECUTIVOS</h3>
+                <button class="modal-close" onclick="hideControlSearchModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cc_searchCiudad" class="form-label">Ciudad *</label>
+                        <div class="select-container">
+                            <select id="cc_searchCiudad" class="form-select">
+                                <option value="">Seleccione la ciudad</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cc_searchTipo" class="form-label">Tipo *</label>
+                        <div class="select-container">
+                            <select id="cc_searchTipo" class="form-select">
+                                <option value="">Seleccione el tipo</option>
+                                <option value="contratos">Contratos</option>
+                                <option value="recibosOficiales">Recibos Oficiales</option>
+                                <option value="recordProduccion">Récord de Producción</option>
+                                <option value="recibosInscripcion">Recibos de Inscripción</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideControlSearchModal()">Cancelar</button>
+                <button class="btn btn-primary" id="cc_bBuscarConsecutivo" onclick="handleControlSearch()">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda -->
+    <div class="modal-overlay" id="cc_resultsModal">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA</h3>
+                <button class="modal-close" onclick="hideControlResultsModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="results-info" id="cc_resultsInfo"></div>
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Inicial</th>
+                                <th>Final</th>
+                                <th>Ciudad</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cc_resultsTableBody">
+                            <tr>
+                                <td colspan="5" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>Sin resultados</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideControlResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmar Actualizar -->
+    <div class="modal-overlay" id="cc_confirmUpdateModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header"><h3>Confirmación</h3></div>
+            <div class="modal-body"><p>¿Está segur@ que quiere actualizar el registro?</p></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideControlConfirmUpdateModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmControlUpdate()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmar Actualizar Específico -->
+    <div class="modal-overlay" id="cc_confirmUpdateSpecificModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header"><h3>Confirmación</h3></div>
+            <div class="modal-body"><p>¿Está segur@ que quiere actualizar este consecutivo?</p></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideControlConfirmUpdateSpecificModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmControlUpdateSpecific()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar -->
+    <div class="modal-overlay" id="cc_successModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha actualizado con éxito el<br>Consecutivo!</p>
+                <button type="button" class="btn btn-primary" onclick="hideControlSuccessModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear -->
+    <div class="modal-overlay" id="cc_successCreateModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p>Se ha creado con éxito el<br>Consecutivo!</p>
+                <button type="button" class="btn btn-primary" onclick="hideControlSuccessCreateModal()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmación Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">Confirmar Cerrar Sesión</h3></div>
+            <div class="modal-body"><p class="modal-message">¿Está seguro de que desea cerrar sesión?</p></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/admin-control-consecutivos.js"></script>
+</body>
+</html>
+
+
