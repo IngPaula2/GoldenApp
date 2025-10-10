@@ -426,6 +426,43 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Toggle de Organización -->
+    <div id="confirmToggleOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button class="modal-close" onclick="cancelToggleOrg()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelToggleOrg()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmToggleOrg()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Toggle de Organización -->
+    <div id="successToggleOrgModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                <button class="modal-close" onclick="closeSuccessToggleOrgModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessToggleOrgModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========================================
          SCRIPTS
          ======================================== -->

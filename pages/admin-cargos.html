@@ -795,6 +795,43 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Toggle de Cargo -->
+    <div id="confirmToggleCargoModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button class="modal-close" onclick="cancelToggleCargo()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelToggleCargo()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmToggleCargo()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Toggle de Cargo -->
+    <div id="successToggleCargoModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                <button class="modal-close" onclick="closeSuccessToggleCargoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessToggleCargoModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts JavaScript -->
     <script src="../assets/js/admin-cargos.js"></script>
 </body>

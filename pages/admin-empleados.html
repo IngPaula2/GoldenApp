@@ -754,6 +754,43 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Toggle de Empleado -->
+    <div id="confirmToggleEmpleadoModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button class="modal-close" onclick="cancelToggleEmpleado()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelToggleEmpleado()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmToggleEmpleado()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Toggle de Empleado -->
+    <div id="successToggleEmpleadoModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ESTADO ACTUALIZADO</h3>
+                <button class="modal-close" onclick="closeSuccessToggleEmpleadoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessToggleEmpleadoModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts JavaScript -->
     <script src="../assets/js/admin-empleados.js"></script>
 </body>
