@@ -1541,10 +1541,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Botón Buscar Beneficiario clickeado');
                     showSearchBeneficiarioModal();
                     break;
-                case 'Crear Beneficiario':
-                    console.log('Botón Crear Beneficiario clickeado');
-                    showCreateBeneficiarioModal();
-                    break;
                 case 'Seleccionar':
                     console.log('Botón Seleccionar clickeado');
                     const selectedCity = document.getElementById('citySelect').value;
