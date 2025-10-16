@@ -417,6 +417,13 @@ function confirmUpdateConsecutivo() {
     }
 }
 
+function cancelUpdateConsecutivo() {
+    console.log('❌ Cancelando actualización de consecutivo...');
+    // Descartar cualquier cambio pendiente y cerrar el modal de confirmación
+    pendingUpdateData = null;
+    hideConfirmUpdateConsecutivoModal();
+}
+
 function handleClearForm() {
     console.log('🧹 Limpiando formulario...');
     clearForm();
@@ -1079,6 +1086,7 @@ window.cancelCreateConsecutivo = cancelCreateConsecutivo;
 window.closeSuccessConsecutivoModal = closeSuccessConsecutivoModal;
 window.cancelLogout = cancelLogout;
 window.confirmUpdateConsecutivo = confirmUpdateConsecutivo;
+window.cancelUpdateConsecutivo = cancelUpdateConsecutivo;
 window.closeSuccessUpdateConsecutivoModal = closeSuccessUpdateConsecutivoModal;
 window.showConsecutivoResultsModal = showConsecutivoResultsModal;
 window.hideConsecutivoResultsModal = hideConsecutivoResultsModal;

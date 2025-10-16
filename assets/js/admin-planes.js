@@ -36,18 +36,17 @@ function getSelectedCity() {
     return sessionStorage.getItem('selectedCity') || '';
 }
 
-/**
- * STORE DE PLANES
- * 
- * Maneja la persistencia local de los datos de planes.
- * En producción, estos datos deben sincronizarse con el backend.
- * 
- * BACKEND INTEGRATION:
- * - GET /api/planes - Obtener todos los planes
- * - POST /api/planes - Crear nuevo plan
- * - PUT /api/planes/{id} - Actualizar plan existente
- * - DELETE /api/planes/{id} - Eliminar plan
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - STORE DE PLANES
+// ========================================
+// Endpoint: GET /api/planes
+// Datos: Cargar todos los planes del sistema
+// Endpoint: POST /api/planes
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones, escalas }
+// Endpoint: PUT /api/planes/{id}
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones, escalas }
+// Endpoint: DELETE /api/planes/{id}
+// Datos: { id }
 const planesStore = (() => {
     // Cargar datos existentes del localStorage
     try {
@@ -194,17 +193,13 @@ if (userInfo && dropdown) {
     });
 }
 
-/**
- * PERSISTENCIA DE DATOS
- * 
- * Guarda los datos de planes en localStorage.
- * En producción, debe enviar los datos al backend.
- * 
- * BACKEND INTEGRATION:
- * - POST /api/planes - Para planes nuevos
- * - PUT /api/planes/{id} - Para planes actualizados
- * - Manejar errores de red y reintentos
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - PERSISTENCIA DE DATOS
+// ========================================
+// Endpoint: POST /api/planes
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones, escalas }
+// Endpoint: PUT /api/planes/{id}
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones, escalas }
 function persistPlanes() {
     try { 
         console.log('Guardando planes en localStorage...');
@@ -247,15 +242,11 @@ function persistPlanes() {
 // GESTIÓN DE MODALES
 // ========================================
 
-/**
- * MODALES DE CONFIRMACIÓN
- * 
- * Maneja los modales de confirmación para cerrar sesión y operaciones críticas.
- * 
- * BACKEND INTEGRATION:
- * - POST /api/auth/logout - Para cerrar sesión
- * - Validar token de autenticación antes de cerrar
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - CERRAR SESIÓN
+// ========================================
+// Endpoint: POST /api/auth/logout
+// Datos: { token }
 
 window.showConfirmLogoutModal = function() {
     const modal = document.getElementById('confirmLogoutModal');
@@ -335,17 +326,11 @@ function loadTable() {
 }
 
 function showPlanSearchModal() { const m = document.getElementById('planSearchModal'); if (m) { m.classList.add('show'); document.body.style.overflow='hidden'; } }
-/**
- * MODALES DE PLANES
- * 
- * Gestiona la apertura y cierre de modales para operaciones de planes.
- * Incluye validación de formularios y preparación de datos.
- * 
- * BACKEND INTEGRATION:
- * - GET /api/planes/search - Para búsqueda de planes
- * - POST /api/planes - Para crear nuevos planes
- * - PUT /api/planes/{id} - Para actualizar planes existentes
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - BÚSQUEDA DE PLANES
+// ========================================
+// Endpoint: GET /api/planes/search
+// Datos: { termino, filtros }
 
 function hidePlanSearchModal() { 
     const m = document.getElementById('planSearchModal'); 
@@ -355,16 +340,11 @@ function hidePlanSearchModal() {
     } 
 }
 
-/**
- * MODAL DE CREAR PLAN
- * 
- * Abre el modal para crear un nuevo plan.
- * Resetea el formulario y configura los campos por defecto.
- * 
- * BACKEND INTEGRATION:
- * - Preparar datos para POST /api/planes
- * - Validar campos obligatorios antes de enviar
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - CREAR PLAN
+// ========================================
+// Endpoint: POST /api/planes
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones }
 function showCreatePlanModal() {
     const m = document.getElementById('createPlanModal');
     if (m) {
@@ -401,18 +381,13 @@ function showCreatePlanModal() {
 function hideCreatePlanModal() { const m = document.getElementById('createPlanModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
 function hidePlanResultsModal() { const m = document.getElementById('planResultsModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
 
-/**
- * CREAR O ACTUALIZAR PLAN
- * 
- * Función principal que maneja la creación y actualización de planes.
- * Valida los datos del formulario y prepara la estructura del plan.
- * 
- * BACKEND INTEGRATION:
- * - POST /api/planes - Para crear nuevos planes
- * - PUT /api/planes/{id} - Para actualizar planes existentes
- * - Validar datos en el backend antes de guardar
- * - Manejar errores de validación y red
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - CREAR/ACTUALIZAR PLAN
+// ========================================
+// Endpoint: POST /api/planes
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones }
+// Endpoint: PUT /api/planes/{id}
+// Datos: { codigo, nombre, valorPlan, cuotaInicial, numCuotas, mensualidad, fechaInicial, mesesAsesoria, usuariosAplican, numLibros, activo, observaciones }
 function createOrUpdateFromForm() {
     // Determinar si es creación o actualización
     const isUpdate = window.currentEditPlanCode;
@@ -886,18 +861,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-/**
- * GESTIÓN DE ESCALAS
- * 
- * Maneja la creación y actualización de escalas para cada plan.
- * Las escalas definen los porcentajes de comisión por nivel jerárquico.
- * 
- * BACKEND INTEGRATION:
- * - POST /api/planes/{id}/escalas - Para crear escalas de un plan
- * - PUT /api/planes/{id}/escalas - Para actualizar escalas existentes
- * - GET /api/planes/{id}/escalas - Para obtener escalas de un plan
- * - Validar que la suma de escalas no exceda el 100%
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - GESTIÓN DE ESCALAS
+// ========================================
+// Endpoint: POST /api/planes/{id}/escalas
+// Datos: { asesor, supervisor, subgerente, gerente, director, subdirectorNacional, directorNacional }
+// Endpoint: PUT /api/planes/{id}/escalas
+// Datos: { asesor, supervisor, subgerente, gerente, director, subdirectorNacional, directorNacional }
+// Endpoint: GET /api/planes/{id}/escalas
+// Datos: { id }
 function showPlanEscalasModal() {
     const modal = document.getElementById('planEscalasModal');
     if (modal) {
@@ -1813,18 +1785,17 @@ function hideReportePlanesModal() {
 /**
  * Maneja la generación del reporte de planes
  */
-/**
- * GENERACIÓN DE REPORTES
- * 
- * Maneja la generación de reportes de planes por ciudad.
- * Permite exportar los datos en diferentes formatos.
- * 
- * BACKEND INTEGRATION:
- * - GET /api/planes/reporte?ciudad={ciudad} - Para obtener datos del reporte
- * - GET /api/planes/export/excel?ciudad={ciudad} - Para exportar a Excel
- * - GET /api/planes/export/pdf?ciudad={ciudad} - Para exportar a PDF
- * - GET /api/planes/export/word?ciudad={ciudad} - Para exportar a Word
- */
+// ========================================
+// 🔗 CONEXIÓN BACKEND - GENERACIÓN DE REPORTES
+// ========================================
+// Endpoint: GET /api/planes/reporte
+// Datos: { ciudad }
+// Endpoint: GET /api/planes/export/excel
+// Datos: { ciudad }
+// Endpoint: GET /api/planes/export/pdf
+// Datos: { ciudad }
+// Endpoint: GET /api/planes/export/word
+// Datos: { ciudad }
 function handleGenerarReportePlanes() {
     const ciudad = document.getElementById('reporteCiudad').value;
     
