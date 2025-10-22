@@ -28,13 +28,6 @@
 // VARIABLES GLOBALES Y CONFIGURACIÓN
 // ========================================
 
-// Ciudad actual (tomada de sessionStorage; sin valor por defecto)
-let ciudadActual = sessionStorage.getItem('selectedCity') || '';
-
-// Utilidad: obtener ciudad seleccionada de la sesión de forma segura
-function getSelectedCity() {
-    return sessionStorage.getItem('selectedCity') || '';
-}
 
 // ========================================
 // 🔗 CONEXIÓN BACKEND - STORE DE PLANES
@@ -269,7 +262,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../index.html';
+    window.location.href = '../../index.html';
 }
 
 function getNextPlanCode() {
@@ -588,92 +581,35 @@ function validateMesesAsesoria(value) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Siempre mostrar selección de ciudad al entrar
-    console.log('Mostrando modal de selección de ciudad');
-    // showSelectPlanModal(); // Comentado para eliminar el aviso automático
+    // Mostrar el contenido una vez que todo esté cargado
+    document.body.classList.add('loaded');
+    
+    // Debug: verificar datos existentes
+    console.log('=== DEBUGGING PLANES DATA ===');
+    console.log('planesStore keys:', Object.keys(planesStore));
+    console.log('planesStore length:', Object.keys(planesStore).length);
+    console.log('localStorage planesData:', localStorage.getItem('planesData'));
     
     // Corregir planes existentes sin escalas
     fixPlansWithoutEscalas();
     
-    loadTable();
-    
-    // ========================================
-    // FUNCIONALIDAD DEL SELECT DE CIUDADES
-    // ========================================
-    
-    // Funcionalidad del select de ciudades en Planes
-    const planSelect = document.getElementById('cId_Ciudad');
-    
-    /**
-     * Pobla el select de ciudades con datos actualizados
-     * Se sincroniza con los datos de ciudades desde otras interfaces
-     */
-    function populatePlanCitySelect() {
-        if (!planSelect) return;
-        // Preferir origen vivo, con fallback a localStorage siempre que exista
-        let ciudades = {};
-        if (typeof window.getCiudadesData === 'function') {
-            try { ciudades = window.getCiudadesData(); } catch (e) { ciudades = {}; }
-        } else {
-            try {
-                const raw = localStorage.getItem('ciudadesData');
-                const parsed = raw ? JSON.parse(raw) : {};
-                if (parsed && typeof parsed === 'object') {
-                    ciudades = Object.fromEntries(
-                        Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
-                    );
-                }
-            } catch (e) { ciudades = {}; }
-        }
-        const current = planSelect.value;
-        planSelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
-        Object.values(ciudades)
-            .filter(c => c.activo !== false) // Solo ciudades activas
-            .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
-            .forEach(c => {
-                const opt = document.createElement('option');
-                const code = String(c.codigo || '').toUpperCase();
-                const name = String(c.nombre || '').toUpperCase();
-                opt.value = c.codigo;
-                opt.textContent = `${code} - ${name}`;
-                planSelect.appendChild(opt);
+    // Recargar datos desde localStorage si es necesario
+    try {
+        const stored = localStorage.getItem('planesData');
+        if (stored) {
+            const data = JSON.parse(stored);
+            console.log('Datos recuperados de localStorage:', data);
+            // Actualizar el store con los datos del localStorage
+            Object.keys(data).forEach(key => {
+                planesStore[key] = data[key];
             });
-        if (current && ciudades[current] && ciudades[current].activo !== false) planSelect.value = current;
+            console.log('Store actualizado con datos de localStorage');
+        }
+    } catch (e) {
+        console.error('Error al cargar datos de localStorage:', e);
     }
     
-    if (planSelect) {
-        populatePlanCitySelect();
-        // Suscribirse a cambios en ciudades desde otras interfaces
-        try { window.addEventListener('ciudades:updated', populatePlanCitySelect); } catch (e) {}
-    }
-    
-    // Funcionalidad del botón seleccionar ciudad
-    const bSeleccionarPlan = document.getElementById('bSeleccionarPlan');
-    if (bSeleccionarPlan) {
-        bSeleccionarPlan.addEventListener('click', function() {
-            const selectedCity = document.getElementById('cId_Ciudad').value;
-            if (selectedCity) {
-                console.log('Ciudad seleccionada:', selectedCity);
-                try { sessionStorage.setItem('selectedCity', selectedCity); } catch (e) {}
-                try { showNotification('Ciudad seleccionada: ' + selectedCity, 'success'); } catch (e) {}
-                hideSelectPlanModal();
-                // Actualizar la variable global
-                ciudadActual = selectedCity;
-            } else {
-                try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch (e) { alert('Por favor, seleccione una ciudad'); }
-            }
-        });
-    }
-    
-    // Cerrar modal de selección de ciudad al hacer clic fuera
-    const selectPlanModal = document.getElementById('selectPlanModal');
-    if (selectPlanModal) {
-        selectPlanModal.addEventListener('click', function(e) {
-            if (e.target === selectPlanModal) {
-                hideSelectPlanModal();
-            }
-        });
-    }
+    loadTable();
     // Header buttons
     const bBuscar = document.getElementById('bBuscarPlan');
     const bCrear = document.getElementById('bCrearPlan');
@@ -682,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     
     // Event listeners para campos de precio con formateo correcto
-    const priceFields = ['pValorPlan', 'pCuotaInicial', 'pMensualidad'];
+    const priceFields = ['tValor', 'tCuota_Inicial', 'tMensualidad'];
     priceFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
@@ -711,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Event listener para forzar mayúsculas en Nombre del Plan
-    const nombreField = document.getElementById('pNombre');
+    const nombreField = document.getElementById('tNombre');
     if (nombreField) {
         nombreField.addEventListener('input', function() {
             // Convertir a mayúsculas en tiempo real
@@ -720,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Event listener para meses de asesoría
-    const mesesField = document.getElementById('pMesesAsesoria');
+    const mesesField = document.getElementById('tMeses_Asesoria');
     if (mesesField) {
         mesesField.addEventListener('input', function() {
             // Solo permitir números
@@ -735,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Event listener para # Cuotas (solo números)
-    const cuotasField = document.getElementById('pNumCuotas');
+    const cuotasField = document.getElementById('tCuotas');
     if (cuotasField) {
         cuotasField.addEventListener('input', function() {
             this.value = this.value.replace(/[^\d]/g, '');
@@ -854,10 +790,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Mostrar modal de selección de ciudad al cargar la página (simulando login)
-    // Esto mostrará el modal automáticamente cuando se cargue la página
-    // Mostrar SIEMPRE el selector de ciudad al cargar esta interfaz
-    // setTimeout(() => { try { forceShowSelectPlanModal(); } catch (e) { try { showSelectPlanModal(); } catch (e2) {} } }, 500); // Comentado para eliminar el aviso automático
 
 });
 
@@ -1736,38 +1668,8 @@ function togglePlanStatusFromTable(codigo, inputElement) {
 function showReportePlanesModal() {
     const modal = document.getElementById('reportePlanesModal');
     if (modal) {
-        // Cargar ciudades en el select
-        cargarCiudadesEnReporte();
-        
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
-    }
-}
-
-/**
- * Carga las ciudades en el select del reporte
- */
-function cargarCiudadesEnReporte() {
-    const selectCiudad = document.getElementById('reporteCiudad');
-    if (!selectCiudad) return;
-    
-    // Limpiar opciones existentes
-    selectCiudad.innerHTML = '<option value="">Seleccione la ciudad</option>';
-    
-    // Obtener ciudades del localStorage
-    try {
-        const ciudadesData = localStorage.getItem('ciudadesData');
-        if (ciudadesData) {
-            const ciudades = JSON.parse(ciudadesData);
-            Object.values(ciudades).forEach(ciudad => {
-                const option = document.createElement('option');
-                option.value = ciudad.nombre;
-                option.textContent = ciudad.nombre.toUpperCase();
-                selectCiudad.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error('Error al cargar ciudades:', error);
     }
 }
 
@@ -1789,32 +1691,23 @@ function hideReportePlanesModal() {
 // 🔗 CONEXIÓN BACKEND - GENERACIÓN DE REPORTES
 // ========================================
 // Endpoint: GET /api/planes/reporte
-// Datos: { ciudad }
+// Datos: { }
 // Endpoint: GET /api/planes/export/excel
-// Datos: { ciudad }
+// Datos: { }
 // Endpoint: GET /api/planes/export/pdf
-// Datos: { ciudad }
+// Datos: { }
 // Endpoint: GET /api/planes/export/word
-// Datos: { ciudad }
+// Datos: { }
 function handleGenerarReportePlanes() {
-    const ciudad = document.getElementById('reporteCiudad').value;
-    
-    // Validar campo obligatorio
-    if (!ciudad) {
-        alert('Por favor seleccione una ciudad');
-        return;
-    }
-    
     console.log('=== GENERANDO REPORTE DE PLANES ===');
-    console.log('Ciudad:', ciudad);
     
-    // Obtener todos los planes (no hay filtro por ciudad en los datos de planes)
+    // Obtener todos los planes
     const planesFiltrados = Object.values(planesStore);
     
     console.log('Total de planes:', planesFiltrados.length);
     
-    // Redirigir al archivo HTML del reporte con parámetros
-    const reportUrl = `../pages/reporte-planes.html?ciudad=${encodeURIComponent(ciudad)}`;
+    // Redirigir al archivo HTML del reporte
+    const reportUrl = `reporte-planes.html`;
     window.open(reportUrl, '_blank');
     
     // Cerrar modal
@@ -1824,8 +1717,8 @@ function handleGenerarReportePlanes() {
 /**
  * Genera el reporte de planes
  */
-function generarReportePlanes(planes, ciudad) {
-    // Crear contenido del reporte con el mismo formato que empleados
+function generarReportePlanes(planes) {
+    // Crear contenido del reporte
     let contenido = `
         <html>
         <head>
@@ -1852,69 +1745,6 @@ function generarReportePlanes(planes, ciudad) {
                     font-size: 16px;
                     opacity: 0.9;
                 }
-                .controls {
-                    background: white;
-                    padding: 15px 20px;
-                    border-bottom: 1px solid #ddd;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                }
-                .pagination {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                .pagination button {
-                    background: #6c5ce7;
-                    color: white;
-                    border: none;
-                    padding: 8px 12px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-                .pagination button:hover {
-                    background: #5a4fcf;
-                }
-                .pagination input {
-                    width: 50px;
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    text-align: center;
-                }
-                .search-controls {
-                    display: flex;
-                    align-items: center;
-                    gap: 15px;
-                }
-                .search-input {
-                    padding: 8px 12px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    width: 200px;
-                }
-                .export-buttons {
-                    display: flex;
-                    gap: 10px;
-                }
-                .export-btn {
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 4px;
-                    color: white;
-                    font-weight: bold;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .export-excel { background: #28a745; }
-                .export-word { background: #007bff; }
-                .export-pdf { background: #dc3545; }
-                .export-btn:hover { opacity: 0.9; }
                 .table-container {
                     background: white;
                     margin: 20px;
@@ -1949,60 +1779,12 @@ function generarReportePlanes(planes, ciudad) {
                     margin: 20px;
                     border-radius: 8px;
                 }
-                .info-icon {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #17a2b8;
-                    color: white;
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: bold;
-                    cursor: pointer;
-                }
             </style>
         </head>
         <body>
             <div class="header">
-                <h1>REPORTE DE PLANES ${ciudad.toUpperCase()}</h1>
-                <p>Ciudad: ${ciudad} — Total de Planes: ${planes.length}</p>
-            </div>
-            
-            <div class="controls">
-                <div class="pagination">
-                    <button onclick="goToFirst()">«</button>
-                    <button onclick="goToPrevious()"><</button>
-                    <input type="number" value="1" min="1" max="1" id="currentPage">
-                    <span>de 1</span>
-                    <button onclick="goToNext()">></button>
-                    <button onclick="goToLast()">»</button>
-                </div>
-                
-                <div class="search-controls">
-                    <input type="text" class="search-input" placeholder="Buscar..." id="searchInput">
-                    <select class="search-input">
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                    <input type="text" class="search-input" placeholder="Filtrar..." id="filterInput">
-                </div>
-                
-                <div class="export-buttons">
-                    <button class="export-btn export-excel" onclick="exportToExcel()">
-                        📊 Excel
-                    </button>
-                    <button class="export-btn export-word" onclick="exportToWord()">
-                        📝 Word
-                    </button>
-                    <button class="export-btn export-pdf" onclick="exportToPDF()">
-                        📄 PDF
-                    </button>
-                </div>
+                <h1>REPORTE DE PLANES</h1>
+                <p>Total de Planes: ${planes.length}</p>
             </div>
             
             <div class="table-container">
@@ -2046,44 +1828,6 @@ function generarReportePlanes(planes, ciudad) {
             <div class="footer">
                 <p>© 2025 - GOLDEN APP</p>
             </div>
-            
-            <div class="info-icon" title="Información del reporte">i</div>
-            
-            <script>
-                // Funciones de paginación
-                function goToFirst() { document.getElementById('currentPage').value = 1; }
-                function goToPrevious() { 
-                    const current = parseInt(document.getElementById('currentPage').value);
-                    if (current > 1) document.getElementById('currentPage').value = current - 1;
-                }
-                function goToNext() { 
-                    const current = parseInt(document.getElementById('currentPage').value);
-                    const max = 1; // Solo una página por ahora
-                    if (current < max) document.getElementById('currentPage').value = current + 1;
-                }
-                function goToLast() { document.getElementById('currentPage').value = 1; }
-                
-                // Funciones de exportación
-                function exportToExcel() {
-                    alert('Exportar a Excel - Funcionalidad en desarrollo');
-                }
-                function exportToWord() {
-                    alert('Exportar a Word - Funcionalidad en desarrollo');
-                }
-                function exportToPDF() {
-                    window.print();
-                }
-                
-                // Búsqueda en tiempo real
-                document.getElementById('searchInput').addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('#reportTableBody tr');
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                });
-            </script>
         </body>
         </html>
     `;
@@ -2365,54 +2109,6 @@ function handleCreatePlanEscalas() {
     loadTable();
 }
 
-// ========================================
-// FUNCIONES DEL MODAL DE SELECCIÓN DE CIUDAD
-// ========================================
-
-/**
- * Muestra el modal de selección de ciudad
- * Solo se muestra si el usuario no ha seleccionado una ciudad en esta sesión
- */
-function showSelectPlanModal() {
-    // Verificar si el usuario ya seleccionó una ciudad en esta sesión
-    const selectedCity = sessionStorage.getItem('selectedCity');
-    if (!selectedCity) {
-        const modal = document.getElementById('selectPlanModal');
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-    }
-}
-
-/**
- * Fuerza la visualización del modal de selección de ciudad
- * Se usa para permitir cambiar la ciudad seleccionada
- */
-function forceShowSelectPlanModal() {
-    const modal = document.getElementById('selectPlanModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-/**
- * Oculta el modal de selección de ciudad
- * Restaura el scroll del body
- */
-function hideSelectPlanModal() {
-    const modal = document.getElementById('selectPlanModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-// Hacer las funciones globales para que estén disponibles desde HTML
-window.showSelectPlanModal = showSelectPlanModal;
-window.hideSelectPlanModal = hideSelectPlanModal;
-window.forceShowSelectPlanModal = forceShowSelectPlanModal;
 
 
 

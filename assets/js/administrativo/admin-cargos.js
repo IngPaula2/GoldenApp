@@ -13,43 +13,51 @@
 // PERFIL DE USUARIO Y DROPDOWN
 // ========================================
 
-// Elementos del perfil de usuario
-const userInfo = document.querySelector('.user-info');
-const dropdown = document.getElementById('userDropdown');
-const dropdownArrow = document.querySelector('.dropdown-arrow');
-const sidebar = document.querySelector('.sidebar');
+// Inicializar dropdown del usuario cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    const dropdownArrow = document.querySelector('.dropdown-arrow');
+    const sidebar = document.querySelector('.sidebar');
 
-if (userInfo && dropdown) {
-    // Toggle del dropdown al hacer clic en el perfil
-    userInfo.addEventListener('click', function() {
-        dropdown.classList.toggle('show');
-        dropdownArrow.classList.toggle('open');
-        sidebar.classList.toggle('dropdown-open');
-    });
-    
-    // Cerrar dropdown al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        if (!userInfo.contains(e.target)) {
-            dropdown.classList.remove('show');
-            dropdownArrow.classList.remove('open');
-            sidebar.classList.remove('dropdown-open');
-        }
-    });
-    
-    // Manejar clics en elementos del dropdown
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
-    dropdownItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (this.classList.contains('logout-item')) {
-                // Mostrar modal de confirmación para cerrar sesión
-                showConfirmLogoutModal();
-            } else if (this.classList.contains('admin-users-item')) {
-                // Lógica de administrar usuarios
-                alert('Funcionalidad de administrar usuarios en desarrollo');
+    if (userInfo && dropdown) {
+        // Toggle del dropdown al hacer clic en el perfil
+        userInfo.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+            dropdownArrow.classList.toggle('open');
+            sidebar.classList.toggle('dropdown-open');
+        });
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userInfo.contains(e.target)) {
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
             }
         });
-    });
-}
+        
+        // Manejar clics en elementos del dropdown
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (this.classList.contains('logout-item')) {
+                    // Redirigir inmediatamente al login
+                    window.location.href = '../../index.html';
+                } else if (this.classList.contains('admin-users-item')) {
+                    // Lógica de administrar usuarios
+                    alert('Funcionalidad de administrar usuarios en desarrollo');
+                }
+                // Cerrar dropdown después del clic
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            });
+        });
+    }
+});
 
 // ========================================
 // FUNCIONES DE MODAL DE CERRAR SESIÓN
@@ -76,7 +84,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../index.html';
+    window.location.href = '../../index.html';
 }
 
 // ========================================
@@ -1579,56 +1587,6 @@ window.closeSuccessToggleCargoModal = closeSuccessToggleCargoModal;
 // FUNCIONALIDAD DE CERRAR SESIÓN
 // ========================================
 
-// Inicializar funcionalidad de cerrar sesión cuando se carga el DOM
-document.addEventListener('DOMContentLoaded', function() {
-    // Referencias a elementos del dropdown de usuario
-    const userInfo = document.querySelector('.user-info');
-    const dropdown = document.getElementById('userDropdown');
-    const dropdownArrow = document.querySelector('.dropdown-arrow');
-    const sidebar = document.querySelector('.sidebar');
-    
-    if (userInfo && dropdown) {
-        // Toggle del dropdown al hacer clic en el perfil
-        userInfo.addEventListener('click', function() {
-            dropdown.classList.toggle('show');
-            dropdownArrow.classList.toggle('open');
-            sidebar.classList.toggle('dropdown-open');
-        });
-        
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            if (!userInfo.contains(e.target)) {
-                dropdown.classList.remove('show');
-                dropdownArrow.classList.remove('open');
-                sidebar.classList.remove('dropdown-open');
-            }
-        });
-        
-        // Manejar clics en elementos del dropdown
-        const dropdownItems = document.querySelectorAll('.dropdown-item');
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.stopPropagation();
-                
-                if (this.classList.contains('logout-item')) {
-                    // Funcionalidad de cerrar sesión
-                    sessionStorage.removeItem('isAuthenticated');
-                    sessionStorage.removeItem('username');
-                    window.location.href = '../index.html';
-                } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
-                    // Navegar a administración de usuarios
-                    console.log('Navegando a administrar usuarios');
-                    // Agregar navegación a página de administración de usuarios aquí
-                }
-                
-                // Cerrar dropdown después del clic
-                dropdown.classList.remove('show');
-                dropdownArrow.classList.remove('open');
-                sidebar.classList.remove('dropdown-open');
-            });
-        });
-    }
-});
 
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', initializePage);

@@ -894,6 +894,75 @@ window.testControlNotification = function() {
     setTimeout(() => showNotification('Prueba de información', 'info'), 3000);
 };
 
+// ========================================
+// FUNCIONES DE LOGOUT
+// ========================================
+
+// Inicializar event listeners para el dropdown del usuario
+document.addEventListener('DOMContentLoaded', function() {
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    const dropdownArrow = document.querySelector('.dropdown-arrow');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (userInfo && dropdown) {
+        // Toggle del dropdown al hacer clic en el perfil
+        userInfo.addEventListener('click', function() {
+            dropdown.classList.toggle('show');
+            dropdownArrow.classList.toggle('open');
+            sidebar.classList.toggle('dropdown-open');
+        });
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userInfo.contains(e.target)) {
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            }
+        });
+        
+        // Manejar clics en elementos del dropdown
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.classList.contains('logout-item')) {
+                    // Mostrar modal de confirmación para cerrar sesión
+                    showConfirmLogoutModal();
+                } else if (this.classList.contains('admin-users-item')) {
+                    // Lógica de administrar usuarios
+                    alert('Funcionalidad de administrar usuarios en desarrollo');
+                }
+            });
+        });
+    }
+});
+
+// Funciones de logout
+window.showConfirmLogoutModal = function() {
+    const modal = document.getElementById('confirmLogoutModal');
+    if (modal) {
+        modal.classList.add('show');
+    }
+}
+
+window.cancelLogout = function() {
+    const modal = document.getElementById('confirmLogoutModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+window.confirmLogout = function() {
+    // Limpiar datos de sesión
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    sessionStorage.clear();
+    
+    // Redirigir al index
+    window.location.href = '../../index.html';
+}
+
 console.log('✅ Control de Consecutivos cargado');
 
 

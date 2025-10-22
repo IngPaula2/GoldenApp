@@ -13,7 +13,7 @@
  * - Sincronización con datos del sistema principal
  * 
  * BACKEND INTEGRATION:
- * - GET /api/planes/reporte?ciudad={ciudad} - Obtener datos del reporte
+ * - GET /api/planes/reporte - Obtener datos del reporte
  * - GET /api/planes/export/excel - Exportar a Excel
  * - GET /api/planes/export/word - Exportar a Word
  * - GET /api/planes/export/pdf - Exportar a PDF
@@ -36,11 +36,11 @@ window.__zoom = 1;         // Nivel de zoom
 /**
  * OBTENER PARÁMETROS DE URL
  * 
- * Extrae los parámetros de la URL para determinar la ciudad del reporte.
+ * Extrae los parámetros de la URL para el reporte.
  * 
  * BACKEND INTEGRATION:
  * - Los parámetros deben validarse en el backend
- * - Verificar permisos de acceso por ciudad
+ * - Verificar permisos de acceso
  */
 function parseQuery(){
     const p=new URLSearchParams(location.search);
@@ -54,12 +54,12 @@ function parseQuery(){
  * En producción, debe obtener los datos desde el backend.
  * 
  * BACKEND INTEGRATION:
- * - GET /api/planes?ciudad={ciudad} - Obtener planes por ciudad
+ * - GET /api/planes - Obtener planes
  * - Implementar caché y sincronización
  * - Manejar errores de red y timeouts
  */
-function getPlanes(ciudad){
-    console.log('Buscando planes para ciudad:', ciudad);
+function getPlanes(){
+    console.log('Buscando planes...');
     
     // Verificar primero en localStorage directamente
     let planes = [];
@@ -93,7 +93,7 @@ function getPlanes(ciudad){
     // Si aún no hay planes, intentar función de localStorage alternativa
     if (planes.length === 0) {
         console.log('Obteniendo planes desde localStorage (función alternativa)');
-        planes = getPlanesFromLocalStorage(ciudad);
+        planes = getPlanesFromLocalStorage();
     }
     
     console.log('Planes encontrados:', planes);
@@ -207,9 +207,9 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-function getPlanesFromLocalStorage(ciudad) {
+function getPlanesFromLocalStorage() {
     try{
-        console.log('Leyendo desde localStorage para ciudad:', ciudad);
+        console.log('Leyendo desde localStorage...');
         
         // Intentar diferentes claves de localStorage
         const possibleKeys = ['planesData', 'planesStore', 'planes', 'userCreatedPlanes'];
@@ -263,17 +263,16 @@ function formatearFecha(fecha) {
 }
 
 function renderReport(){
-    const {ciudad} = parseQuery();
-    console.log('Parámetros del reporte:', {ciudad});
+    console.log('Iniciando renderizado del reporte...');
     
     // Sincronizar datos antes de proceder
     sincronizarDatosPlanes();
     
-    document.getElementById('titulo').textContent = `REPORTE DE PLANES ${ciudad.toUpperCase()}`;
-    document.getElementById('subtitulo').textContent = `Ciudad: ${ciudad} — Total de Planes: ${getPlanes(ciudad).length}`;
+    document.getElementById('titulo').textContent = `REPORTE DE PLANES`;
+    document.getElementById('subtitulo').textContent = `Total de Planes: ${getPlanes().length}`;
     
     // Obtener planes
-    const rows = getPlanes(ciudad);
+    const rows = getPlanes();
     console.log('Planes obtenidos para el reporte:', rows);
     
     window.__rows = rows;
@@ -351,7 +350,6 @@ function setZoom(delta){
  * - Manejar archivos grandes y compresión
  */
 function exportCSV(){
-    const {ciudad} = parseQuery();
     const rows = window.__rows||[];
     
     // Crear HTML con formato para Excel
@@ -405,8 +403,8 @@ function exportCSV(){
             <body>
                 <div class="report-container">
                     <div class="report-header">
-                        <div class="report-title">REPORTE DE PLANES ${ciudad.toUpperCase()}</div>
-                        <div class="report-subtitle">Ciudad: ${ciudad} — Total de Planes: ${rows.length}</div>
+                        <div class="report-title">REPORTE DE PLANES</div>
+                        <div class="report-subtitle">Total de Planes: ${rows.length}</div>
                     </div>
                     <div class="table-container">
                         <table>
@@ -543,8 +541,6 @@ function exportPDF(){
 
 // Función para generar HTML limpio sin controles de interfaz
 function generarHTMLLimpio() {
-    const {ciudad} = parseQuery();
-    
     // Obtener todos los planes para el reporte
     const rows = window.__rows || [];
     
@@ -567,8 +563,8 @@ function generarHTMLLimpio() {
     return `
         <div class="report-container">
             <div class="report-header">
-                <div class="report-title">REPORTE DE PLANES ${ciudad.toUpperCase()}</div>
-                <div class="report-subtitle">Ciudad: ${ciudad} — Total de Planes: ${rows.length}</div>
+                <div class="report-title">REPORTE DE PLANES</div>
+                <div class="report-subtitle">Total de Planes: ${rows.length}</div>
             </div>
             <div class="table-container">
                 <table>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<!--
+    FACTURACIÓN - CONTRATOS - GOLDEN APP
+    
+    Este archivo contiene la página del módulo de contratos dentro de facturación.
+    Incluye gestión de contratos con tabla y operaciones CRUD.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2024
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Contratos</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/administrativo/main.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/facturacion/contratos/fac-contratos.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="../../administrativo/admin-titulares.html" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="../contratos/fac-contratos.html" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cogs nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item active">
+                    <a href="fac-contratos.html" class="top-nav-link">Contratos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../facturas/fac-facturas.html" class="top-nav-link">Facturas</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Contratos -->
+            <section class="contracts-section">
+                <div class="section-header">
+                    <h2>Contratos</h2>
+                    <div class="action-buttons">
+                        <button id="bBuscarContrato" class="btn btn-primary" onclick="showSearchContractModal()">Buscar Contrato</button>
+                        <button id="bCrearContrato" class="btn btn-primary" onclick="showCreateContractModal()">Crear Contrato</button>
+                        <button id="bReporteContratos" class="btn btn-primary" onclick="showReportModal()">Reporte</button>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table class="table" id="contractsTable">
+                        <thead>
+                            <tr>
+                                <th># Contrato</th>
+                                <th>Record Produccion</th>
+                                <th>Factura</th>
+                                <th>Identificacion</th>
+                                <th>Titular</th>
+                                <th>Plan</th>
+                                <th>Ejecutivo</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contractsTableBody">
+                            <tr>
+                                <td colspan="8" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-file-contract"></i>
+                                        <p>No existen registros de contratos</p>
+                                        <small>Haz clic en "Crear Contrato" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES DE INTERACCIÓN
+         ======================================== -->
+    
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+        <div class="modal" style="max-width: 520px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Contrato -->
+    <div class="modal-overlay" id="searchContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR CONTRATO</h3>
+                <button class="modal-close" onclick="hideSearchContractModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="searchContractId" class="form-label">Número de Contrato *</label>
+                    <input type="text" id="searchContractId" class="form-input" placeholder="Ingrese el número de contrato">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideSearchContractModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarContrato">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Contrato -->
+    <div class="modal-overlay" id="createContractModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR CONTRATO</h3>
+                <button class="modal-close" onclick="hideCreateContractModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createContractForm">
+                    <!-- Primera fila: Número de Contrato, Record de Producción -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contractNumber" class="form-label">Número de Contrato *</label>
+                            <input type="text" id="contractNumber" class="form-input numeric-input" placeholder="NÚMERO DE CONTRATO" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productionRecord" class="form-label">Record de Producción *</label>
+                            <input type="text" id="productionRecord" class="form-input numeric-input" placeholder="RECORD DE PRODUCCIÓN" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Segunda fila: Identificación del Cliente, Nombre del Titular, Plan -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientId" class="form-label">Identificación del Cliente *</label>
+                            <input type="text" id="clientId" class="form-input" placeholder="IDENTIFICACIÓN DEL CLIENTE" required>
+                            <div id="clientNameDisplay" class="client-name-display" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientName" class="form-label">Nombre del Titular *</label>
+                            <input type="text" id="clientName" class="form-input" placeholder="NOMBRE COMPLETO DEL TITULAR" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plan" class="form-label">Plan *</label>
+                            <input type="text" id="plan" class="form-input" placeholder="SELECCIONE EL PLAN" readonly required>
+                            <button type="button" id="selectPlanBtn" class="btn btn-secondary plan-selector-btn" style="margin-top: 8px; width: 100%;">Seleccionar Plan</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tercera fila: Ejecutivo, Fecha de Contrato, Valor del Contrato -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="executiveId" class="form-label">Identificación del Ejecutivo *</label>
+                            <input type="text" id="executiveId" class="form-input" placeholder="IDENTIFICACIÓN DEL EJECUTIVO" required>
+                            <div id="executiveNameDisplay" class="client-name-display" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="executiveName" class="form-label">Nombre del Ejecutivo *</label>
+                            <input type="text" id="executiveName" class="form-input" placeholder="NOMBRE COMPLETO DEL EJECUTIVO" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contractDate" class="form-label">Fecha y Hora de Contrato *</label>
+                            <input type="datetime-local" id="contractDate" class="form-input" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreateContractModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrearContratoModal">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte -->
+    <div class="modal-overlay" id="reportModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">GENERAR REPORTE</h3>
+                <button class="modal-close" onclick="hideReportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reportType" class="form-label">Tipo de Reporte *</label>
+                        <div class="select-container">
+                            <select id="reportType" class="form-select" required>
+                                <option value="">Seleccione el tipo</option>
+                                <option value="contratos">Reporte de Contratos</option>
+                                <option value="ventas">Reporte de Ventas</option>
+                                <option value="cobros">Reporte de Cobros</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate" class="form-label">Fecha Inicio *</label>
+                        <input type="date" id="startDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate" class="form-label">Fecha Fin *</label>
+                        <input type="date" id="endDate" class="form-input" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideReportModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bGenerarReporte">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Planes -->
+    <div class="modal-overlay" id="planSelectionModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR PLAN</h3>
+                <button class="modal-close" onclick="hidePlanSelectionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="search-container">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="planSearchInput" class="search-input" placeholder="Buscar por nombre o código del plan...">
+                    </div>
+                </div>
+                <div class="plans-grid" id="plansGrid">
+                    <!-- Los planes se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hidePlanSelectionModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- JavaScript -->
+    <script src="../../../assets/js/facturacion/contratos/fac-contratos.js"></script>
+</body>
+</html>
+

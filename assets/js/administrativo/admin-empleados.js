@@ -24,43 +24,51 @@
 // PERFIL DE USUARIO Y DROPDOWN
 // ========================================
 
-// Elementos del perfil de usuario
-const userInfo = document.querySelector('.user-info');
-const dropdown = document.getElementById('userDropdown');
-const dropdownArrow = document.querySelector('.dropdown-arrow');
-const sidebar = document.querySelector('.sidebar');
+// Inicializar dropdown del usuario cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    const dropdownArrow = document.querySelector('.dropdown-arrow');
+    const sidebar = document.querySelector('.sidebar');
 
-if (userInfo && dropdown) {
-    // Toggle del dropdown al hacer clic en el perfil
-    userInfo.addEventListener('click', function() {
-        dropdown.classList.toggle('show');
-        dropdownArrow.classList.toggle('open');
-        sidebar.classList.toggle('dropdown-open');
-    });
-    
-    // Cerrar dropdown al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        if (!userInfo.contains(e.target)) {
-            dropdown.classList.remove('show');
-            dropdownArrow.classList.remove('open');
-            sidebar.classList.remove('dropdown-open');
-        }
-    });
-    
-    // Manejar clics en elementos del dropdown
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
-    dropdownItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (this.classList.contains('logout-item')) {
-                // Mostrar modal de confirmación para cerrar sesión
-                showConfirmLogoutModal();
-            } else if (this.classList.contains('admin-users-item')) {
-                // Lógica de administrar usuarios
-                alert('Funcionalidad de administrar usuarios en desarrollo');
+    if (userInfo && dropdown) {
+        // Toggle del dropdown al hacer clic en el perfil
+        userInfo.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+            dropdownArrow.classList.toggle('open');
+            sidebar.classList.toggle('dropdown-open');
+        });
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userInfo.contains(e.target)) {
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
             }
         });
-    });
-}
+
+        // Manejar clics en elementos del dropdown
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (this.classList.contains('logout-item')) {
+                    // Redirigir inmediatamente al login
+                    window.location.href = '../../index.html';
+                } else if (this.classList.contains('admin-users-item')) {
+                    alert('Funcionalidad de administrar usuarios en desarrollo');
+                }
+
+                // Cerrar dropdown después del clic
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            });
+        });
+    }
+});
 
 // ========================================
 // FUNCIONES DE MODAL DE CERRAR SESIÓN
@@ -87,7 +95,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../index.html';
+    window.location.href = '../../index.html';
 }
 
 // ========================================
@@ -135,7 +143,7 @@ function getSelectedCityCode() {
 
 function loadEmpleadosForSelectedCity() {
     // Limpiar datos fantasma primero
-    limpiarDatosFantasma();
+    // limpiarDatosFantasma(); // COMENTADO TEMPORALMENTE PARA EVITAR BORRAR EMPLEADOS
     
     // Cargar empleados de la ciudad seleccionada (igual que organizaciones)
     const city = getSelectedCityCode();
@@ -155,28 +163,40 @@ function loadEmpleadosForSelectedCity() {
     });
     console.log('Total empleados cargados en memoria para ciudad', city, ':', Object.keys(userCreatedEmpleados).length);
     
-    // Reconstruir tabla
-    try {
-        const tableBody = document.getElementById('empleadosTableBody');
-        if (tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="no-data-message">
-                        <div class="no-data-content">
-                            <i class="fas fa-users"></i>
-                            <p>No existen registros de empleados</p>
-                            <small>Haz clic en "Crear Empleado" para crear el primer registro</small>
-                        </div>
-                    </td>
-                </tr>`;
-            
+    // Limpiar todas las secciones primero
+    clearAllSections();
+    
+    // Reconstruir tabla solo si hay empleados
+    if (Object.keys(userCreatedEmpleados).length > 0) {
+        try {
             Object.values(userCreatedEmpleados)
                 .sort((a,b)=>String(a.identificacion).localeCompare(String(b.identificacion)))
                 .forEach(e => addEmpleadoToSection(e, true));
+        } catch (e) {
+            console.error('Error reconstruyendo tabla:', e);
         }
-    } catch (e) {
-        console.error('Error reconstruyendo tabla:', e);
     }
+}
+
+/**
+ * Limpia todas las secciones de empleados y muestra mensajes de "no hay datos"
+ */
+function clearAllSections() {
+    const sections = ['administrativo', 'pyf', 'servicio'];
+    
+    sections.forEach(section => {
+        const sectionContent = document.getElementById(`content-${section}`);
+        if (sectionContent) {
+            const tbody = sectionContent.querySelector('tbody');
+            if (tbody) {
+                // Limpiar todas las filas existentes
+                tbody.innerHTML = '';
+                
+                // Mostrar mensaje de "no hay datos" para esta sección
+                showNoDataMessage(tbody, section);
+            }
+        }
+    });
 }
 
 // Función para limpiar datos fantasma del localStorage
@@ -200,8 +220,9 @@ function limpiarDatosFantasma() {
                 cleaned[ciudad] = cityCleaned;
             }
         });
-        localStorage.setItem('empleadosByCity', JSON.stringify(cleaned));
-        console.log('Datos fantasma eliminados. Datos limpios:', cleaned);
+        // localStorage.setItem('empleadosByCity', JSON.stringify(cleaned));
+        // console.log('Datos fantasma eliminados. Datos limpios:', cleaned);
+        // COMENTADO TEMPORALMENTE PARA EVITAR BORRAR EMPLEADOS VÁLIDOS
     } catch (e) {
         console.error('Error limpiando datos fantasma:', e);
     }
@@ -302,7 +323,7 @@ function promptForCitySelection() {
                 container.style.display = 'none';
                 document.body.style.overflow = 'auto';
                 // Cargar empleados de la ciudad seleccionada
-                loadEmpleadosForSelectedCity();
+                loadEmpleadosFromStorage();
                 try { showNotification('Ciudad seleccionada: ' + value, 'success'); } catch(e) {}
             });
         }
@@ -2059,17 +2080,21 @@ function obtenerNombrePorIdentificacion(identificacion) {
 function addEmpleadoToSection(empleadoData, replaceIfExists = false) {
     const { area, identificacion } = empleadoData;
     
-    // Guardar por ciudad y persistir
-    const city = getSelectedCityCode();
-    if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
-    if (!empleadosByCity[city]) empleadosByCity[city] = {};
-    const toSave = { ...empleadoData, ciudad: city };
-    empleadosByCity[city][identificacion] = toSave;
-    persistEmpleadosByCity();
-    console.log('Empleado guardado en localStorage para ciudad:', city, 'ID:', identificacion);
-    console.log('Total empleados en ciudad:', Object.keys(empleadosByCity[city]).length);
+    // Solo guardar en localStorage si no es una reconstrucción (replaceIfExists = true significa reconstrucción)
+    if (!replaceIfExists) {
+        // Guardar por ciudad y persistir
+        const city = getSelectedCityCode();
+        if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
+        if (!empleadosByCity[city]) empleadosByCity[city] = {};
+        const toSave = { ...empleadoData, ciudad: city };
+        empleadosByCity[city][identificacion] = toSave;
+        persistEmpleadosByCity();
+        console.log('Empleado guardado en localStorage para ciudad:', city, 'ID:', identificacion);
+        console.log('Total empleados en ciudad:', Object.keys(empleadosByCity[city]).length);
+    }
+    
     // También reflejar en memoria y UI actual
-    userCreatedEmpleados[identificacion] = toSave;
+    userCreatedEmpleados[identificacion] = empleadoData;
     
     // Mapear el área a la sección correspondiente
     let sectionId;
@@ -2848,14 +2873,14 @@ function closeSuccessDeleteEmpleadoModal() {
 function initializePage() {
     console.log('Inicializando página de empleados...');
     // Cargar empleados de la ciudad seleccionada si existe
-    loadEmpleadosForSelectedCity();
+    loadEmpleadosFromStorage();
     // SIEMPRE solicitar selección al cargar esta interfaz
     setTimeout(() => promptForCitySelection(), 300);
     // Escuchar actualizaciones de ciudades
     window.addEventListener('ciudades:updated', () => {
         ciudadActual = getSelectedCity();
         // Recargar empleados cuando cambie la ciudad
-        loadEmpleadosForSelectedCity();
+        loadEmpleadosFromStorage();
     });
     
     // CONFIGURACIÓN DE MODALES: Cerrar al hacer clic fuera
@@ -2983,7 +3008,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Funcionalidad de cerrar sesión
                     sessionStorage.removeItem('isAuthenticated');
                     sessionStorage.removeItem('username');
-                    window.location.href = '../index.html';
+                    window.location.href = '../../index.html';
                 } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
                     // Navegar a administración de usuarios
                     console.log('Navegando a administrar usuarios');
@@ -3277,23 +3302,30 @@ function loadEmpleadosFromStorage() {
                 // Limpiar datos actuales en memoria
                 userCreatedEmpleados = {};
                 
+                // Limpiar todas las secciones primero
+                clearAllSections();
+                
                 // Cargar empleados desde localStorage
                 Object.values(empleados).forEach(empleado => {
                     userCreatedEmpleados[empleado.identificacion] = empleado;
                     console.log('Cargando empleado:', empleado.identificacion, empleado);
                     
-                    // Agregar a la sección correspondiente
-                    addEmpleadoToSection(empleado, false);
+                    // Agregar a la sección correspondiente (usando replaceIfExists = true para reconstrucción)
+                    addEmpleadoToSection(empleado, true);
                 });
                 
                 console.log('✅ Empleados cargados exitosamente desde localStorage');
                 return true;
             } else {
                 console.log(`No hay empleados en localStorage para ciudad ${city}`);
+                // Limpiar secciones y mostrar mensajes de "no hay datos"
+                clearAllSections();
                 return false;
             }
         } else {
             console.log('No hay datos en localStorage');
+            // Limpiar secciones y mostrar mensajes de "no hay datos"
+            clearAllSections();
             return false;
         }
     } catch (e) {
@@ -3384,7 +3416,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Inicializando página de empleados...');
     
     // Limpiar datos de prueba primero
-    limpiarDatosPrueba();
+    // limpiarDatosPrueba(); // COMENTADO TEMPORALMENTE PARA EVITAR BORRAR EMPLEADOS
     
     // Cargar empleados inmediatamente y también con delay
     loadEmpleadosFromStorage();

@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.setItem('username', username);
             
             // Redirigir al dashboard administrativo
-            window.location.href = 'pages/admin-ciudades.html';
+            window.location.href = 'pages/administrativo/admin-ciudades.html';
         }, 1500);
     });
 

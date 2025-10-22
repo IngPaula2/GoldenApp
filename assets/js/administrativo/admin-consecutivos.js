@@ -1005,14 +1005,8 @@ function cancelLogout() {
 
 function confirmLogout() {
     console.log('✅ Confirmando cerrar sesión...');
-    
-    // Simular cierre de sesión
-    showNotification('Cerrando sesión...', 'info');
-    
-    setTimeout(() => {
-        // Redirigir al login
-        window.location.href = '../index.html';
-    }, 1500);
+    // Redirigir inmediatamente al login (sin aviso ni delay)
+    window.location.href = '../../index.html';
 }
 
 // ========================================
