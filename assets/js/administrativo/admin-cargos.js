@@ -117,209 +117,51 @@ let userCreatedCargos = {};
 // Almacenar cargos predeterminados modificados (solo bucket activo en la UI)
 let modifiedPredeterminedCargos = {};
 
-// Ciudad actual (tomada de sessionStorage)
-let ciudadActual = sessionStorage.getItem('selectedCity') || '';
-
-/**
- * Almacén persistente por ciudad para cargos creados por usuario
- * Estructura: { [codigoCiudad]: { [codigoCargo]: { codigo, nombre, activo, ciudad } } }
- */
-const userCargosByCity = (function(){
+// Almacén persistente para cargos creados por usuario (sin ciudades)
+const userCargos = (function(){
     try {
-        const raw = localStorage.getItem('userCargosByCity');
+        const raw = localStorage.getItem('userCargos');
         return raw ? (JSON.parse(raw) || {}) : {};
     } catch (e) { return {}; }
 })();
 
-/**
- * Almacén persistente por ciudad para cargos predeterminados modificados
- * Estructura: { [codigoCiudad]: { [codigoCargo]: { codigo, nombre, activo, ciudad } } }
- */
-const modifiedCargosByCity = (function(){
+// Almacén persistente para cargos predeterminados modificados (sin ciudades)
+const modifiedCargos = (function(){
     try {
-        const raw = localStorage.getItem('modifiedCargosByCity');
+        const raw = localStorage.getItem('modifiedCargos');
         return raw ? (JSON.parse(raw) || {}) : {};
     } catch (e) { return {}; }
 })();
 
-function persistUserCargosByCity() {
-    try { localStorage.setItem('userCargosByCity', JSON.stringify(userCargosByCity)); } catch (e) {}
+function persistUserCargos() {
+    try { localStorage.setItem('userCargos', JSON.stringify(userCargos)); } catch (e) {}
 }
 
-function persistModifiedCargosByCity() {
-    try { localStorage.setItem('modifiedCargosByCity', JSON.stringify(modifiedCargosByCity)); } catch (e) {}
+function persistModifiedCargos() {
+    try { localStorage.setItem('modifiedCargos', JSON.stringify(modifiedCargos)); } catch (e) {}
 }
 
-function getSelectedCity() {
-    return sessionStorage.getItem('selectedCity') || '';
-}
-
-function getSelectedCityCode() {
-    try { return sessionStorage.getItem('selectedCity') || ''; } catch (e) { return ''; }
-}
-
-function loadCargosForSelectedCity() {
-    // Volcar buckets de la ciudad actual a memoria (vista)
-    const city = getSelectedCityCode();
-    const userBucket = (userCargosByCity && userCargosByCity[city]) ? userCargosByCity[city] : {};
-    const modifiedBucket = (modifiedCargosByCity && modifiedCargosByCity[city]) ? modifiedCargosByCity[city] : {};
-    
-    // Limpiar estructuras en memoria
+function loadCargos() {
+    // Cargar cargos sin restricción de ciudad
     try {
+        // Limpiar estructuras en memoria
         Object.keys(userCreatedCargos).forEach(k => delete userCreatedCargos[k]);
         Object.keys(modifiedPredeterminedCargos).forEach(k => delete modifiedPredeterminedCargos[k]);
-    } catch (e) {}
-    
-    // Rellenar en memoria
-    Object.keys(userBucket).forEach(code => { userCreatedCargos[code] = userBucket[code]; });
-    Object.keys(modifiedBucket).forEach(code => { modifiedPredeterminedCargos[code] = modifiedBucket[code]; });
-    
-    // Reconstruir tabla
-    try {
-        const tableBody = document.getElementById('cargosTableBody');
-        if (tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="no-data-message">
-                        <div class="no-data-content">
-                            <i class="fas fa-briefcase"></i>
-                            <p>No existen registros de cargos</p>
-                            <small>Haz clic en "Crear Cargo" para crear el primer registro</small>
-                        </div>
-                    </td>
-                </tr>`;
-            
-            // Agregar cargos predeterminados modificados
-            Object.values(modifiedPredeterminedCargos)
-                .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo)))
-                .forEach(c => addCargoToTable(c, true));
-            
-            // Agregar cargos creados por usuario
-            Object.values(userCreatedCargos)
-                .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo)))
-                .forEach(c => addCargoToTable(c, true));
-        }
-    } catch (e) {}
+        
+        // Cargar cargos creados por usuario
+        Object.keys(userCargos).forEach(code => { userCreatedCargos[code] = userCargos[code]; });
+        
+        // Cargar cargos predeterminados modificados
+        Object.keys(modifiedCargos).forEach(code => { modifiedPredeterminedCargos[code] = modifiedCargos[code]; });
+        
+        // Reconstruir tabla
+        refreshCargosView();
+    } catch (e) {
+        console.error('Error cargando cargos:', e);
+    }
 }
 
-// Fallback: mostrar modal local de selección de ciudad si no existe el global de ciudades
-function promptForCitySelection() {
-    // Usar modal global si está disponible
-    if (typeof window.showSelectCityModal === 'function') {
-        window.showSelectCityModal();
-        return;
-    }
-    // Inyectar un modal con la misma estructura/ids que el de Ciudades
-    let overlay = document.getElementById('selectCityModal');
-    let overlayContainer = document.querySelector('#selectCityModal.modal-overlay');
-    // Si no existe, crear overlay y estructura
-    if (!overlay || !overlayContainer) {
-        const container = document.createElement('div');
-        container.id = 'selectCityModal';
-        container.className = 'modal-overlay';
-        container.style.display = 'none';
-        container.innerHTML = `
-            <div class="modal" style="max-width: 420px; width: 90%;">
-                <div class="modal-header">
-                    <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
-                    <button class="modal-close" onclick="hideSelectCityModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="citySelect" class="form-label">Ciudad *</label>
-                        <div class="select-container">
-                            <select id="citySelect" class="form-select">
-                                <option value="">Seleccione la ciudad</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
-                </div>
-            </div>`;
-        document.body.appendChild(container);
-        // Cerrar al hacer clic fuera
-        container.addEventListener('click', (e) => {
-            if (e.target === container) {
-                container.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-        // Botón seleccionar
-        const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
-        bSeleccionar.addEventListener('click', () => {
-            const sel = container.querySelector('#citySelect');
-            const value = sel.value;
-            if (!value) { showNotification('Por favor, seleccione una ciudad', 'warning'); return; }
-            sessionStorage.setItem('selectedCity', value);
-            ciudadActual = value;
-            container.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            // Cargar cargos de la ciudad seleccionada
-            loadCargosForSelectedCity();
-            showNotification('Ciudad seleccionada: ' + value, 'success');
-        });
-        // Exponer funciones con mismos nombres si no existen
-        if (typeof window.showSelectCityModal !== 'function') {
-            window.showSelectCityModal = function() {
-                try { populateCitySelectOptions(); } catch (e) {}
-                container.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            };
-        }
-        if (typeof window.hideSelectCityModal !== 'function') {
-            window.hideSelectCityModal = function() {
-                container.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            };
-        }
-    }
-    // Poblar y mostrar
-    function populateCitySelectOptions() {
-        const sel = document.getElementById('citySelect');
-        if (!sel) return;
-        let ciudades = {};
-        if (typeof window.getCiudadesData === 'function') {
-            try { ciudades = window.getCiudadesData(); } catch (e) { ciudades = {}; }
-        } else {
-            // Fallback SIEMPRE a localStorage si existe data válida
-            try {
-                const raw = localStorage.getItem('ciudadesData');
-                const parsed = raw ? JSON.parse(raw) : {};
-                if (parsed && typeof parsed === 'object') {
-                    ciudades = Object.fromEntries(
-                        Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
-                    );
-                }
-            } catch (e) { ciudades = {}; }
-        }
-        const current = sel.value;
-        sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
-        Object.values(ciudades)
-            .filter(c => c.activo !== false) // Solo ciudades activas
-            .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo)))
-            .forEach(c => {
-                const opt = document.createElement('option');
-                const code = String(c.codigo || '').toUpperCase();
-                const name = String(c.nombre || '').toUpperCase();
-                opt.value = c.codigo;
-                opt.textContent = `${code} - ${name}`;
-                sel.appendChild(opt);
-            });
-        if (current && ciudades[current] && ciudades[current].activo !== false) sel.value = current;
-    }
-    // Reaccionar cuando se creen/actualicen ciudades desde la interfaz de Ciudades
-    try { window.addEventListener('ciudades:updated', populateCitySelectOptions); } catch (e) {}
-    populateCitySelectOptions();
-    // Abrir modal
-    if (typeof window.showSelectCityModal === 'function') {
-        window.showSelectCityModal();
-    }
-}
+// Función eliminada - ya no se necesita selección de ciudad
 
 /**
  * Normaliza el nombre de la sección para comparaciones
@@ -345,13 +187,6 @@ function normalizeSection(seccion) {
  */
 function showCreateCargoModal() {
     const modal = document.getElementById('createCargoModal');
-    // Validar ciudad seleccionada antes de permitir crear cargos
-    ciudadActual = getSelectedCity();
-    if (!ciudadActual) {
-        promptForCitySelection();
-        showNotification('Por favor, seleccione una ciudad antes de crear cargos', 'warning');
-        return;
-    }
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
 }
@@ -571,19 +406,15 @@ function updateCargoInUI(cargoId, cargoData) {
         };
     } else {
         // Si no está en userCreatedCargos, es un cargo predeterminado
-        // Guardarlo en modifiedPredeterminedCargos por ciudad
-        const city = getSelectedCityCode();
-        if (!userCargosByCity[city]) userCargosByCity[city] = {};
-        if (!modifiedCargosByCity[city]) modifiedCargosByCity[city] = {};
+        // Guardarlo en modifiedPredeterminedCargos
         const toSave = {
             codigo: cargoData.tId,
             nombre: cargoData.tNombre,
             seccion: cargoData.bSeccion,
-            activo: true,
-            ciudad: city
+            activo: true
         };
-        modifiedCargosByCity[city][cargoId] = toSave;
-        persistModifiedCargosByCity();
+        modifiedCargos[cargoId] = toSave;
+        persistModifiedCargos();
         // También reflejar en memoria
         modifiedPredeterminedCargos[cargoId] = toSave;
     }
@@ -848,32 +679,8 @@ function handleSearchCargo() {
  */
 function initializePage() {
     console.log('Inicializando página de cargos...');
-    // Cargar cargos de la ciudad seleccionada si existe
-    loadCargosForSelectedCity();
-    // SIEMPRE solicitar selección al cargar esta interfaz
-    setTimeout(() => promptForCitySelection(), 300);
-    // Mantener sincronizada la ciudad actual y, si existe el select, refrescar opciones
-    window.addEventListener('ciudades:updated', () => {
-        ciudadActual = getSelectedCity();
-        // Si el modal local está presente, refrescar opciones
-        const sel = document.getElementById('citySelect');
-        if (sel) {
-            try {
-                const ciudades = (typeof window.getCiudadesData === 'function') ? window.getCiudadesData() : {};
-                const current = sel.value;
-                sel.innerHTML = '<option value="">Seleccione la ciudad</option>';
-                Object.values(ciudades)
-                    .sort((a, b) => a.codigo.localeCompare(b.codigo))
-                    .forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c.codigo;
-                        opt.textContent = `${c.codigo} - ${c.nombre}`;
-                        sel.appendChild(opt);
-                    });
-                if (current && ciudades[current]) sel.value = current;
-            } catch (e) {}
-        }
-    });
+    // Cargar cargos sin restricción de ciudad
+    loadCargos();
     
     // Los formularios ya no existen, se manejan con onclick en los botones
     console.log('Formularios configurados para manejo directo');
@@ -1018,19 +825,15 @@ function formatCargoCode(code) {
 function addCargoToSection(cargoData) {
     const { bSeccion, tId, tNombre } = cargoData;
     
-    // Guardar por ciudad y persistir
-    const city = getSelectedCityCode();
-    if (!city) { showNotification('Seleccione una ciudad primero', 'warning'); return; }
-    if (!userCargosByCity[city]) userCargosByCity[city] = {};
+    // Guardar sin restricción de ciudad
     const toSave = {
         codigo: tId,
         nombre: tNombre,
         seccion: bSeccion,
-        activo: true,
-        ciudad: city
+        activo: true
     };
-    userCargosByCity[city][tId] = toSave;
-    persistUserCargosByCity();
+    userCargos[tId] = toSave;
+    persistUserCargos();
     // También reflejar en memoria y UI actual
     userCreatedCargos[tId] = toSave;
     
@@ -1544,11 +1347,15 @@ function confirmToggleCargo() {
     if (codigo != null) {
         const cargo = userCreatedCargos[codigo] || modifiedPredeterminedCargos[codigo];
         if (cargo) {
-            const city = getSelectedCityCode();
-            if (!userCargosByCity[city]) userCargosByCity[city] = {};
-            const toSave = { ...cargo, ciudad: city };
-            userCargosByCity[city][codigo] = toSave;
-            persistUserCargosByCity();
+            // Guardar sin restricción de ciudad
+            const toSave = { ...cargo };
+            if (userCreatedCargos[codigo]) {
+                userCargos[codigo] = toSave;
+                persistUserCargos();
+            } else if (modifiedPredeterminedCargos[codigo]) {
+                modifiedCargos[codigo] = toSave;
+                persistModifiedCargos();
+            }
             const confirmModal = document.getElementById('confirmToggleCargoModal');
             if (confirmModal) confirmModal.classList.remove('show');
             showSuccessToggleCargoModal(codigo);

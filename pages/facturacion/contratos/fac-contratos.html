@@ -140,7 +140,13 @@
             <!-- Sección de Contratos -->
             <section class="contracts-section">
                 <div class="section-header">
-                    <h2>Contratos</h2>
+                    <div class="section-title">
+                        <h2>Contratos</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
                     <div class="action-buttons">
                         <button id="bBuscarContrato" class="btn btn-primary" onclick="showSearchContractModal()">Buscar Contrato</button>
                         <button id="bCrearContrato" class="btn btn-primary" onclick="showCreateContractModal()">Crear Contrato</button>
@@ -149,16 +155,16 @@
                 </div>
 
                 <div class="data-table">
-                    <table class="table" id="contractsTable">
+                    <table class="table contracts-table" id="contractsTable">
                         <thead>
                             <tr>
                                 <th># Contrato</th>
                                 <th>Record Produccion</th>
-                                <th>Factura</th>
                                 <th>Identificacion</th>
                                 <th>Titular</th>
                                 <th>Plan</th>
                                 <th>Ejecutivo</th>
+                                <th>Estado</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
@@ -184,7 +190,7 @@
          ======================================== -->
     
     <!-- Modal de Selección de Ciudad (al ingresar) -->
-    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+    <div class="modal-overlay" id="selectCityModal">
         <div class="modal" style="max-width: 520px; width: 95%;">
             <div class="modal-header">
                 <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
@@ -220,13 +226,21 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="searchContractId" class="form-label">Número de Contrato *</label>
-                    <input type="text" id="searchContractId" class="form-input" placeholder="Ingrese el número de contrato">
+                    <label class="form-label">Tipo de Búsqueda *</label>
+                    <select id="searchType" class="form-input" onchange="updateSearchPlaceholder()">
+                        <option value="contractNumber">Número de Contrato</option>
+                        <option value="clientName">Nombre del Titular</option>
+                        <option value="clientId">Identificación del Titular</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchValue" class="form-label" id="searchLabel">Número de Contrato *</label>
+                    <input type="text" id="searchValue" class="form-input" placeholder="Ingrese el número de contrato">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideSearchContractModal()">Cancelar</button>
-                <button class="btn btn-primary" id="bBuscarContrato">Buscar</button>
+                <button class="btn btn-primary" id="bBuscarContratoModal">Buscar</button>
             </div>
         </div>
     </div>
@@ -254,11 +268,11 @@
                         </div>
                     </div>
                     
-                    <!-- Segunda fila: Identificación del Cliente, Nombre del Titular, Plan -->
+                    <!-- Segunda fila: Identificación del Titular, Nombre del Titular, Plan -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="clientId" class="form-label">Identificación del Cliente *</label>
-                            <input type="text" id="clientId" class="form-input" placeholder="IDENTIFICACIÓN DEL CLIENTE" required>
+                            <label for="clientId" class="form-label">Identificación del Titular *</label>
+                            <input type="text" id="clientId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required>
                             <div id="clientNameDisplay" class="client-name-display" style="display: none;"></div>
                         </div>
                         <div class="form-group">
@@ -299,9 +313,9 @@
 
     <!-- Modal de Reporte -->
     <div class="modal-overlay" id="reportModal" style="display: none;">
-        <div class="modal modal-large">
+        <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">GENERAR REPORTE</h3>
+                <h3 class="modal-title">GENERAR REPORTE DE CONTRATOS</h3>
                 <button class="modal-close" onclick="hideReportModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -309,23 +323,11 @@
             <div class="modal-body">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="reportType" class="form-label">Tipo de Reporte *</label>
-                        <div class="select-container">
-                            <select id="reportType" class="form-select" required>
-                                <option value="">Seleccione el tipo</option>
-                                <option value="contratos">Reporte de Contratos</option>
-                                <option value="ventas">Reporte de Ventas</option>
-                                <option value="cobros">Reporte de Cobros</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="startDate" class="form-label">Fecha Inicio *</label>
+                        <label for="startDate" class="form-label">Fecha Inicial *</label>
                         <input type="date" id="startDate" class="form-input" required>
                     </div>
                     <div class="form-group">
-                        <label for="endDate" class="form-label">Fecha Fin *</label>
+                        <label for="endDate" class="form-label">Fecha Final *</label>
                         <input type="date" id="endDate" class="form-input" required>
                     </div>
                 </div>
@@ -359,6 +361,117 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="hidePlanSelectionModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Toggle de Contrato -->
+    <div class="modal-overlay" id="confirmToggleContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button class="modal-close" onclick="cancelToggleContract()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message" style="margin: 0 auto;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelToggleContract()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmToggleContract()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Toggle de Contrato -->
+    <div class="modal-overlay" id="successToggleContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessToggleContractModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message" style="margin: 0 auto;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessToggleContractModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Crear Contrato -->
+    <div class="modal-overlay" id="confirmCreateContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR CREACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreateContract()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message" style="margin: 0 auto;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelCreateContract()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmCreateContract()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Contrato -->
+    <div class="modal-overlay" id="successCreateContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreateContractModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message" style="margin: 0 auto;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessCreateContractModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Actualizar Contrato -->
+    <div class="modal-overlay" id="confirmUpdateContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR ACTUALIZACIÓN</h3>
+                <button class="modal-close" onclick="cancelUpdateContract()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message" style="margin: 0 auto;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelUpdateContract()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmUpdateContract()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar Contrato -->
+    <div class="modal-overlay" id="successUpdateContractModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessUpdateContractModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message" style="margin: 0 auto;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessUpdateContractModal()">Volver</button>
             </div>
         </div>
     </div>

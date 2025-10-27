@@ -46,7 +46,103 @@
 .table { width: 100%; border-collapse: collapse; font-size: 16px; }
 .table thead { background: #f8f9fa; }
 .table th { padding: 18px 12px; text-align: left; font-weight: 700; font-size: 15px; text-transform: uppercase; }
-.table td { padding: 18px 12px; font-size: 15px; border-bottom: 1px solid #e9ecef; text-transform: uppercase; }
+.table td { 
+    padding: 18px 12px; 
+    font-size: 15px; 
+    border-bottom: 1px solid #e9ecef; 
+    text-transform: uppercase; 
+    vertical-align: middle;
+}
+
+/* Estilos específicos para cada columna */
+.contract-number {
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    min-width: 120px;
+}
+
+.production-record {
+    text-align: center;
+    min-width: 100px;
+}
+
+/* Estilo eliminado - columna de factura ya no existe */
+
+.client-id {
+    text-align: center;
+    min-width: 120px;
+    font-weight: 600;
+}
+
+.client-name {
+    text-align: left;
+    min-width: 150px;
+    font-weight: 500;
+}
+
+.plan-cell {
+    text-align: center;
+    min-width: 120px;
+}
+
+.executive-name {
+    text-align: left;
+    min-width: 150px;
+    font-weight: 500;
+}
+
+.status-cell {
+    text-align: center;
+    min-width: 140px;
+}
+
+.action-buttons-cell {
+    text-align: center;
+    min-width: 100px;
+}
+
+.action-buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.btn-edit {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-delete {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
 .table tbody tr:hover { background: #f8f9fa; }
 
 .no-data-message { text-align: center; padding: 32px 16px; }
@@ -232,7 +328,7 @@
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 2000 !important;
     backdrop-filter: blur(5px);
     margin: 0;
     padding: 0;
@@ -242,23 +338,74 @@
     display: flex;
 }
 
+/* Modal de edición debe aparecer al frente de resultados de búsqueda */
+#createContractModal {
+    z-index: 10000 !important;
+}
+
+/* Modal de confirmación debe aparecer al frente de todo */
+#confirmUpdateContractModal {
+    z-index: 25000 !important;
+}
+
+/* Modal de confirmación de toggle debe aparecer al frente de todo */
+#confirmToggleContractModal {
+    z-index: 15000 !important;
+}
+
+/* Modal de éxito de toggle debe aparecer al frente de todo */
+#successToggleContractModal {
+    z-index: 15000 !important;
+}
+
+/* Modal de selección de planes debe aparecer al frente de todo */
+#planSelectionModal {
+    z-index: 20000 !important;
+}
+
+/* Modal de éxito de actualización debe aparecer al frente de todo */
+#successUpdateContractModal {
+    z-index: 25000 !important;
+}
+
+/* Modal de confirmación de creación debe aparecer al frente de todo */
+#confirmCreateContractModal {
+    z-index: 25000 !important;
+}
+
+/* Modal de éxito de creación debe aparecer al frente de todo */
+#successCreateContractModal {
+    z-index: 25000 !important;
+}
+
+/* Aumentar altura del modal de selección de planes */
+#planSelectionModal .modal {
+    max-height: 80vh;
+    height: 80vh;
+    min-height: 600px;
+}
+
+#planSelectionModal .modal-body {
+    max-height: calc(80vh - 200px);
+    overflow-y: auto;
+    padding: 20px;
+}
+
 .modal {
     background: rgba(229, 227, 227, 0.925);
     border-radius: 12px;
     padding: 30px;
-    max-width: 800px;
-    width: 95%;
+    max-width: 500px;
+    width: 90%;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     border: 1px solid #dbcd7a;
-    margin: 0 auto;
-    position: relative;
-    left: 0;
-    right: 0;
 }
 
 .modal-large {
     max-width: 800px;
     width: 95%;
+    max-height: 90vh;
+    height: auto;
 }
 
 .modal-header {
@@ -272,35 +419,51 @@
 
 .modal-header h3 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    color: #1a1a1a;
-    letter-spacing: 0.5px;
+    color: #333;
     text-transform: uppercase;
     flex: 1;
     text-align: center;
+    padding: 0;
+    width: 100%;
 }
 
 .modal-close {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 18px;
+    color: #666;
     cursor: pointer;
-    color: #6c757d;
-    padding: 0;
+    padding: 5px;
+    border-radius: 50%;
     width: 30px;
     height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
 }
 
 .modal-close:hover {
-    color: #495057;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
 }
 
 .modal-body {
     margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    align-items: stretch;
 }
 
 .modal-footer {
@@ -332,7 +495,6 @@
     font-weight: 500;
     color: #495057;
     font-size: 0.9rem;
-    text-transform: none !important;
 }
 
 /* Form Inputs - Estilo empleados */
@@ -346,6 +508,18 @@
     background-color: white;
     text-transform: none !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    text-align: left;
+    direction: ltr;
+}
+
+.form-input::placeholder {
+    color: #6c757d;
+    opacity: 1;
+    font-size: 16px;
+    text-align: left;
+    position: relative;
+    left: 0;
 }
 
 .form-input:focus {
@@ -372,29 +546,29 @@
 .form-select {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
     transition: border-color 0.3s ease;
     background-color: white;
     text-transform: none !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
+    color: #000;
 }
 
 .form-select:focus {
     outline: none;
-    border-color: #dbcd7a;
-    box-shadow: 0 0 0 3px rgba(219, 205, 122, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
 }
 
 .form-select option {
     padding: 8px 12px;
     background-color: white;
-    color: #495057;
+    color: #000;
 }
 
 /* Estilos para badges */
@@ -464,7 +638,31 @@
 
 /* Estilos para validación numérica */
 .numeric-input {
-    text-align: right;
+    text-align: left;
+}
+
+.numeric-input::placeholder {
+    text-align: left;
+    color: #6c757d;
+    opacity: 1;
+    font-size: 16px;
+    position: static;
+    left: auto;
+    transform: none;
+}
+
+/* Estilos específicos para campos de contrato */
+#contractNumber::placeholder,
+#productionRecord::placeholder {
+    text-align: left;
+    color: #6c757d;
+    opacity: 1;
+    font-size: 16px;
+    position: static;
+    left: auto;
+    transform: none;
+    display: inline-block;
+    width: auto;
 }
 
 /* Removido el estilo de validación visual para campos numéricos */
@@ -505,6 +703,12 @@
     position: relative;
     display: flex;
     align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .search-icon {
@@ -534,24 +738,70 @@
     color: #6c757d;
 }
 
+/* Estilos mejorados para búsqueda */
+.search-container {
+    position: sticky;
+    top: 0;
+    background: transparent;
+    z-index: 10;
+    padding: 0;
+    margin-bottom: 16px;
+    border-bottom: none;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.search-input {
+    font-size: 16px;
+    padding: 14px 14px 14px 45px;
+    border: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    background: transparent;
+    outline: none;
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+.search-input-container:focus-within {
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+    transform: translateY(-1px);
+}
+
 /* Estilos para grid de planes - Modificado para diseño horizontal */
 .plans-grid {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 400px;
+    max-height: 65vh;
     overflow-y: auto;
+    padding: 8px;
+    flex: 1;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
 }
 
 .plan-card {
     border: 2px solid #e9ecef;
     border-radius: 8px;
-    padding: 12px 16px;
+    padding: 16px 20px;
     cursor: pointer;
     transition: all 0.3s ease;
     background: #fff;
     width: 100%;
-    min-height: 60px;
+    min-height: 80px;
 }
 
 .plan-card:hover {
@@ -610,6 +860,42 @@
 }
 
 /* Responsive design */
+@media (min-width: 1200px) {
+    .modal-large {
+        max-width: 1000px;
+        width: 90%;
+        max-height: 90vh;
+        height: auto;
+    }
+    
+    .plans-grid {
+        max-height: 70vh;
+    }
+    
+    .plan-card {
+        padding: 20px 24px;
+        min-height: 90px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .modal-large {
+        max-width: 1200px;
+        width: 85%;
+        max-height: 90vh;
+        height: auto;
+    }
+    
+    .plans-grid {
+        max-height: 75vh;
+    }
+    
+    .plan-card {
+        padding: 24px 28px;
+        min-height: 100px;
+    }
+}
+
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
@@ -618,6 +904,11 @@
     .modal {
         width: 95%;
         margin: 1rem;
+    }
+    
+    .modal-large {
+        max-width: 95%;
+        width: 95%;
     }
     
     .modal-header,
@@ -646,6 +937,7 @@
     
     .plans-grid {
         grid-template-columns: 1fr;
+        max-height: 500px;
     }
 }
 
@@ -707,7 +999,7 @@
 .plan-card .plan-details-row {
     display: flex !important;
     align-items: center !important;
-    gap: 24px !important;
+    gap: 32px !important;
     flex-wrap: wrap !important;
     flex: 1 !important;
 }
@@ -765,4 +1057,642 @@
     .plan-card .plan-detail-inline {
         font-size: 12px !important;
     }
+}
+
+/* ========================================
+   ESTILOS PARA INFORMACIÓN DE CIUDAD SELECCIONADA
+   ======================================== */
+
+/* Section title con información de ciudad */
+.section-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.section-title h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.current-city-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    color: #6b7280;
+}
+
+.current-city-info i {
+    color: #DEB448;
+    font-size: 0.8rem;
+}
+
+.current-city-info span {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Modal de selección de ciudad */
+#selectCityModal.show {
+    display: flex;
+}
+
+/* ========================================
+   NOTIFICACIONES
+   ======================================== */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    z-index: 99999 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+    max-width: 350px;
+    word-wrap: break-word;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-success {
+    background: #28a745 !important;
+    border: none !important;
+    color: white !important;
+}
+
+.notification-warning {
+    background: #f59e0b !important;
+    border: none !important;
+}
+
+.notification-error {
+    background: #ef4444 !important;
+    border: none !important;
+}
+
+.notification-info {
+    background: #3b82f6 !important;
+    border: none !important;
+}
+
+/* ========================================
+   ESTILOS PARA TABLA DE CONTRATOS
+   ======================================== */
+
+/* Botón de editar amarillo - Estilo exacto de la imagen */
+.btn-edit {
+    background: #DEB448 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-edit:hover {
+    background: #c9a43a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4) !important;
+}
+
+.btn-edit i {
+    color: #1a1a1a !important;
+    font-size: 14px !important;
+}
+
+/* Toggle switch animado - Estilo compacto para tabla */
+.animated-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 28px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* Contenedor del toggle switch */
+.status-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.status-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.status-text {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.status-active {
+    color: #22c55e;
+    background-color: #dcfce7;
+}
+
+.status-inactive {
+    color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.animated-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 
+        0 4px 8px rgba(255, 71, 87, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    /* Asegurar que el toggle esté contenido */
+    max-width: 60px;
+    max-height: 30px;
+    z-index: 1;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.toggle-slider:after {
+    content: "OFF";
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Estado ON (Activo) */
+.animated-toggle input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #2ed573, #27c565);
+    box-shadow: 
+        0 4px 8px rgba(46, 213, 115, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.animated-toggle input:checked + .toggle-slider:before {
+    transform: translateX(32px);
+}
+
+.animated-toggle input:checked + .toggle-slider:after {
+    content: "ON";
+    left: 8px;
+    right: auto;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Efectos hover suaves */
+.animated-toggle:hover .toggle-slider {
+    opacity: 0.9;
+}
+
+.animated-toggle:hover .toggle-slider:before {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para columna de estado */
+td:nth-child(7) {
+    font-weight: 500;
+    color: #495057;
+    text-transform: uppercase;
+}
+
+/* Mantener tamaño y justificación constante de la tabla */
+.contracts-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.contracts-table th,
+.contracts-table td {
+    text-align: left;
+    vertical-align: middle;
+    padding: 12px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Columnas específicas con ancho fijo - Actualizado sin columna de factura */
+.contracts-table th:nth-child(1),
+.contracts-table td:nth-child(1) { width: 15%; } /* Número de Contrato */
+.contracts-table th:nth-child(2),
+.contracts-table td:nth-child(2) { width: 12%; } /* Record de Producción */
+.contracts-table th:nth-child(3),
+.contracts-table td:nth-child(3) { width: 15%; } /* ID Cliente */
+.contracts-table th:nth-child(4),
+.contracts-table td:nth-child(4) { width: 20%; } /* Nombre Cliente */
+.contracts-table th:nth-child(5),
+.contracts-table td:nth-child(5) { width: 15%; } /* Plan */
+.contracts-table th:nth-child(6),
+.contracts-table td:nth-child(6) { width: 15%; } /* Ejecutivo */
+.contracts-table th:nth-child(7),
+.contracts-table td:nth-child(7) { width: 8%; }  /* Estado */
+.contracts-table th:nth-child(8),
+.contracts-table td:nth-child(8) { width: 15%; } /* Opciones */
+
+/* Asegurar que la columna de opciones mantenga su tamaño */
+.action-buttons-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 100px;
+    max-width: 100px;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    padding: 4px;
+}
+
+/* Prevenir que el toggle afecte el tamaño de la tabla */
+.animated-toggle {
+    flex-shrink: 0;
+    width: 60px !important;
+    height: 28px !important;
+}
+
+/* Asegurar que el botón de editar mantenga su tamaño */
+.btn-edit {
+    flex-shrink: 0;
+    width: 32px !important;
+    height: 32px !important;
+}
+
+/* Prevenir cambios de tamaño en la tabla al cambiar estados */
+.contracts-table tbody tr {
+    height: 60px;
+    min-height: 60px;
+}
+
+.contracts-table tbody td {
+    height: 60px;
+    min-height: 60px;
+    vertical-align: middle;
+}
+
+/* ========================================
+   ESTILOS MEJORADOS PARA NUEVO LAYOUT DE OPCIONES
+   ======================================== */
+
+/* Contenedor de botones de acción mejorado */
+.action-buttons-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px;
+    min-height: 40px;
+    width: 100%;
+}
+
+/* Botón de editar con mejor espaciado */
+.btn-edit {
+    background: #DEB448 !important;
+    color: #1a1a1a !important;
+    border: none !important;
+    border-radius: 6px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3) !important;
+    transition: all 0.3s ease !important;
+    flex-shrink: 0;
+}
+
+.btn-edit:hover {
+    background: #c9a43a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4) !important;
+}
+
+.btn-edit i {
+    color: #1a1a1a !important;
+    font-size: 14px !important;
+}
+
+/* Toggle switch como en la imagen - verde con ON */
+.status-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.status-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.status-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ef4444;
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: none;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-slider:after {
+    content: "OFF";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+}
+
+/* Estado ON (Activo) - Verde con ON */
+.status-toggle input:checked + .toggle-slider {
+    background: #22c55e;
+}
+
+.status-toggle input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+}
+
+.status-toggle input:checked + .toggle-slider:after {
+    content: "ON";
+    left: 8px;
+    right: auto;
+    color: white;
+}
+
+/* Efectos hover suaves */
+.status-toggle:hover .toggle-slider {
+    opacity: 0.9;
+}
+
+/* Indicador de estado en columna ESTADO */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+}
+
+/* Badge de estado como en la imagen - texto simple gris */
+.status-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    color: #6b7280;
+    background: none;
+    border: none;
+}
+
+.status-inactive {
+    color: #6b7280;
+    background: none;
+    border: none;
+}
+
+/* Mejorar el espaciado general de la tabla */
+.contracts-table td {
+    padding: 12px 8px;
+    vertical-align: middle;
+}
+
+/* Asegurar que las columnas mantengan su proporción */
+.contracts-table th:nth-child(7),
+.contracts-table td:nth-child(7) { 
+    width: 8%; 
+    text-align: center;
+}  /* Estado */
+
+.contracts-table th:nth-child(8),
+.contracts-table td:nth-child(8) { 
+    width: 15%; 
+    text-align: center;
+    min-width: 120px;
+} /* Opciones */
+
+/* ========================================
+   ESTILOS PARA RESULTADOS DE BÚSQUEDA
+   ======================================== */
+
+.search-results-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 16px;
+    border: 2px solid #DEB448;
+}
+
+.search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #DEB448;
+    border-radius: 6px 6px 0 0;
+}
+
+.search-results-header h3 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.search-results-content {
+    padding: 20px;
+}
+
+.search-results-content p {
+    margin: 0 0 16px 0;
+    color: #495057;
+    font-size: 14px;
+}
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.search-result-item:hover {
+    background: #e9ecef;
+    border-color: #DEB448;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.2);
+}
+
+.result-info {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.result-info strong {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.result-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+.result-actions .btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+/* Estilos para modal de detalles */
+.contract-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row strong {
+    min-width: 150px;
+    color: #495057;
+    font-weight: 600;
+}
+
+/* Botón de ver detalles (ojo) */
+.btn-view {
+    background: #DEB448 !important;
+    color: #1a1a1a !important;
+    border: none !important;
+    border-radius: 6px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(222, 180, 72, 0.3) !important;
+    transition: all 0.3s ease !important;
+    flex-shrink: 0;
+}
+
+.btn-view:hover {
+    background: #c9a43a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.4) !important;
+}
+
+.btn-view i {
+    color: #1a1a1a !important;
+    font-size: 14px !important;
 }
