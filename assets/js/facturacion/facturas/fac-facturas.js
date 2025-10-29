@@ -21,8 +21,9 @@ let invoicesData = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeModals();
-    loadInvoicesData();
     initializeUserDropdown();
+    initializeCitySelection();
+    loadInvoicesData();
 });
 
 // ========================================
@@ -45,12 +46,134 @@ function initializeModals() {
             hideAllModals();
         }
     });
+
+    // Botón de seleccionar ciudad como en contratos
+    const bSeleccionarCiudad = document.getElementById('bSeleccionarCiudad');
+    if (bSeleccionarCiudad) {
+        bSeleccionarCiudad.addEventListener('click', handleSelectCity);
+    }
 }
 
 function hideAllModals() {
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.style.display = 'none';
     });
+}
+
+// ========================================
+// SELECCIÓN DE CIUDAD (PATRÓN REUTILIZABLE)
+// ========================================
+
+function initializeCitySelection() {
+    try {
+        // Asegurar datos de ciudades mínimos si aplica
+        if (!verificarDatosCiudades()) {
+            restaurarDatosCiudadesBasicos();
+        }
+    } catch (e) {
+        // Si no existen helpers, continuar sin bloquear
+    }
+
+    // Resetear selección previa al entrar
+    try { sessionStorage.removeItem('selectedCity'); } catch (e) {}
+
+    // Mostrar modal inmediatamente
+    showSelectCityModal();
+}
+
+function showSelectCityModal() {
+    const modal = document.getElementById('selectCityModal');
+    if (modal) {
+        populateCitySelectOptions();
+        modal.style.display = 'flex';
+        modal.style.zIndex = '9999';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => { document.getElementById('citySelect')?.focus(); }, 100);
+    }
+}
+
+function hideSelectCityModal() {
+    const modal = document.getElementById('selectCityModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function populateCitySelectOptions() {
+    const citySelect = document.getElementById('citySelect');
+    if (!citySelect) return;
+
+    let ciudades = {};
+    try {
+        if (typeof window.getCiudadesData === 'function') {
+            ciudades = window.getCiudadesData() || {};
+        } else {
+            const raw = localStorage.getItem('ciudadesData');
+            const data = raw ? JSON.parse(raw) : {};
+            ciudades = Object.fromEntries(
+                Object.entries(data).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+            );
+        }
+    } catch (e) {
+        ciudades = {};
+    }
+
+    citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
+
+    Object.values(ciudades)
+        .filter(c => c && c.activo !== false)
+        .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+        .forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.codigo;
+            opt.textContent = `${c.codigo} - ${String(c.nombre || '').toUpperCase()}`;
+            citySelect.appendChild(opt);
+        });
+}
+
+function handleSelectCity() {
+    const citySelect = document.getElementById('citySelect');
+    const selectedCity = citySelect ? citySelect.value : '';
+    if (!selectedCity) {
+        showNotification('Por favor, seleccione una ciudad', 'warning');
+        return;
+    }
+
+    try { sessionStorage.setItem('selectedCity', selectedCity); } catch (e) {}
+    updateCurrentCityName(selectedCity);
+    hideSelectCityModal();
+
+    // TODO: cargar datos dependientes de la ciudad (cuando existan endpoints)
+    // Por ahora solo refrescar listado local
+    loadInvoicesData();
+
+    const cityName = getCityNameByCode(selectedCity);
+    const fullCityName = cityName ? `${selectedCity} - ${cityName}` : selectedCity;
+    showNotification(`Ciudad seleccionada: ${fullCityName}`, 'success');
+}
+
+
+function getCityNameByCode(cityCode) {
+    try {
+        if (typeof window.getCiudadesData === 'function') {
+            const ciudades = window.getCiudadesData() || {};
+            return ciudades[cityCode]?.nombre || '';
+        }
+        const raw = localStorage.getItem('ciudadesData');
+        if (!raw) return '';
+        const data = JSON.parse(raw);
+        return data && data[cityCode] ? data[cityCode].nombre || '' : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function updateCurrentCityName(cityCode) {
+    const span = document.getElementById('currentCityName');
+    if (!span) return;
+    const name = getCityNameByCode(cityCode);
+    span.textContent = name ? `${cityCode} - ${name}`.toUpperCase() : `${cityCode}`;
 }
 
 // ========================================
@@ -69,22 +192,130 @@ function hideSearchInvoiceModal() {
 
 function showCreateInvoiceModal() {
     document.getElementById('createInvoiceModal').style.display = 'flex';
-    // Establecer fecha actual
-    document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
-}
-
-function hideCreateInvoiceModal() {
-    document.getElementById('createInvoiceModal').style.display = 'none';
+    
+    // Establecer fecha actual automáticamente
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('invoiceDate').value = today;
+    
+    // Obtener próximo número de factura desde consecutivos
+    loadNextInvoiceNumber();
+    
+    // Limpiar formulario
     clearCreateInvoiceForm();
 }
 
 function clearCreateInvoiceForm() {
-    document.getElementById('invoiceNumber').value = '';
-    document.getElementById('invoiceDate').value = '';
+    document.getElementById('clientId').value = '';
     document.getElementById('clientName').value = '';
+    document.getElementById('contractSelect').innerHTML = '<option value="">Seleccione el contrato</option>';
+    document.getElementById('firstPaymentDate').value = '';
+    document.getElementById('planInfo').value = '';
+    document.getElementById('executiveInfo').value = '';
     document.getElementById('invoiceValue').value = '';
-    document.getElementById('invoiceStatus').value = '';
-    document.getElementById('dueDate').value = '';
+    
+    // Ocultar display de nombre del cliente
+    const clientNameDisplay = document.getElementById('clientNameDisplay');
+    if (clientNameDisplay) {
+        clientNameDisplay.style.display = 'none';
+    }
+}
+
+function loadNextInvoiceNumber() {
+    // TODO: Integrar con API de consecutivos
+    // Por ahora usar número incremental
+    const nextNumber = invoicesData.length + 1;
+    document.getElementById('invoiceNumber').value = nextNumber.toString().padStart(8, '0');
+}
+
+// Event listener para buscar titular por ID
+document.getElementById('clientId')?.addEventListener('input', function() {
+    const clientId = this.value.trim();
+    if (clientId.length >= 6) {
+        searchTitularByCedula(clientId);
+    } else {
+        // Limpiar campos si el ID es muy corto
+        document.getElementById('clientName').value = '';
+        document.getElementById('contractSelect').innerHTML = '<option value="">Seleccione el contrato</option>';
+        clearContractInfo();
+    }
+});
+
+function searchTitularByCedula(cedula) {
+    // TODO: Integrar con API de titulares
+    // Por ahora simular búsqueda
+    console.log(`Buscando titular con cédula: ${cedula}`);
+    
+    // Simular datos de ejemplo
+    const titularesEjemplo = {
+        '100002323': { nombre: 'ANDREA PEREZ VARGAS', contratos: [
+            { id: 1, numero: '10120014', plan: 'ESPECIAL', ejecutivo: 'PAULA PACHON VARGAS', valor: 150000 }
+        ]},
+        '1028481082': { nombre: 'PAULA PACHON VARGAS', contratos: [
+            { id: 2, numero: '10120008', plan: 'ESPECIAL', ejecutivo: 'ESLI MARTINEZ VARGAS', valor: 200000 }
+        ]}
+    };
+    
+    const titular = titularesEjemplo[cedula];
+    if (titular) {
+        // Mostrar nombre del titular
+        document.getElementById('clientName').value = titular.nombre;
+        
+        // Mostrar display de confirmación
+        const clientNameDisplay = document.getElementById('clientNameDisplay');
+        if (clientNameDisplay) {
+            clientNameDisplay.textContent = `✓ ${titular.nombre}`;
+            clientNameDisplay.style.display = 'block';
+        }
+        
+        // Cargar contratos del titular
+        loadContractsForTitular(titular.contratos);
+    } else {
+        // Limpiar si no se encuentra
+        document.getElementById('clientName').value = '';
+        document.getElementById('contractSelect').innerHTML = '<option value="">Seleccione el contrato</option>';
+        clearContractInfo();
+        
+        const clientNameDisplay = document.getElementById('clientNameDisplay');
+        if (clientNameDisplay) {
+            clientNameDisplay.style.display = 'none';
+        }
+    }
+}
+
+function loadContractsForTitular(contratos) {
+    const contractSelect = document.getElementById('contractSelect');
+    contractSelect.innerHTML = '<option value="">Seleccione el contrato</option>';
+    
+    contratos.forEach(contrato => {
+        const option = document.createElement('option');
+        option.value = contrato.id;
+        option.textContent = `Contrato ${contrato.numero} - ${contrato.plan}`;
+        option.dataset.contrato = JSON.stringify(contrato);
+        contractSelect.appendChild(option);
+    });
+}
+
+// Event listener para cuando se selecciona un contrato
+document.getElementById('contractSelect')?.addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    if (selectedOption.value) {
+        const contrato = JSON.parse(selectedOption.dataset.contrato);
+        loadContractInfo(contrato);
+    } else {
+        clearContractInfo();
+    }
+});
+
+function loadContractInfo(contrato) {
+    document.getElementById('planInfo').value = contrato.plan;
+    document.getElementById('executiveInfo').value = contrato.ejecutivo;
+    document.getElementById('invoiceValue').value = contrato.valor;
+}
+
+function clearContractInfo() {
+    document.getElementById('planInfo').value = '';
+    document.getElementById('executiveInfo').value = '';
+    document.getElementById('invoiceValue').value = '';
 }
 
 // ========================================
@@ -140,7 +371,7 @@ function loadInvoicesData() {
             <td>${invoice.clientName}</td>
             <td class="invoice-value">$${formatNumber(invoice.value)}</td>
             <td><span class="status-badge ${invoice.status}">${invoice.status}</span></td>
-            <td>${formatDate(invoice.dueDate)}</td>
+            <td>${invoice.firstPaymentDate ? formatDate(invoice.firstPaymentDate) : '—'}</td>
             <td>
                 <div class="action-buttons-cell">
                     <button class="btn-icon btn-edit" onclick="editInvoice(${invoice.id})" title="Editar">
@@ -188,15 +419,19 @@ function deleteInvoice(id) {
 // ========================================
 
 // Crear Factura
-document.getElementById('bCrearFactura')?.addEventListener('click', function() {
+document.getElementById('bCrearFacturaModal')?.addEventListener('click', function() {
     const invoiceData = {
         id: invoicesData.length + 1,
         invoiceNumber: document.getElementById('invoiceNumber').value,
         date: document.getElementById('invoiceDate').value,
+        clientId: document.getElementById('clientId').value,
         clientName: document.getElementById('clientName').value,
+        contractId: document.getElementById('contractSelect').value,
+        plan: document.getElementById('planInfo').value,
+        executive: document.getElementById('executiveInfo').value,
         value: parseFloat(document.getElementById('invoiceValue').value),
-        status: document.getElementById('invoiceStatus').value,
-        dueDate: document.getElementById('dueDate').value
+        firstPaymentDate: document.getElementById('firstPaymentDate').value,
+        status: 'pendiente' // Estado por defecto
     };
     
     // Validar campos requeridos
@@ -230,8 +465,8 @@ document.getElementById('bGenerarReporte')?.addEventListener('click', function()
 // ========================================
 
 function validateInvoiceForm(data) {
-    if (!data.invoiceNumber || !data.date || !data.clientName || 
-        !data.value || !data.status || !data.dueDate) {
+    if (!data.invoiceNumber || !data.date || !data.clientId || !data.clientName || 
+        !data.contractId || !data.value) {
         showNotification('Por favor complete todos los campos requeridos', 'warning');
         return false;
     }

@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Referencias a los elementos de modales
     const selectCityModal = document.getElementById('selectCityModal');
-    const selectCityModalOverlay = document.querySelector('#selectCityModal.modal-overlay');
+    const selectCityModalOverlay = document.getElementById('selectCityModal');
     const modal = document.getElementById('cityModal');
     const citySearchModalOverlay = document.querySelector('#cityModal.modal-overlay');
     const createCityModal = document.getElementById('createCityModal');
@@ -161,8 +161,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verificar si el usuario ya seleccionó una ciudad en esta sesión
         const selectedCity = sessionStorage.getItem('selectedCity');
         if (!selectedCity) {
-            selectCityModalOverlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            // Poblar el select antes de mostrar el modal
+            if (typeof refreshCitySelects === 'function') {
+                refreshCitySelects();
+            }
+            
+            // Usar getElementById como fallback si el selector falla
+            const modal = selectCityModalOverlay || document.getElementById('selectCityModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.style.zIndex = '9999';
+                document.body.style.overflow = 'hidden';
+            } else {
+                console.error('No se encontró el modal selectCityModal');
+            }
         }
     }
     
@@ -171,8 +183,20 @@ document.addEventListener('DOMContentLoaded', function() {
      * Se usa para permitir cambiar la ciudad seleccionada
      */
     function forceShowSelectCityModal() {
-        selectCityModalOverlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        // Poblar el select antes de mostrar el modal
+        if (typeof refreshCitySelects === 'function') {
+            refreshCitySelects();
+        }
+        
+        // Usar getElementById como fallback si el selector falla
+        const modal = selectCityModalOverlay || document.getElementById('selectCityModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.style.zIndex = '9999';
+            document.body.style.overflow = 'hidden';
+        } else {
+            console.error('No se encontró el modal selectCityModal');
+        }
     }
     
     /**
@@ -180,8 +204,12 @@ document.addEventListener('DOMContentLoaded', function() {
      * Restaura el scroll del body
      */
     function hideSelectCityModal() {
-        selectCityModalOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        // Usar getElementById como fallback si el selector falla
+        const modal = selectCityModalOverlay || document.getElementById('selectCityModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
     }
     
     /**

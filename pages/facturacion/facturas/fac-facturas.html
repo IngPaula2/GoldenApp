@@ -138,20 +138,23 @@
         <!-- Área de Contenido -->
         <div class="content-area">
             <!-- Sección de Facturas -->
-            <section class="tab-content active" id="facturas">
+            <section class="contracts-section">
                 <div class="section-header">
-                    <h2>Facturas</h2>
+                    <div class="section-title">
+                        <h2>Facturas</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
                     <div class="action-buttons">
                         <button class="btn btn-primary" onclick="showReportModal()">
-                            <i class="fas fa-chart-bar"></i>
                             Reporte
                         </button>
                         <button class="btn btn-primary" onclick="showSearchInvoiceModal()">
-                            <i class="fas fa-search"></i>
                             Buscar Factura
                         </button>
                         <button class="btn btn-primary" onclick="showCreateInvoiceModal()">
-                            <i class="fas fa-plus"></i>
                             Crear Factura
                         </button>
                     </div>
@@ -191,6 +194,32 @@
          MODALES DE INTERACCIÓN
          ======================================== -->
     
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal">
+        <div class="modal" style="max-width: 520px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select" required>
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Búsqueda de Factura -->
     <div class="modal-overlay" id="searchInvoiceModal" style="display: none;">
         <div class="modal">
@@ -223,48 +252,69 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="invoiceNumber" class="form-label">Número de Factura *</label>
-                        <input type="text" id="invoiceNumber" class="form-input" placeholder="Número de factura" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="invoiceDate" class="form-label">Fecha de Factura *</label>
-                        <input type="date" id="invoiceDate" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="clientName" class="form-label">Cliente *</label>
-                        <input type="text" id="clientName" class="form-input" placeholder="Nombre del cliente" required>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="invoiceValue" class="form-label">Valor *</label>
-                        <input type="number" id="invoiceValue" class="form-input" placeholder="Valor en pesos" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="invoiceStatus" class="form-label">Estado *</label>
-                        <div class="select-container">
-                            <select id="invoiceStatus" class="form-select" required>
-                                <option value="">Seleccione el estado</option>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="pagada">Pagada</option>
-                                <option value="vencida">Vencida</option>
-                                <option value="cancelada">Cancelada</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                <form id="createInvoiceForm">
+                    <!-- Primera fila: Número de Factura, Fecha -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="invoiceNumber" class="form-label">Número de Factura *</label>
+                            <input type="text" id="invoiceNumber" class="form-input numeric-input" placeholder="NÚMERO DE FACTURA" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="invoiceDate" class="form-label">Fecha de Factura *</label>
+                            <input type="date" id="invoiceDate" class="form-input" readonly required>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="dueDate" class="form-label">Fecha de Vencimiento *</label>
-                        <input type="date" id="dueDate" class="form-input" required>
+                    
+                    <!-- Segunda fila: ID del Titular, Nombre del Titular -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientId" class="form-label">Identificación del Titular *</label>
+                            <input type="text" id="clientId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required>
+                            <div id="clientNameDisplay" class="client-name-display" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientName" class="form-label">Nombre del Titular *</label>
+                            <input type="text" id="clientName" class="form-input" placeholder="NOMBRE COMPLETO DEL TITULAR" readonly required>
+                        </div>
                     </div>
-                </div>
+                    
+                    <!-- Tercera fila: Selección de Contrato -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contractSelect" class="form-label">Contrato del Titular *</label>
+                            <div class="select-container">
+                                <select id="contractSelect" class="form-select" required>
+                                    <option value="">Seleccione el contrato</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstPaymentDate" class="form-label">Fecha de Primer Pago</label>
+                            <input type="date" id="firstPaymentDate" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Cuarta fila: Información del Contrato Seleccionado -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="planInfo" class="form-label">Plan</label>
+                            <input type="text" id="planInfo" class="form-input" placeholder="PLAN" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="executiveInfo" class="form-label">Ejecutivo</label>
+                            <input type="text" id="executiveInfo" class="form-input" placeholder="EJECUTIVO" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="invoiceValue" class="form-label">Valor Factura *</label>
+                            <input type="number" id="invoiceValue" class="form-input" placeholder="VALOR TOTAL DEL PLAN" readonly required>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideCreateInvoiceModal()">Cancelar</button>
-                <button class="btn btn-primary" id="bCrearFactura">Crear</button>
+                <button type="button" class="btn btn-secondary" onclick="hideCreateInvoiceModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrearFacturaModal">Crear</button>
             </div>
         </div>
     </div>

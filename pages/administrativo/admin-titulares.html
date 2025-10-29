@@ -159,8 +159,15 @@
              <!-- Sección de Titulares -->
              <section class="titulares-section">
                  <div class="section-header">
-                     <h2>Titulares</h2>
+                     <div class="section-title">
+                         <h2>Titulares</h2>
+                         <div class="current-city-info" id="currentCityInfo">
+                             <i class="fas fa-map-marker-alt"></i>
+                             <span id="currentCityName">Seleccione una ciudad</span>
+                         </div>
+                     </div>
                      <div class="action-buttons">
+                         <button class="btn btn-primary" onclick="showCityModal()">Cambiar Ciudad</button>
                          <button class="btn btn-primary" onclick="showSearchTitularModal()">Buscar Titular</button>
                          <button class="btn btn-primary" onclick="showCreateTitularModal()">Crear Titular</button>
                      </div>
@@ -244,7 +251,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
-                <button class="modal-close" onclick="hideModal()">
+                <button class="modal-close" onclick="hideCityModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -254,15 +261,13 @@
                     <div class="select-container">
                         <select id="citySelect" class="form-select">
                             <option value="">Seleccione la ciudad</option>
-                            <option value="101" selected>101 - BOGOTA</option>
-                            <option value="201">201 - BUCARAMANGA</option>
                         </select>
                         <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary btn-large">Seleccionar</button>
+                <button class="btn btn-primary btn-large" onclick="handleSelectCity()">Seleccionar</button>
             </div>
         </div>
     </div>
@@ -299,7 +304,7 @@
                     </div>
                     <div class="form-group">
                         <label for="tId" class="form-label">Número ID *</label>
-                        <input type="text" id="tId" class="form-input" placeholder="Número de identificación" required>
+                        <input type="text" id="tId" name="tId" class="form-input" placeholder="Número de identificación" required>
                     </div>
                     <div class="form-group">
                         <label for="tApellido1" class="form-label">Primer Apellido *</label>
@@ -327,15 +332,15 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tDireccion" class="form-label">Dirección *</label>
-                        <input type="text" id="tDireccion" class="form-input" placeholder="Dirección de residencia" required>
+                        <input type="text" id="tDireccion" name="tDireccion" class="form-input" placeholder="Dirección de residencia" required>
                     </div>
                     <div class="form-group">
                         <label for="tBarrioT" class="form-label">Barrio *</label>
-                        <input type="text" id="tBarrioT" class="form-input" placeholder="Barrio" required>
+                        <input type="text" id="tBarrioT" name="tBarrioT" class="form-input" placeholder="Barrio" required>
                     </div>
                     <div class="form-group">
                         <label for="tCelular" class="form-label">Celular *</label>
-                        <input type="text" id="tCelular" class="form-input" placeholder="Número de celular" required>
+                        <input type="text" id="tCelular" name="tCelular" class="form-input" placeholder="Número de celular" required>
                     </div>
                 </div>
                 
@@ -343,11 +348,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tCorreo" class="form-label">Correo Electrónico *</label>
-                        <input type="email" id="tCorreo" class="form-input" placeholder="correo@ejemplo.com" required>
+                        <input type="email" id="tCorreo" name="tCorreo" class="form-input" placeholder="correo@ejemplo.com" required>
                     </div>
                     <div class="form-group">
                         <label for="tFecha_Ingreso" class="form-label">Fecha de Ingreso *</label>
-                        <input type="date" id="tFecha_Ingreso" class="form-input" required>
+                        <input type="date" id="tFecha_Ingreso" name="tFecha_Ingreso" class="form-input" required>
                     </div>
                 </div>
                 
@@ -410,41 +415,41 @@
                         </div>
                         <div class="form-group">
                             <label for="bNumeroId" class="form-label">Número ID *</label>
-                            <input type="text" id="bNumeroId" class="form-input" placeholder="Digite el Número de ID">
+                            <input type="text" id="bNumeroId" name="bNumeroId" class="form-input" placeholder="Digite el Número de ID">
                         </div>
                         <div class="form-group">
                             <label for="beneficiarioApellido1" class="form-label">Primer Apellido *</label>
-                            <input type="text" id="beneficiarioApellido1" class="form-input" placeholder="Digite el Primer Apellido">
+                            <input type="text" id="beneficiarioApellido1" name="beneficiarioApellido1" class="form-input" placeholder="Digite el Primer Apellido">
                         </div>
                         <div class="form-group">
                             <label for="beneficiarioApellido2" class="form-label">Segundo Apellido</label>
-                            <input type="text" id="beneficiarioApellido2" class="form-input" placeholder="Digite el Segundo Apellido">
+                            <input type="text" id="beneficiarioApellido2" name="beneficiarioApellido2" class="form-input" placeholder="Digite el Segundo Apellido">
                         </div>
                         <div class="form-group">
                             <label for="beneficiarioNombre1" class="form-label">Primer Nombre *</label>
-                            <input type="text" id="beneficiarioNombre1" class="form-input" placeholder="Digite el Primer Nombre">
+                            <input type="text" id="beneficiarioNombre1" name="beneficiarioNombre1" class="form-input" placeholder="Digite el Primer Nombre">
                         </div>
                         <div class="form-group">
                             <label for="beneficiarioNombre2" class="form-label">Segundo Nombre</label>
-                            <input type="text" id="beneficiarioNombre2" class="form-input" placeholder="Digite el Segundo Nombre">
+                            <input type="text" id="beneficiarioNombre2" name="beneficiarioNombre2" class="form-input" placeholder="Digite el Segundo Nombre">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="bDireccion" class="form-label">Dirección *</label>
-                            <input type="text" id="bDireccion" class="form-input" placeholder="Digite la Dirección">
+                            <input type="text" id="bDireccion" name="bDireccion" class="form-input" placeholder="Digite la Dirección">
                         </div>
                         <div class="form-group">
                             <label for="bTelefono" class="form-label">Teléfono *</label>
-                            <input type="text" id="bTelefono" class="form-input" placeholder="Digite el Teléfono">
+                            <input type="text" id="bTelefono" name="bTelefono" class="form-input" placeholder="Digite el Teléfono">
                         </div>
                         <div class="form-group">
                             <label for="bEmail" class="form-label">Email *</label>
-                            <input type="email" id="bEmail" class="form-input" placeholder="Digite el Email">
+                            <input type="email" id="bEmail" name="bEmail" class="form-input" placeholder="Digite el Email">
                         </div>
                         <div class="form-group">
                             <label for="bActivo" class="form-label">Activo *</label>
-                            <select id="bActivo" class="form-input">
+                            <select id="bActivo" name="bActivo" class="form-input">
                                 <option value="">Seleccione...</option>
                                 <option value="SI">Sí</option>
                                 <option value="NO">No</option>
@@ -472,7 +477,7 @@
              <div class="modal-body">
                  <div class="form-group">
                      <label for="searchTitularId" class="form-label">ID Titular *</label>
-                     <input type="text" id="searchTitularId" class="form-input" placeholder="Ingrese el ID del titular">
+                     <input type="text" id="searchTitularId" name="searchTitularId" class="form-input" placeholder="Ingrese el ID del titular">
                  </div>
              </div>
              <div class="modal-footer">
@@ -495,7 +500,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="searchBeneficiarioId" class="form-label">ID Beneficiario *</label>
-                    <input type="text" id="searchBeneficiarioId" class="form-input" placeholder="Ingrese el ID del beneficiario">
+                    <input type="text" id="searchBeneficiarioId" name="searchBeneficiarioId" class="form-input" placeholder="Ingrese el ID del beneficiario">
                 </div>
             </div>
             <div class="modal-footer">
@@ -882,6 +887,35 @@
 
     <!-- JavaScript -->
     <script src="../../assets/js/administrativo/admin-titulares.js"></script>
+    
+    <!-- Script para limpiar notificaciones existentes -->
+    <script>
+        // Limpiar notificaciones inmediatamente al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => {
+                notif.classList.remove('show');
+                notif.remove();
+            });
+        });
+        
+        // También limpiar inmediatamente si el DOM ya está cargado
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notif => {
+                    notif.classList.remove('show');
+                    notif.remove();
+                });
+            });
+        } else {
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => {
+                notif.classList.remove('show');
+                notif.remove();
+            });
+        }
+    </script>
 </body>
 </html>
 

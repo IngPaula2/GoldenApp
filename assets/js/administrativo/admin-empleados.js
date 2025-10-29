@@ -279,6 +279,7 @@ function getSelectedCity() {
 function promptForCitySelection() {
     // Usar el modal existente en HTML si está, o inyectarlo si no existe
     let container = document.getElementById('selectCityModal');
+    console.log('🔍 Debug - Modal encontrado:', container);
     if (!container) {
         // Inyectar un modal con la misma estructura/ids para heredar estilos de ciudades
         container = document.createElement('div');
@@ -318,13 +319,18 @@ function promptForCitySelection() {
                 const sel = container.querySelector('#citySelect');
                 const value = sel ? sel.value : '';
                 if (!value) { try { showNotification('Por favor, seleccione una ciudad', 'warning'); } catch(e) { alert('Por favor, seleccione una ciudad'); } return; }
+                
+                // Obtener nombre completo de la ciudad para la notificación
+                const selectedOption = sel.options[sel.selectedIndex];
+                const cityName = selectedOption ? selectedOption.textContent : value;
+                
                 sessionStorage.setItem('selectedCity', value);
                 ciudadActual = value;
                 container.style.display = 'none';
                 document.body.style.overflow = 'auto';
                 // Cargar empleados de la ciudad seleccionada
                 loadEmpleadosFromStorage();
-                try { showNotification('Ciudad seleccionada: ' + value, 'success'); } catch(e) {}
+                try { showNotification('Ciudad seleccionada: ' + cityName, 'success'); } catch(e) {}
             });
         }
     }
@@ -339,6 +345,12 @@ function promptForCitySelection() {
             container.style.display = 'none';
             document.body.style.overflow = 'auto';
         };
+        
+        // Configurar event listener para el botón del modal HTML si existe
+        const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
+        if (bSeleccionar && !bSeleccionar.onclick) {
+            bSeleccionar.addEventListener('click', handleSelectCity);
+        }
     }
     function populateCitySelectOptions() {
         const sel = document.getElementById('citySelect');
@@ -1233,6 +1245,14 @@ function getCargoNombre(cargoCodigo, area = null) {
  * @param {string} type - Tipo de notificación (success, error, warning, info)
  */
 function showNotification(message, type = 'info') {
+    // Remover notificaciones existentes del mismo mensaje
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notif => {
+        if (notif.textContent === message) {
+            notif.remove();
+        }
+    });
+    
     // Crear elemento de notificación
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -1246,13 +1266,17 @@ function showNotification(message, type = 'info') {
         notification.classList.add('show');
     }, 100);
     
-    // Ocultar automáticamente después de 3 segundos
+    // Ocultar automáticamente después de 2 segundos (reducido)
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
-            document.body.removeChild(notification);
+            try {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            } catch(e) {}
         }, 300);
-    }, 3000);
+    }, 2000);
 }
 
 /**
@@ -3546,6 +3570,138 @@ function getCargoNombre(cargoCodigo, area = null) {
     return cargo ? cargo.nombre : cargoCodigo.toUpperCase();
 }
 
+// ========================================
+// FUNCIONES DE CIUDAD
+// ========================================
+
+/**
+ * Muestra el modal de selección de ciudad
+ */
+function showSelectCityModal() {
+    console.log('🏙️ Mostrando modal de selección de ciudad...');
+    const modal = document.getElementById('selectCityModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        loadCitiesForSelection();
+    }
+}
+
+/**
+ * Oculta el modal de selección de ciudad
+ */
+function hideSelectCityModal() {
+    const modal = document.getElementById('selectCityModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+/**
+ * Carga las ciudades disponibles en el select
+ */
+function loadCitiesForSelection() {
+    console.log('📋 Cargando ciudades para selección...');
+    
+    const citySelect = document.getElementById('citySelect');
+    if (!citySelect) return;
+    
+    // Cargar ciudades reales del sistema
+    let ciudades = {};
+    if (typeof window.getCiudadesData === 'function') {
+        try { 
+            ciudades = window.getCiudadesData(); 
+        } catch (e) { 
+            ciudades = {}; 
+        }
+    } else {
+        // Fallback a localStorage si existe data válida
+        try {
+            const raw = localStorage.getItem('ciudadesData');
+            const parsed = raw ? JSON.parse(raw) : {};
+            if (parsed && typeof parsed === 'object') {
+                ciudades = Object.fromEntries(
+                    Object.entries(parsed).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+                );
+            }
+        } catch (e) { 
+            ciudades = {}; 
+        }
+    }
+    
+    const current = citySelect.value;
+    citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
+    
+    Object.values(ciudades)
+        .filter(c => c.activo !== false) // Solo ciudades activas
+        .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+        .forEach(c => {
+            const opt = document.createElement('option');
+            const code = String(c.codigo || '').toUpperCase();
+            const name = String(c.nombre || '').toUpperCase();
+            opt.value = c.codigo;
+            opt.textContent = `${code} - ${name}`;
+            citySelect.appendChild(opt);
+        });
+    
+    if (current && ciudades[current] && ciudades[current].activo !== false) {
+        citySelect.value = current;
+    }
+}
+
+/**
+ * Maneja la selección de ciudad
+ */
+function handleSelectCity() {
+    console.log('✅ Procesando selección de ciudad...');
+    
+    const citySelect = document.getElementById('citySelect');
+    const selectedValue = citySelect ? citySelect.value : '';
+    
+    if (!selectedValue) {
+        if (window.showNotification) {
+            showNotification('Por favor seleccione una ciudad', 'warning');
+        }
+        return;
+    }
+    
+    // Obtener código de la ciudad seleccionada
+    const cityCode = citySelect.value;
+    
+    // Obtener nombre completo para el indicador y la notificación
+    const selectedOption = citySelect.options[citySelect.selectedIndex];
+    const cityName = selectedOption ? selectedOption.textContent : '';
+    
+    // Actualizar indicador de ciudad actual
+    updateCurrentCityDisplay(cityName);
+    
+    // Ocultar modal
+    hideSelectCityModal();
+    
+    if (window.showNotification) {
+        // Remover notificaciones existentes del mismo mensaje
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notif => {
+            if (notif.textContent.includes('Ciudad seleccionada')) {
+                notif.remove();
+            }
+        });
+        // Mostrar notificación con código y nombre de la ciudad
+        showNotification(`Ciudad seleccionada: ${cityName}`, 'success');
+    }
+}
+
+/**
+ * Actualiza la visualización de la ciudad actual
+ */
+function updateCurrentCityDisplay(cityName) {
+    const currentCityElement = document.getElementById('currentCityName');
+    if (currentCityElement) {
+        currentCityElement.textContent = cityName;
+    }
+}
+
 // Exponer funciones globalmente
 window.forceLoadEmpleados = forceLoadEmpleados;
 window.debugLocalStorage = debugLocalStorage;
@@ -3555,9 +3711,42 @@ window.buscarNombreEmpleado = buscarNombreEmpleado;
 window.obtenerNombrePorIdentificacion = obtenerNombrePorIdentificacion;
 window.cargarEscalasExistentes = cargarEscalasExistentes;
 window.verificarPersistenciaEmpleados = verificarPersistenciaEmpleados;
+window.showSelectCityModal = showSelectCityModal;
+window.hideSelectCityModal = hideSelectCityModal;
+window.handleSelectCity = handleSelectCity;
+window.updateCurrentCityDisplay = updateCurrentCityDisplay;
+window.clearAllNotifications = clearAllNotifications;
+
+// Función para limpiar todas las notificaciones
+function clearAllNotifications() {
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notif => {
+        notif.classList.remove('show');
+        notif.style.display = 'none';
+        notif.remove();
+    });
+    
+    // También limpiar cualquier elemento con texto de ciudad seleccionada
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(el => {
+        if (el.textContent && el.textContent.includes('Ciudad seleccionada')) {
+            if (el.classList.contains('notification') || el.style.position === 'fixed') {
+                el.remove();
+            }
+        }
+    });
+}
+
+// Limpiar notificaciones inmediatamente
+clearAllNotifications();
 
 // Esperar a que el DOM esté completamente cargado
-document.addEventListener('DOMContentLoaded', initializePage);
+document.addEventListener('DOMContentLoaded', function() {
+    // Limpiar notificaciones existentes
+    clearAllNotifications();
+    
+    initializePage();
+});
 
 // También inicializar si la página ya está cargada
 if (document.readyState === 'loading') {

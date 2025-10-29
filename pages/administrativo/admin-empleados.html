@@ -141,17 +141,24 @@
             <!-- Sección de Empleados -->
             <section class="empleados-section">
                 <div class="section-header">
-                    <h2>Empleados</h2>
+                    <div class="section-title">
+                        <h2>Empleados</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
                     <div class="action-buttons">
-                         <button id="bBuscar" class="btn btn-primary" onclick="showSearchEmpleadoModal()">
-                             Buscar
-                         </button>
-                         <button id="bCrear" class="btn btn-primary" onclick="showCreateEmpleadoModal()">
-                             Crear
-                         </button>
-                         <button id="bReporte" class="btn btn-primary" onclick="showReporteEmpleadosModal()">
-                             Reporte
-                         </button>
+                        <button id="bCambiarCiudad" class="btn btn-primary" onclick="showSelectCityModal()">Cambiar Ciudad</button>
+                        <button id="bBuscar" class="btn btn-primary" onclick="showSearchEmpleadoModal()">
+                            Buscar
+                        </button>
+                        <button id="bCrear" class="btn btn-primary" onclick="showCreateEmpleadoModal()">
+                            Crear
+                        </button>
+                        <button id="bReporte" class="btn btn-primary" onclick="showReporteEmpleadosModal()">
+                            Reporte
+                        </button>
                     </div>
                 </div>
 
@@ -269,12 +276,12 @@
          MODALES DE INTERACCIÓN
          ======================================== -->
     
-    <!-- Modal de Selección de Ciudad (opcional, disponible en HTML) -->
+    <!-- Modal de Selección de Ciudad -->
     <div class="modal-overlay" id="selectCityModal" style="display: none;">
         <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
-                <button class="modal-close" onclick="(window.hideSelectCityModal && window.hideSelectCityModal())">
+                <button class="modal-close" onclick="hideSelectCityModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -290,17 +297,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="(function(){
-                    try {
-                        var sel = document.getElementById('citySelect');
-                        var value = sel ? sel.value : '';
-                        if (!value) { if (window.showNotification) { showNotification('Por favor, seleccione una ciudad', 'warning'); } return; }
-                        sessionStorage.setItem('selectedCity', value);
-                        if (window.hideSelectCityModal) window.hideSelectCityModal();
-                        if (window.loadEmpleadosForSelectedCity) window.loadEmpleadosForSelectedCity();
-                        if (window.showNotification) { showNotification('Ciudad seleccionada: ' + value, 'success'); }
-                    } catch(e) {}
-                })()">Seleccionar</button>
+                <button type="button" class="btn btn-primary" onclick="handleSelectCity()">Seleccionar</button>
             </div>
         </div>
     </div>
@@ -792,5 +789,38 @@
 
     <!-- Scripts JavaScript -->
     <script src="../../assets/js/administrativo/admin-empleados.js"></script>
+    
+    <!-- Script para limpiar notificaciones existentes -->
+    <script>
+        function clearAllNotifications() {
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => {
+                notif.classList.remove('show');
+                notif.style.display = 'none';
+                notif.remove();
+            });
+            
+            // También limpiar cualquier elemento con texto de ciudad seleccionada
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el.textContent && el.textContent.includes('Ciudad seleccionada')) {
+                    if (el.classList.contains('notification') || el.style.position === 'fixed') {
+                        el.remove();
+                    }
+                }
+            });
+        }
+        
+        // Limpiar notificaciones inmediatamente
+        clearAllNotifications();
+        
+        // Limpiar notificaciones al cargar la página
+        document.addEventListener('DOMContentLoaded', clearAllNotifications);
+        
+        // También limpiar inmediatamente si el DOM ya está cargado
+        if (document.readyState !== 'loading') {
+            clearAllNotifications();
+        }
+    </script>
 </body>
 </html>

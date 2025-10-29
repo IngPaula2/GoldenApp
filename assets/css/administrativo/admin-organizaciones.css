@@ -9,6 +9,58 @@
 }
 
 /* ==============================
+   SECTION HEADER
+   ============================== */
+.organizaciones-page .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.organizaciones-page .section-title {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.organizaciones-page .section-header h2 {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.organizaciones-page .current-city-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.organizaciones-page .current-city-info i {
+    color: #DEB448;
+    font-size: 0.8rem;
+}
+
+.organizaciones-page .current-city-info span {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.organizaciones-page .action-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* ==============================
    MODALES
    ============================== */
 .organizaciones-page .modal-overlay {
@@ -139,7 +191,7 @@
     border: none;
     border-radius: 8px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     transition: all 0.3s ease;
 }
 
@@ -239,24 +291,47 @@
 /* ==============================
    BOTONES
    ============================== */
-.organizaciones-page .btn { cursor: pointer; }
-.organizaciones-page .btn-primary {
+
+/* Botones de acción */
+.organizaciones-page .action-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.organizaciones-page .action-buttons .btn-primary {
     background: #DEB448;
     color: #1a1a1a;
-    border-radius: 8px;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(222, 180, 72, 0.4);
 }
-.organizaciones-page .btn-primary:hover {
+
+.organizaciones-page .action-buttons .btn-primary:hover {
+    background: #c9a43a;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(222, 180, 72, 0.45);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
 }
-.organizaciones-page .btn-secondary {
+
+.organizaciones-page .action-buttons .btn-secondary {
     background: #6c757d;
     color: white;
-    border-radius: 8px;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.organizaciones-page .action-buttons .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Botones generales */
+.organizaciones-page .btn { 
+    cursor: pointer; 
+    font-weight: 400;
 }
 
 /* ==============================
@@ -270,6 +345,7 @@
     border-radius: 8px;
     color: #fff;
     font-weight: 500;
+    font-size: 14px;
     z-index: 20000;
     transform: translateX(100%);
     transition: transform 0.3s ease;
@@ -400,6 +476,44 @@
     font-size: 13px;
     padding: 6px 12px;
     border-radius: 8px;
+}
+
+/* ==============================
+   RESPONSIVE DESIGN
+   ============================== */
+
+/* Reducir espaciado general para pantallas grandes */
+@media (min-width: 1200px) {
+    .organizaciones-page .action-buttons {
+        gap: 0.5rem;
+    }
+    
+    .organizaciones-page .action-buttons .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Móviles grandes - hacer más compacto */
+@media (max-width: 767px) {
+    .organizaciones-page .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .organizaciones-page .action-buttons .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        width: 100%;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .organizaciones-page .action-buttons .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
 }
 
 /* ==============================
