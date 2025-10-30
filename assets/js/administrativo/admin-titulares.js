@@ -519,6 +519,9 @@ window.confirmLogout = function() {
     window.location.href = '../../index.html';
 }
 
+// [BACKEND] Punto de integración general (Titulares):
+// Sustituir el uso de localStorage por llamadas al backend para
+// listar/crear/actualizar/eliminar titulares.
 // Cargar datos persistidos desde localStorage (si existen)
 try {
     const storedTitulares = localStorage.getItem('titularesData');
@@ -3558,6 +3561,9 @@ function getSelectedCityCode() {
 }
 
 function loadTitularesForSelectedCity() {
+    // [BACKEND] Punto de integración (Listar titulares por ciudad):
+    // Reemplazar la carga desde buckets/localStorage por consulta al backend
+    // y luego refrescar la tabla/UI con la respuesta.
     // Volcar buckets de la ciudad actual a memoria (vista)
     const city = getSelectedCityCode();
     const titularesBucket = (titularesByCity && titularesByCity[city]) ? titularesByCity[city] : {};

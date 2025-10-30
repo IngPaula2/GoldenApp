@@ -132,6 +132,9 @@ function updateControlCurrentCityDisplay(cityName) {
 // ========================================
 
 function loadControlConsecutivosForCity(cityCode, clearData = false) {
+    // [BACKEND] Punto de integración (Obtener control de consecutivos por ciudad):
+    // Sustituir lectura/limpieza de localStorage por llamada al backend
+    // y luego renderizar la tabla con la respuesta.
     console.log(`📊 Cargando control-consecutivos para ciudad: ${cityCode}`);
 
     if (clearData) {
@@ -148,6 +151,8 @@ function loadControlConsecutivosForCity(cityCode, clearData = false) {
 }
 
 function saveControlConsecutivosToStorage() {
+    // [BACKEND] Punto de integración (Persistir cambios):
+    // Enviar al backend el estado de controlConsecutivosData para la ciudad.
     if (controlSelectedCity && controlSelectedCity.codigo) {
         try {
             localStorage.setItem(`controlConsecutivos_${controlSelectedCity.codigo}`,
@@ -231,6 +236,8 @@ function hideControlConfirmCreateModal() {
 }
 
 function confirmControlCreate() {
+    // [BACKEND] Punto de integración (Crear consecutivos):
+    // Enviar newItem al backend y, al éxito, refrescar la tabla desde backend.
     console.log('🎉 Confirmando creación de consecutivos...');
     const formData = getControlCreateFormData();
     const newItem = {
@@ -316,6 +323,8 @@ function hideControlUpdateModal() {
 }
 
 function handleControlUpdate() {
+    // [BACKEND] Punto de integración (Actualizar consecutivos completos):
+    // Enviar 'data' al backend para el id actual y actualizar vista al éxito.
     if (!controlCurrentId) { controlShowNotification('No hay registro seleccionado', 'error'); return; }
 
     const fieldMap = {
@@ -489,6 +498,8 @@ function loadControlCitiesForSearch() {
 }
 
 function handleControlSearch() {
+    // [BACKEND] Punto de integración (Buscar por ciudad y tipo):
+    // Consultar al backend y mostrar resultados en el modal de resultados.
     console.log('🔍 Buscando consecutivo de control...');
     
     const ciudadCodigo = document.getElementById('cc_searchCiudad')?.value || '';

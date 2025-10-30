@@ -121,6 +121,10 @@ function initializeModals() {
             }
         });
     });
+    // Evitar que clics dentro del contenido del modal se propaguen al overlay
+    document.querySelectorAll('.modal-overlay .modal').forEach(mod => {
+        mod.addEventListener('click', function(e){ e.stopPropagation(); });
+    });
     
     // Cerrar modales con Escape
     document.addEventListener('keydown', function(e) {
@@ -191,6 +195,11 @@ function showCreateContractModal() {
     
     // Asegurar que el modal de edición aparezca al frente de los resultados de búsqueda
     modal.style.zIndex = '10000';
+    
+    // Enfocar campo de identificación del titular al abrir
+    setTimeout(function(){
+        try { document.getElementById('clientId').focus(); } catch(e) {}
+    }, 80);
     
     // Si no estamos editando, mostrar información del rango de consecutivos
     if (!window.editingContractId) {

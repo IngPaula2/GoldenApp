@@ -25,6 +25,10 @@
 // ========================================
 
 // Inicializar dropdown del usuario cuando el DOM esté listo
+// [BACKEND] Punto de integración general:
+// Reemplazar el uso de localStorage/sessionStorage por llamadas a backend
+// en funciones de carga/listado, creación, actualización y eliminación.
+// Ver marcadores [BACKEND] en funciones específicas más abajo.
 document.addEventListener('DOMContentLoaded', function() {
     const userInfo = document.querySelector('.user-info');
     const dropdown = document.getElementById('userDropdown');
@@ -2319,6 +2323,9 @@ function cancelCreateEmpleado() {
  * Confirma la creación del empleado
  */
 function confirmCreateEmpleado() {
+    // [BACKEND] Punto de integración (Crear empleado):
+    // Enviar datos del formulario al backend y, tras éxito,
+    // refrescar la UI. El bloque actual usa localStorage.
     // Cerrar modal de confirmación
     const confirmModal = document.getElementById('confirmCreateEmpleadoModal');
         confirmModal.classList.remove('show');
@@ -2545,6 +2552,8 @@ function cancelUpdateEmpleado() {
  * Confirma la actualización del empleado
  */
 function confirmUpdateEmpleado() {
+    // [BACKEND] Punto de integración (Actualizar empleado):
+    // Enviar los cambios al backend y, tras éxito, actualizar la UI/local.
     // Cerrar modal de confirmación
     const confirmModal = document.getElementById('confirmUpdateEmpleadoModal');
     confirmModal.classList.remove('show');
@@ -2641,6 +2650,9 @@ function closeSuccessUpdateEmpleadoModal() {
  * Muestra el modal de confirmación para eliminar empleado
  */
 function showConfirmDeleteEmpleadoModal() {
+    // [BACKEND] Punto de integración (Eliminar empleado):
+    // Al confirmar, realizar la solicitud al backend y
+    // actualizar la UI al completar.
     const modal = document.getElementById('confirmDeleteEmpleadoModal');
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -3304,6 +3316,9 @@ function verificarPersistenciaEmpleados() {
 window.userCreatedEmpleados = userCreatedEmpleados;
 
 // Función para cargar empleados desde localStorage al inicializar
+// [BACKEND] Punto de integración (Listar empleados por ciudad):
+// Sustituir lectura desde localStorage por request al backend para
+// obtener los empleados de la ciudad seleccionada.
 function loadEmpleadosFromStorage() {
     console.log('=== CARGANDO EMPLEADOS DESDE LOCALSTORAGE ===');
     

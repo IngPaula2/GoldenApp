@@ -89,6 +89,8 @@
     max-width: 520px;
     width: 95%;
     border: 1px solid #dbcd7a;
+    position: relative;
+    pointer-events: auto;
 }
 
 .organizaciones-page .modal-header {
@@ -357,6 +359,11 @@
 .organizaciones-page .notification-error { background: #dc3545; }
 .organizaciones-page .notification-warning { background: #ffc107; color: #1a1a1a; }
 .organizaciones-page .notification-info { background: #17a2b8; }
+
+/* Asegurar que el modal de crear/editar quede sobre cualquier overlay residual */
+#createOrgModal {
+    z-index: 6000 !important;
+}
 
 /* Modal de confirmación de toggle - más pequeño */
 #confirmToggleOrgModal .modal {

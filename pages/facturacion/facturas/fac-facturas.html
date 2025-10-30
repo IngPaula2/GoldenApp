@@ -148,6 +148,7 @@
                         </div>
                     </div>
                     <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showSelectCityModal()">Cambiar Ciudad</button>
                         <button class="btn btn-primary" onclick="showReportModal()">
                             Reporte
                         </button>
@@ -165,17 +166,20 @@
                         <thead>
                             <tr>
                                 <th># Factura</th>
-                                <th>Fecha</th>
-                                <th>Cliente</th>
-                                <th>Valor</th>
+                                <th># Contrato</th>
+                                <th>Fecha Factura</th>
+                                <th>ID Titular</th>
+                                <th>Nombre Titular</th>
+                                <th>Valor Total</th>
+                                <th>Primer Pago</th>
+                                <th>Ejecutivo</th>
                                 <th>Estado</th>
-                                <th>Vencimiento</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="invoicesTableBody">
                             <tr>
-                                <td colspan="7" class="no-data-message">
+                                <td colspan="10" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-receipt"></i>
                                         <p>No existen registros de facturas</p>
@@ -220,6 +224,42 @@
         </div>
     </div>
 
+    <!-- Modal de Resultados de Búsqueda de Facturas -->
+    <div class="modal-overlay" id="invoiceResultsModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA</h3>
+                <button class="modal-close" onclick="hideInvoiceResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table" id="invoiceResultsTable">
+                        <thead>
+                            <tr>
+                                <th># Factura</th>
+                                <th># Contrato</th>
+                                <th>Fecha Factura</th>
+                                <th>ID Titular</th>
+                                <th>Nombre Titular</th>
+                                <th>Valor Total</th>
+                                <th>Primer Pago</th>
+                                <th>Ejecutivo</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceSearchResultsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideInvoiceResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Búsqueda de Factura -->
     <div class="modal-overlay" id="searchInvoiceModal" style="display: none;">
         <div class="modal">
@@ -230,9 +270,23 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="searchInvoiceId" class="form-label">Número de Factura *</label>
-                    <input type="text" id="searchInvoiceId" class="form-input" placeholder="Ingrese el número de factura">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoiceSearchType" class="form-label">Tipo de Búsqueda *</label>
+                        <div class="select-container">
+                            <select id="invoiceSearchType" class="form-select">
+                                <option value="invoiceNumber">Número de Factura</option>
+                                <option value="contractNumber">Número de Contrato</option>
+                                <option value="clientId">Identificación del Titular</option>
+                                <option value="clientName">Nombre del Titular</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchInvoiceValue" id="invoiceSearchLabel" class="form-label">Número de Factura *</label>
+                        <input type="text" id="searchInvoiceValue" class="form-input" placeholder="Ingrese el número de factura">
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -244,9 +298,9 @@
 
     <!-- Modal de Crear Factura -->
     <div class="modal-overlay" id="createInvoiceModal" style="display: none;">
-        <div class="modal modal-large">
+        <div class="modal modal-large" role="dialog" aria-modal="true" aria-labelledby="createInvoiceModalTitle" tabindex="-1">
             <div class="modal-header">
-                <h3 class="modal-title">CREAR FACTURA</h3>
+                <h3 class="modal-title" id="createInvoiceModalTitle">CREAR FACTURA</h3>
                 <button class="modal-close" onclick="hideCreateInvoiceModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -254,19 +308,19 @@
             <div class="modal-body">
                 <form id="createInvoiceForm">
                     <!-- Primera fila: Número de Factura, Fecha -->
-                    <div class="form-row">
+                    <div class="form-row two-col">
                         <div class="form-group">
                             <label for="invoiceNumber" class="form-label">Número de Factura *</label>
                             <input type="text" id="invoiceNumber" class="form-input numeric-input" placeholder="NÚMERO DE FACTURA" readonly required>
                         </div>
                         <div class="form-group">
                             <label for="invoiceDate" class="form-label">Fecha de Factura *</label>
-                            <input type="date" id="invoiceDate" class="form-input" readonly required>
+                            <input type="date" id="invoiceDate" class="form-input" required>
                         </div>
                     </div>
                     
                     <!-- Segunda fila: ID del Titular, Nombre del Titular -->
-                    <div class="form-row">
+                    <div class="form-row two-col">
                         <div class="form-group">
                             <label for="clientId" class="form-label">Identificación del Titular *</label>
                             <input type="text" id="clientId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required>
@@ -279,7 +333,7 @@
                     </div>
                     
                     <!-- Tercera fila: Selección de Contrato -->
-                    <div class="form-row">
+                    <div class="form-row two-col">
                         <div class="form-group">
                             <label for="contractSelect" class="form-label">Contrato del Titular *</label>
                             <div class="select-container">
@@ -296,7 +350,7 @@
                     </div>
                     
                     <!-- Cuarta fila: Información del Contrato Seleccionado -->
-                    <div class="form-row">
+                    <div class="form-row three-col">
                         <div class="form-group">
                             <label for="planInfo" class="form-label">Plan</label>
                             <input type="text" id="planInfo" class="form-input" placeholder="PLAN" readonly>
@@ -307,7 +361,7 @@
                         </div>
                         <div class="form-group">
                             <label for="invoiceValue" class="form-label">Valor Factura *</label>
-                            <input type="number" id="invoiceValue" class="form-input" placeholder="VALOR TOTAL DEL PLAN" readonly required>
+                            <input type="text" id="invoiceValue" class="form-input" placeholder="VALOR TOTAL DEL PLAN" readonly required>
                         </div>
                     </div>
                 </form>
@@ -315,6 +369,105 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="hideCreateInvoiceModal()">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="bCrearFacturaModal">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Crear Factura -->
+    <div class="modal-overlay" id="confirmCreateInvoiceModal" style="display: none;">
+        <div class="modal" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR CREACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreateInvoice()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message">¿Está segur@ que desea crear esta Factura?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelCreateInvoice()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmCreateInvoice()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Factura -->
+    <div class="modal-overlay" id="successCreateInvoiceModal" style="display: none;">
+        <div class="modal modal-success" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreateInvoiceModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p class="modal-message">¡La factura fue creada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessCreateInvoiceModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación Activar/Anular Factura -->
+    <div class="modal-overlay" id="confirmToggleInvoiceModal" style="display:none;">
+        <div class="modal modal-confirm" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR</h3>
+                <button class="modal-close" onclick="cancelToggleInvoice()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p class="modal-message" id="confirmToggleInvoiceText">¿Está segur@ que desea cambiar el estado de esta factura?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelToggleInvoice()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmToggleInvoice()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Éxito Activar/Anular Factura -->
+    <div class="modal-overlay" id="successToggleInvoiceModal" style="display:none;">
+        <div class="modal modal-success" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessToggleInvoiceModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p class="modal-message" id="successToggleInvoiceText">El estado de la factura se actualizó correctamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessToggleInvoiceModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación Actualizar Factura -->
+    <div class="modal-overlay" id="confirmUpdateInvoiceModal" style="display:none;">
+        <div class="modal modal-confirm" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR</h3>
+                <button class="modal-close" onclick="cancelUpdateInvoice()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p class="modal-message">¿Desea actualizar esta factura?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelUpdateInvoice()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmUpdateInvoice()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Éxito Actualizar Factura -->
+    <div class="modal-overlay" id="successUpdateInvoiceModal" style="display:none;">
+        <div class="modal modal-success" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessUpdateInvoiceModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p class="modal-message">La factura se actualizó correctamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessUpdateInvoiceModal()">Aceptar</button>
             </div>
         </div>
     </div>
@@ -330,18 +483,6 @@
             </div>
             <div class="modal-body">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="reportType" class="form-label">Tipo de Reporte *</label>
-                        <div class="select-container">
-                            <select id="reportType" class="form-select" required>
-                                <option value="">Seleccione el tipo</option>
-                                <option value="facturas">Reporte de Facturas</option>
-                                <option value="cobros">Reporte de Cobros</option>
-                                <option value="vencimientos">Reporte de Vencimientos</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
                     <div class="form-group">
                         <label for="startDate" class="form-label">Fecha Inicio *</label>
                         <input type="date" id="startDate" class="form-input" required>
@@ -364,6 +505,7 @@
          ======================================== -->
     
     <!-- JavaScript -->
+    <script src="../../../assets/js/accessibility.js"></script>
     <script src="../../../assets/js/facturacion/facturas/fac-facturas.js"></script>
 </body>
 </html>

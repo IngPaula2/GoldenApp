@@ -53,6 +53,9 @@ function getSelectedCityCode() {
 }
 
 function loadOrgsForSelectedCity() {
+    // [BACKEND] Punto de integración (Listar organizaciones por ciudad):
+    // Reemplazar limpieza/carga desde memoria/localStorage por consulta al backend
+    // y luego renderizar la tabla con la respuesta.
     // Volcar bucket de la ciudad actual a organizacionesData (memoria de la vista)
     const city = getSelectedCityCode();
     const bucket = (organizacionesByCity && organizacionesByCity[city]) ? organizacionesByCity[city] : {};
@@ -112,6 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // GESTIÓN DE MODALES
     // ========================================
     
+    // [BACKEND] Punto de integración general (Organizaciones):
+    // Reemplazar lecturas/escrituras en localStorage por llamadas al backend
+    // en carga de organizaciones por ciudad, creación/actualización/eliminación.
+    // Ver marcadores [BACKEND] en funciones específicas.
     // Referencias a los elementos de modales
     const selectOrgModal = document.getElementById('selectOrgModal');
     const selectOrgModalOverlay = document.getElementById('selectOrgModal');
@@ -179,8 +186,26 @@ document.addEventListener('DOMContentLoaded', function() {
      * Muestra el modal para crear una nueva organización
      */
     function showCreateOrgModal() {
+        // Cerrar cualquier overlay abierto para evitar capas bloqueando clics
+        try {
+            const overlays = Array.from(document.querySelectorAll('.modal-overlay'));
+            overlays.forEach(function(ov){
+                if (ov.id !== 'createOrgModal') {
+                    ov.classList.remove('show');
+                    ov.style.display = 'none';
+                }
+            });
+        } catch (e) {}
+
+        // Mostrar el modal de creación/edición de organización de forma consistente
+        try { createOrgModalOverlay.classList.add('show'); } catch (e) {}
         createOrgModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        // Asegurar foco en el primer campo editable
+        setTimeout(function(){
+            try { document.getElementById('tNombre').focus(); } catch(e) {}
+        }, 50);
     }
     
     /**
@@ -870,6 +895,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Deshabilitar el campo código para evitar cambios (con delay para asegurar que se aplique)
         setTimeout(() => {
             document.getElementById('tId').disabled = true;
+            // Asegurar que el nombre esté editable al entrar en modo edición
+            try { document.getElementById('tNombre').disabled = false; } catch(e) {}
         }, 100);
     }
     
