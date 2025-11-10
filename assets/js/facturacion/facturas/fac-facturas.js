@@ -1,3 +1,4 @@
+
 function renderInvoicesTable(list) {
     const tbody = document.getElementById('invoicesTableBody');
     tbody.innerHTML = '';

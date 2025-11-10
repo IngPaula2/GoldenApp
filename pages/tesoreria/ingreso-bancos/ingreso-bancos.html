@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<!--
+    TESORERÍA - INGRESO A BANCOS - GOLDEN APP
+    
+    Este archivo contiene la página del módulo de ingreso a bancos dentro de tesorería.
+    Incluye gestión de ingresos a bancos con tabla y operaciones CRUD.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2025
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Ingreso a Bancos</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/administrativo/main.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/tesoreria/ingreso-bancos/ingreso-bancos.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="../../administrativo/admin-titulares.html" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../facturacion/contratos/fac-contratos.html" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="../ingreso-caja/ingreso-caja.html" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cogs nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item">
+                    <a href="../ingreso-caja/ingreso-caja.html" class="top-nav-link">Ingreso a Caja</a>
+                </li>
+                <li class="top-nav-item active">
+                    <a href="ingreso-bancos.html" class="top-nav-link">Ingreso a Bancos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../mantenimiento/tipo-ingresos.html" class="top-nav-link">Mantenimiento</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../cuentas-bancarias/cuentas-bancarias.html" class="top-nav-link">Cuentas Bancarias</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Ingresos a Bancos -->
+            <section class="bank-inflow-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Ingresos a Bancos</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="changeCityButton" onclick="showSelectCityModal()" style="display: none;">
+                            Cambiar Ciudad
+                        </button>
+                        <button class="btn btn-primary" onclick="showSearchInflowModal()">
+                            Buscar Ingreso
+                        </button>
+                        <button class="btn btn-primary" onclick="showCreateInflowModal()">
+                            Crear Ingreso
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table class="table" id="bankInflowTable">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha Hoy</th>
+                                <th>Fecha Documento</th>
+                                <th># Cuenta</th>
+                                <th>Valor</th>
+                                <th>Papeleta</th>
+                                <th>Concepto</th>
+                                <th class="status-column">ESTADO</th>
+                                <th class="options-column">OPCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bankInflowTableBody">
+                            <tr>
+                                <td colspan="9" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-university"></i>
+                                        <p>No existen registros de ingresos a bancos</p>
+                                        <small>Haz clic en "Crear Ingreso" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES DE INTERACCIÓN
+         ======================================== -->
+    
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+        <div class="modal" style="max-width: 520px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select" required>
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Ingreso -->
+    <div class="modal-overlay" id="searchInflowModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR INGRESO</h3>
+                <button class="modal-close" onclick="hideSearchInflowModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inflowSearchType" class="form-label">Tipo de Búsqueda *</label>
+                        <div class="select-container">
+                            <select id="inflowSearchType" class="form-select">
+                                <option value="number">Número de Ingreso</option>
+                                <option value="holderId">Identificación del Titular</option>
+                                <option value="holderName">Nombre del Titular</option>
+                                <option value="voucher">Papeleta</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchInflowValue" id="inflowSearchLabel" class="form-label">Valor de Búsqueda *</label>
+                        <input type="text" id="searchInflowValue" class="form-input" placeholder="Ingrese el valor a buscar">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideSearchInflowModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarIngreso">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda -->
+    <div class="modal-overlay" id="inflowResultsModal" style="display: none;">
+        <div class="modal modal-large modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA</h3>
+                <button class="modal-close" onclick="hideInflowResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table" id="inflowResultsTable">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha Hoy</th>
+                                <th>Fecha Documento</th>
+                                <th># Cuenta</th>
+                                <th>Valor</th>
+                                <th>Papeleta</th>
+                                <th>Concepto</th>
+                                <th>ESTADO</th>
+                                <th>OPCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inflowSearchResultsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideInflowResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Ingreso -->
+    <div class="modal-overlay" id="createInflowModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR INGRESO</h3>
+                <button class="modal-close" onclick="hideCreateInflowModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createInflowForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="inflowNumber" class="form-label">Número *</label>
+                            <input type="text" id="inflowNumber" class="form-input numeric-input" placeholder="NÚMERO" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="inflowAccount" class="form-label"># Cuenta *</label>
+                            <div class="select-container">
+                                <select id="inflowAccount" class="form-select" required>
+                                    <option value="">Seleccione una cuenta</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="inflowDateToday" class="form-label">Fecha Hoy *</label>
+                            <input type="date" id="inflowDateToday" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="inflowDocumentDate" class="form-label">Fecha Documento *</label>
+                            <input type="date" id="inflowDocumentDate" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="inflowValue" class="form-label">Valor *</label>
+                            <input type="text" id="inflowValue" class="form-input numeric-input" placeholder="VALOR AUTOMÁTICO" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="inflowVoucher" class="form-label">Papeleta *</label>
+                            <input type="text" id="inflowVoucher" class="form-input numeric-plain-input" placeholder="PAPELETA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="inflowConcept" class="form-label">Concepto *</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="inflowConcept" class="form-input" placeholder="Seleccione un ingreso a caja" readonly required>
+                                <button type="button" class="btn btn-primary" onclick="showCashInflowSelectionModal()" style="padding: 12px 20px; white-space: nowrap;">
+                                    <i class="fas fa-search"></i> Seleccionar
+                                </button>
+                            </div>
+                            <input type="hidden" id="inflowCashInflowData" value="">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreateInflowModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrearIngreso">Crear Ingreso</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Editar Ingreso -->
+    <div class="modal-overlay" id="editInflowModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">EDITAR INGRESO</h3>
+                <button class="modal-close" onclick="hideEditInflowModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editInflowForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="editInflowNumber" class="form-label">Número *</label>
+                            <input type="text" id="editInflowNumber" class="form-input numeric-input" placeholder="NÚMERO" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editInflowAccount" class="form-label"># Cuenta *</label>
+                            <div class="select-container">
+                                <select id="editInflowAccount" class="form-select" required>
+                                    <option value="">Seleccione una cuenta</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="editInflowDateToday" class="form-label">Fecha Hoy *</label>
+                            <input type="date" id="editInflowDateToday" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editInflowDocumentDate" class="form-label">Fecha Documento *</label>
+                            <input type="date" id="editInflowDocumentDate" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="editInflowValue" class="form-label">Valor *</label>
+                            <input type="text" id="editInflowValue" class="form-input numeric-input" placeholder="VALOR AUTOMÁTICO" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="editInflowVoucher" class="form-label">Papeleta *</label>
+                            <input type="text" id="editInflowVoucher" class="form-input numeric-plain-input" placeholder="PAPELETA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editInflowConcept" class="form-label">Concepto *</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="editInflowConcept" class="form-input" placeholder="Seleccione un ingreso a caja" readonly required>
+                                <button type="button" class="btn btn-primary" onclick="showCashInflowSelectionModal(true)" style="padding: 12px 20px; white-space: nowrap;">
+                                    <i class="fas fa-search"></i> Seleccionar
+                                </button>
+                            </div>
+                            <input type="hidden" id="editInflowCashInflowData" value="">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideEditInflowModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bActualizarIngreso">Actualizar Ingreso</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Ingreso a Caja -->
+    <div class="modal-overlay" id="cashInflowSelectionModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">ESCOJA EL INGRESO A CAJA</h3>
+                <button class="modal-close" onclick="hideCashInflowSelectionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="search-container">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="cashInflowSearchInput" class="search-input" placeholder="Buscar por número, concepto o titular...">
+                    </div>
+                </div>
+                <div class="data-table">
+                    <table class="table" id="cashInflowsTable">
+                        <thead>
+                            <tr>
+                                <th>Ingreso a Caja #</th>
+                                <th>Tipo Ingreso</th>
+                                <th>Valor</th>
+                                <th>Concepto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cashInflowsTableBody">
+                            <!-- Los ingresos a caja se cargarán dinámicamente aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCashInflowSelectionModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Crear Ingreso -->
+    <div class="modal-overlay" id="confirmCreateInflowModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreateInflow()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea crear este Ingreso a Banco?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateInflow()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateInflow()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Actualizar Ingreso -->
+    <div class="modal-overlay" id="confirmUpdateInflowModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelUpdateInflow()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea actualizar este Ingreso a Banco?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateInflow()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateInflow()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Ingreso -->
+    <div class="modal-overlay" id="successCreateInflowModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreateInflowModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡El ingreso a banco fue creado correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCreateInflowModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar Ingreso -->
+    <div class="modal-overlay" id="successUpdateInflowModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessUpdateInflowModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡El ingreso a banco fue actualizado correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateInflowModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Toggle Estado -->
+    <div class="modal-overlay" id="confirmToggleInflowModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelToggleInflow()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="confirmToggleInflowText">¿Está segur@ que desea cambiar el estado de este ingreso?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelToggleInflow()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmToggleInflow()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Toggle Estado -->
+    <div class="modal-overlay" id="successToggleInflowModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessToggleInflowModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="successToggleInflowText">El estado del ingreso se actualizó correctamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessToggleInflowModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- JavaScript -->
+    <script src="../../../assets/js/accessibility.js"></script>
+    <script src="../../../assets/js/tesoreria/ingreso-bancos/ingreso-bancos.js"></script>
+</body>
+</html>
+

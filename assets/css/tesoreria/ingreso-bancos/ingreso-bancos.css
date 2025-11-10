@@ -1,0 +1,936 @@
+/* Estilos para Ingreso a Bancos - TESORERÍA - GOLDEN APP */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+}
+
+.page-header h2 { 
+    font-weight: 700; 
+    margin: 0; 
+    font-size: 22px; 
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+}
+
+.section-header h2 { 
+    font-weight: 700; 
+    margin: 0; 
+    font-size: 22px; 
+}
+
+.action-buttons { 
+    display: flex; 
+    gap: 12px; 
+}
+
+.bank-inflow-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Título y ciudad actual */
+.section-title { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem; 
+}
+
+.section-title h2 { 
+    margin: 0; 
+    color: #1a1a1a; 
+    font-size: 1.5rem; 
+    font-weight: 600; 
+}
+
+.current-city-info { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    margin-top: 6px; 
+    color: #6b7280; 
+}
+
+.current-city-info i { 
+    color: #DEB448; 
+    font-size: 0.8rem; 
+}
+
+.current-city-info span { 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+
+.btn.btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    padding: 10px 20px;
+}
+
+.btn.btn-primary:hover {
+    background: #d4a942;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn.btn-primary:active {
+    transform: translateY(1px);
+}
+
+.btn.btn-secondary {
+    background: #6c757d;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.action-buttons .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: all var(--transition-fast, 0.2s ease);
+    text-transform: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.action-buttons .btn i {
+    font-size: 14px;
+}
+
+.data-table { 
+    overflow-x: auto; 
+}
+
+.table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 16px; 
+}
+
+.table thead { 
+    background: #f8f9fa; 
+}
+
+.table th { 
+    padding: 18px 12px; 
+    text-align: left; 
+    font-weight: 700; 
+    font-size: 15px; 
+    text-transform: uppercase; 
+    color: #1a1a1a;
+}
+
+.table th.status-column,
+.table th.options-column {
+    text-align: left;
+    font-size: 13px;
+}
+
+.table td {
+    padding: 18px 12px;
+    font-size: 15px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    color: #1a1a1a;
+}
+
+.table td.status-column {
+    text-align: left;
+    padding-left: 12px;
+}
+
+.table td.options-column {
+    text-align: left;
+    padding-left: 12px;
+}
+
+.table td.status-column .status-badge {
+    display: inline-block;
+    text-align: left;
+}
+
+.table td.options-column .action-buttons-cell {
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.table tbody tr:hover { 
+    background: #f0f0f0; 
+}
+
+/* Mensaje cuando no hay datos */
+.no-data-message {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-data-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #6b7280;
+}
+
+.no-data-content i {
+    font-size: 48px;
+    color: #d1d5db;
+}
+
+.no-data-content p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.no-data-content small {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+/* Modales */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000 !important;
+    backdrop-filter: blur(5px);
+}
+
+/* Modal de resultados de búsqueda */
+#inflowResultsModal {
+    z-index: 2000 !important;
+}
+
+/* Modal de editar debe aparecer encima del de resultados */
+#editInflowModal {
+    z-index: 3000 !important;
+}
+
+/* Modales de confirmación y éxito deben aparecer encima de todo */
+#confirmUpdateInflowModal,
+#successUpdateInflowModal,
+#confirmCreateInflowModal,
+#successCreateInflowModal,
+#confirmToggleInflowModal,
+#successToggleInflowModal {
+    z-index: 4000 !important;
+}
+
+.modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #dbcd7a;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modal-large {
+    max-width: 800px;
+}
+
+.modal-header {
+    margin-bottom: 25px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    border-bottom: none;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+.modal-body {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    align-items: stretch;
+    min-height: 0;
+}
+
+.modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 0;
+    border-top: none;
+}
+
+/* Formularios */
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-row.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-transform: uppercase;
+}
+
+.form-input {
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #fff;
+    color: #1a1a1a;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.form-input:read-only {
+    background: #f3f4f6;
+    cursor: not-allowed;
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.select-container {
+    position: relative;
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    color: #000;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+/* Inputs numéricos */
+.numeric-input {
+    text-align: left;
+}
+
+.input-error {
+    border-color: #dc2626 !important;
+}
+
+.input-error:focus {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Modal de éxito */
+.modal-success {
+    background: rgba(229, 227, 227, 0.925);
+    border: 1px solid #28a745;
+}
+
+.modal-success .modal-title {
+    color: #333;
+}
+
+.modal-message {
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .action-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .form-row.two-col {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal {
+        width: 95%;
+        max-height: 95vh;
+    }
+}
+
+/* Notificaciones (toast) */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 20000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification.show { 
+    transform: translateX(0); 
+}
+
+.notification-success { background: #28a745; }
+.notification-error { background: #dc3545; }
+.notification-warning { background: #ffc107; color: #1a1a1a; }
+.notification-info { background: #17a2b8; }
+
+/* ========================================
+   ESTILOS PARA ESTADO Y ACCIONES
+   ======================================== */
+
+/* Badge de estado */
+.status-badge {
+    display: inline-block;
+    padding: 0;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #6b7280 !important;
+    text-align: left;
+}
+
+.status-badge.active,
+.status-badge.inactive {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #6b7280 !important;
+    text-align: left;
+}
+
+/* Toggle switch */
+.status-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.status-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.status-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 
+        0 4px 8px rgba(255, 71, 87, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    max-width: 60px;
+    max-height: 30px;
+    z-index: 1;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.toggle-slider:after {
+    content: "OFF";
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.status-toggle input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #2ed573, #27c565);
+    box-shadow: 
+        0 4px 8px rgba(46, 213, 115, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.status-toggle input:checked + .toggle-slider:before {
+    transform: translateX(32px);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.status-toggle input:checked + .toggle-slider:after {
+    content: "ON";
+    left: 8px;
+    right: auto;
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+}
+
+.status-toggle:hover .toggle-slider {
+    opacity: 0.9;
+}
+
+.status-toggle:hover .toggle-slider:before {
+    box-shadow: 
+        0 3px 6px rgba(0, 0, 0, 0.25),
+        0 1px 2px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Botones de acción */
+.action-buttons-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 0;
+    transition: all 0.2s ease;
+    color: #6b7280;
+    font-size: 16px;
+}
+
+.btn-edit {
+    background-color: #DEB448;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-edit:hover {
+    background-color: #d4a942;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-edit i {
+    color: #000;
+}
+
+/* Modal de resultados */
+.modal-results {
+    max-width: 1400px !important;
+    width: 90% !important;
+    min-height: auto;
+    max-height: 90vh;
+    padding: 20px !important;
+}
+
+.modal-results .modal-header {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-results .modal-body {
+    padding: 15px 0;
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.modal-results .data-table {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.modal-results .table {
+    width: 100%;
+    margin: 0;
+    font-size: 13px;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.modal-results .table th {
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.modal-results .table td {
+    padding: 10px 8px;
+    font-size: 13px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+.modal-results .table td:nth-child(8),
+.modal-results .table th:nth-child(8) {
+    text-align: left;
+    padding-left: 8px;
+}
+
+.modal-results .table td:nth-child(9),
+.modal-results .table th:nth-child(9) {
+    text-align: left;
+    padding-left: 8px;
+}
+
+.modal-results .table td:nth-child(8) .status-badge {
+    text-align: left;
+}
+
+.modal-results .table td:nth-child(9) .action-buttons-cell {
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.modal-results .table td:nth-child(9) .status-toggle-container {
+    justify-content: flex-start;
+}
+
+.modal-results .table tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.modal-results .modal-footer {
+    padding: 15px 0 0 0;
+    margin-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ========================================
+   MODAL DE SELECCIÓN DE INGRESO A CAJA
+   ======================================== */
+
+/* Modal de selección de ingreso a caja debe aparecer al frente de todo */
+#cashInflowSelectionModal {
+    z-index: 20000 !important;
+}
+
+/* Aumentar altura del modal de selección de ingreso a caja */
+#cashInflowSelectionModal .modal {
+    max-height: 80vh;
+    height: 80vh;
+    min-height: 600px;
+}
+
+#cashInflowSelectionModal .modal-body {
+    max-height: calc(80vh - 200px);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Estilos para barra de búsqueda */
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #6c757d;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: transparent;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+.search-input-container:focus-within {
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.search-input::placeholder {
+    color: #6c757d;
+}
+
+/* Estilos para tabla de ingresos a caja */
+#cashInflowSelectionModal .data-table {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(80vh - 250px);
+    flex: 1;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+#cashInflowSelectionModal .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 0;
+}
+
+#cashInflowSelectionModal .table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8f9fa;
+}
+
+#cashInflowSelectionModal .table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+#cashInflowSelectionModal .table td {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    color: #1a1a1a;
+}
+
+#cashInflowSelectionModal .table tbody tr.cash-inflow-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#cashInflowSelectionModal .table tbody tr.cash-inflow-row:hover {
+    background-color: #f0f0f0;
+}
+
+#cashInflowSelectionModal .table tbody tr.cash-inflow-row.selected {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+#cashInflowSelectionModal .table tbody tr.cash-inflow-row.selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #2196f3;
+}
+
