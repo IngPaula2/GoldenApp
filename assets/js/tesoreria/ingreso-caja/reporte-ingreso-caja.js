@@ -53,11 +53,15 @@ function getIngresosCaja(){
     const reportData = localStorage.getItem('reporteIngresosCajaData');
     console.log('🔍 Buscando reporteIngresosCajaData en localStorage:', reportData);
     
+    // Obtener ciudad del reporte guardado o de window.__reportCity
+    let reportCity = '';
     if (reportData) {
         try {
             const data = JSON.parse(reportData);
+            reportCity = data.city || '';
             console.log('📊 Datos del reporte encontrados:', data);
-            if (data.inflows && Array.isArray(data.inflows)) {
+            if (data.inflows && Array.isArray(data.inflows) && data.inflows.length > 0) {
+                // Solo usar datos del reporte si tiene ingresos
                 console.log(`✅ Ingresos del reporte:`, data.inflows.length, data.inflows);
                 // Verificar que los ingresos tengan invoiceNumber
                 data.inflows.forEach((inflow, idx) => {
@@ -67,30 +71,62 @@ function getIngresosCaja(){
                 });
                 return data.inflows;
             } else {
-                console.log('❌ No hay ingresos en los datos del reporte');
+                console.log('⚠️ reporteIngresosCajaData existe pero está vacío, buscando en ingresosCaja_${city}...');
             }
         } catch (e) {
             console.error('❌ Error parseando datos del reporte:', e);
         }
     } else {
-        console.log('❌ No se encontró reporteIngresosCajaData en localStorage');
+        console.log('❌ No se encontró reporteIngresosCajaData en localStorage, buscando en ingresosCaja_${city}...');
     }
     
     const params = parseQuery();
     console.log('📅 Parámetros del reporte:', params);
     
+    // Usar ciudad del reporte guardado, window.__reportCity, o params.ciudad (en ese orden)
+    const city = reportCity || window.__reportCity || params.ciudad || '';
+    console.log('🏙️ Ciudad a usar para buscar ingresos:', city, '(reportCity:', reportCity, ', __reportCity:', window.__reportCity, ', params.ciudad:', params.ciudad, ')');
+    
     let ingresos = [];
     try {
-        const raw = localStorage.getItem(`ingresosCaja_${params.ciudad}`);
-        console.log('📦 Datos raw de localStorage:', raw);
+        const raw = localStorage.getItem(`ingresosCaja_${city}`);
+        console.log('📦 Datos raw de localStorage:', raw ? `Encontrados ${raw.length} caracteres` : 'No encontrados');
         
         if (raw) {
             const data = JSON.parse(raw);
             console.log('📋 Datos parseados:', data);
             ingresos = Array.isArray(data) ? data : Object.values(data);
-            console.log(`✅ Ingresos encontrados en localStorage:`, ingresos.length, ingresos);
+            console.log(`✅ Ingresos encontrados en localStorage:`, ingresos.length);
+            
+            // Log detallado de cada ingreso
+            ingresos.forEach((ing, idx) => {
+                console.log(`  Ingreso ${idx + 1}:`, {
+                    numero: ing.numero,
+                    fecha: ing.fecha,
+                    date: ing.date,
+                    valor: ing.valor,
+                    cuota: ing.cuota,
+                    invoiceNumber: ing.invoiceNumber,
+                    tieneDetalleCuotas: !!ing.detalleCuotas
+                });
+            });
         } else {
-            console.log(`❌ No hay ingresos en localStorage para ciudad ${params.ciudad}`);
+            console.log(`❌ No hay ingresos en localStorage para ciudad ${city}`);
+            // Intentar buscar todas las claves de ingresosCaja
+            console.log('🔍 Buscando todas las claves de ingresosCaja en localStorage...');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('ingresosCaja_')) {
+                    const cityCode = key.replace('ingresosCaja_', '');
+                    const cityData = JSON.parse(localStorage.getItem(key));
+                    console.log(`  - ${key}: ${Array.isArray(cityData) ? cityData.length : 'N/A'} ingresos`);
+                }
+            }
+            
+            // Si encontramos ingresos en otra ciudad, intentar usarlos
+            if (city && city !== '') {
+                console.log(`⚠️ No se encontraron ingresos para ciudad ${city}, pero se encontraron en otras ciudades.`);
+            }
         }
     } catch(e) {
         console.error('❌ Error leyendo localStorage:', e);
@@ -173,8 +209,16 @@ function renderTable() {
         // Obtener tipo de ingreso (solo código)
         const tipoIngreso = inflow.tipoIngresoCodigo || inflow.tipo || '';
         
-        // Formatear cuota
-        const cuotaFormatted = formatNumberValue(inflow.cuota || 0);
+        // Formatear cuota - Extraer solo el primer número si hay múltiples cuotas separadas por comas
+        let cuotaValue = inflow.cuota || 0;
+        if (typeof cuotaValue === 'string' && cuotaValue.includes(',')) {
+            // Si hay múltiples cuotas separadas por comas, tomar solo la primera
+            const primeraCuota = cuotaValue.split(',')[0].trim();
+            cuotaValue = parseInt(primeraCuota) || 0;
+        } else if (typeof cuotaValue === 'string') {
+            cuotaValue = parseInt(cuotaValue) || 0;
+        }
+        const cuotaFormatted = formatNumberValue(cuotaValue);
         
         // Formatear valor
         const valorFormatted = formatNumberValue(inflow.valor || 0);
@@ -818,7 +862,15 @@ function exportExcel(){
                             <tbody>
                                 ${rows.map(inflow => {
                                     const tipoIngreso = inflow.tipoIngresoCodigo || inflow.tipo || '';
-                                    const cuotaFormatted = formatNumberValue(inflow.cuota || 0);
+                                    // Formatear cuota - Extraer solo el primer número si hay múltiples cuotas separadas por comas
+                                    let cuotaValue = inflow.cuota || 0;
+                                    if (typeof cuotaValue === 'string' && cuotaValue.includes(',')) {
+                                        const primeraCuota = cuotaValue.split(',')[0].trim();
+                                        cuotaValue = parseInt(primeraCuota) || 0;
+                                    } else if (typeof cuotaValue === 'string') {
+                                        cuotaValue = parseInt(cuotaValue) || 0;
+                                    }
+                                    const cuotaFormatted = formatNumberValue(cuotaValue);
                                     const valorFormatted = formatNumberValue(inflow.valor || 0);
                                     const titularNombre = inflow.holderName || '';
                                     
@@ -1080,7 +1132,15 @@ function generarHTMLLimpio() {
     
     const filasTabla = rows.map(inflow => {
         const tipoIngreso = inflow.tipoIngresoCodigo || inflow.tipo || '';
-        const cuotaFormatted = formatNumberValue(inflow.cuota || 0);
+        // Formatear cuota - Extraer solo el primer número si hay múltiples cuotas separadas por comas
+        let cuotaValue = inflow.cuota || 0;
+        if (typeof cuotaValue === 'string' && cuotaValue.includes(',')) {
+            const primeraCuota = cuotaValue.split(',')[0].trim();
+            cuotaValue = parseInt(primeraCuota) || 0;
+        } else if (typeof cuotaValue === 'string') {
+            cuotaValue = parseInt(cuotaValue) || 0;
+        }
+        const cuotaFormatted = formatNumberValue(cuotaValue);
         const valorFormatted = formatNumberValue(inflow.valor || 0);
         const titularNombre = inflow.holderName || '';
         

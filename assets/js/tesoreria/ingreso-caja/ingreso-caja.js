@@ -5616,12 +5616,33 @@ function confirmCreateInflow() {
         const valorTotal = installments.reduce((sum, inst) => sum + (inst.valorPagar || 0), 0);
         
         // Crear un solo registro de ingreso con el detalle de múltiples cuotas
+        // Validar y formatear fecha correctamente
+        let fechaFormateada = inflowData.fecha || new Date().toISOString().split('T')[0];
+        let dateISO = '';
+        try {
+            if (inflowData.fecha) {
+                // Si la fecha viene en formato YYYY-MM-DD, convertirla a ISO
+                const fechaDate = new Date(inflowData.fecha + 'T00:00:00');
+                if (!isNaN(fechaDate.getTime())) {
+                    dateISO = fechaDate.toISOString();
+                } else {
+                    dateISO = new Date().toISOString();
+                }
+            } else {
+                dateISO = new Date().toISOString();
+            }
+        } catch (e) {
+            console.error('Error formateando fecha:', e);
+            fechaFormateada = new Date().toISOString().split('T')[0];
+            dateISO = new Date().toISOString();
+        }
+        
         const inflow = {
             id: Date.now(),
             tipoIngresoCodigo: inflowData.tipoIngresoCodigo,
             tipoIngresoNombre: inflowData.tipoIngresoNombre,
             numero: String(numeroIngreso),
-            fecha: inflowData.fecha,
+            fecha: fechaFormateada,
             observaciones: inflowData.observaciones || '',
             holderId: inflowData.holderId,
             holderName: inflowData.holderName,
@@ -5634,7 +5655,7 @@ function confirmCreateInflow() {
             reciboOficial: inflowData.reciboOficial || '',
             recordProduccion: inflowData.recordProduccion || '',
             estado: 'activo',
-            date: new Date(inflowData.fecha).toISOString(),
+            date: dateISO,
             // IMPORTANTE: Guardar detalle de cuotas para calcular saldos correctamente
             // Este array contiene el valor exacto pagado por cada cuota
             detalleCuotas: installments.map(inst => ({
@@ -5649,6 +5670,21 @@ function confirmCreateInflow() {
         // Guardar el registro en localStorage
         // BACKEND: Reemplazar por POST /api/cash-inflows
         localStorage.setItem(`ingresosCaja_${inflowData.city}`, JSON.stringify(list));
+        
+        // Log de depuración: Verificar que se guardó correctamente
+        console.log('✅ Ingreso guardado:', {
+            numero: inflow.numero,
+            fecha: inflow.fecha,
+            date: inflow.date,
+            valor: inflow.valor,
+            cuota: inflow.cuota,
+            ciudad: inflowData.city,
+            totalIngresos: list.length
+        });
+        
+        // Verificar que se puede leer correctamente
+        const verify = JSON.parse(localStorage.getItem(`ingresosCaja_${inflowData.city}`));
+        console.log('✅ Verificación: Total de ingresos en localStorage:', verify.length);
         
         // Actualizar el puntero del siguiente número consecutivo
         if (numeroIngreso > 0) {
