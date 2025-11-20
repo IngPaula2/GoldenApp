@@ -1,5 +1,5 @@
 /**
- * 💰 FUNCIONALIDAD INGRESO A CAJA - GOLDEN APP
+ *  FUNCIONALIDAD INGRESO A CAJA - GOLDEN APP
  * 
  * Este archivo contiene la lógica JavaScript para el módulo de ingreso a caja.
  * Incluye gestión de modales y operaciones CRUD para ingresos a caja.
@@ -231,7 +231,13 @@ function initializeModals() {
 
 function hideAllModals() {
     // Solo cerrar modales principales, no los de confirmación o éxito
-    const modalsToClose = ['createInflowModal', 'createInflowDetailsModal', 'searchInflowModal', 'reportModal'];
+    const modalsToClose = [
+        'createInflowModal', 
+        'createInflowDetailsModal', 
+        'searchInflowModal', 
+        'reportModal',
+        'selectInstallmentsModal'
+    ];
     modalsToClose.forEach(modalId => {
         const modal = document.getElementById(modalId);
         if (modal) modal.style.display = 'none';
@@ -242,6 +248,7 @@ function hideAllModals() {
     if (cityModal) {
         const city = getSelectedCityCode();
         if (!city) {
+            document.body.style.overflow = 'hidden'; // Mantener overflow hidden si no hay ciudad
             return; // No cerrar si no hay ciudad seleccionada
         }
         cityModal.style.display = 'none';
@@ -279,16 +286,47 @@ function initializeCitySelection() {
 }
 
 function showSelectCityModal() {
+    console.log('🔍 Intentando mostrar modal de ciudad...');
     const modal = document.getElementById('selectCityModal');
-    if (modal) {
+    if (!modal) {
+        console.error('❌ Modal de selección de ciudad no encontrado en el DOM');
+        return;
+    }
+    
+    console.log('✅ Modal encontrado, preparando para mostrar...');
+    
+    // Cerrar otros modales excepto el de ciudad
+    const modalsToClose = [
+        'createInflowModal', 
+        'createInflowDetailsModal', 
+        'searchInflowModal', 
+        'reportModal',
+        'selectInstallmentsModal'
+    ];
+    modalsToClose.forEach(modalId => {
+        const m = document.getElementById(modalId);
+        if (m) m.style.display = 'none';
+    });
+    
+    // Mostrar modal de ciudad
+    try {
         populateCitySelectOptions();
         modal.style.display = 'flex';
         modal.style.zIndex = '2000';
         document.body.style.overflow = 'hidden';
+        console.log('✅ Modal de ciudad mostrado correctamente');
+        
         setTimeout(() => { 
             const citySelect = document.getElementById('citySelect');
-            if (citySelect) citySelect.focus(); 
+            if (citySelect) {
+                citySelect.focus();
+                console.log('✅ Campo de selección enfocado');
+            } else {
+                console.warn('⚠️ Campo citySelect no encontrado');
+            }
         }, 100);
+    } catch (error) {
+        console.error('❌ Error al mostrar modal de ciudad:', error);
     }
 }
 
@@ -408,15 +446,20 @@ function showCreateInflowModal() {
         const isEditing = !!window.__editingInflowId;
         
         if (!isEditing) {
-            // Limpiar formulario
+            // Limpiar formulario (esto también cargará el número si no existe)
             clearCreateInflowForm();
-            // Obtener próximo número de ingreso
-            loadNextInflowNumber();
             // Fecha manual (sin valor por defecto)
             const dateEl = document.getElementById('inflowDate');
             if (dateEl) {
                 dateEl.value = '';
             }
+            // Asegurar que el número se cargue (por si acaso)
+            setTimeout(() => {
+                const numberInput = document.getElementById('inflowNumber');
+                if (!numberInput || !numberInput.value) {
+                    loadNextInflowNumber();
+                }
+            }, 100);
             
             // Restaurar título y botón
             const modalTitle = document.querySelector('#createInflowModal .modal-title');
@@ -445,9 +488,10 @@ function showCreateInflowDetailsModal() {
     if (modal) {
         modal.style.display = 'flex';
         clearCreateInflowDetailsForm();
-        // Actualizar label del recibo oficial según el tipo de ingreso
+        // Actualizar labels según el tipo de ingreso
         setTimeout(() => {
             updateReciboOficialLabel();
+            updateCuotaFieldLabel();
         }, 50);
         // Enfocar el primer campo
         const holderId = document.getElementById('holderId');
@@ -480,6 +524,679 @@ function hideCreateInflowDetailsModal() {
     }
 }
 
+// ========================================
+// MODAL DE SELECCIÓN DE CUOTAS
+// ========================================
+
+/**
+ * Muestra el modal de selección de cuotas
+ */
+function showSelectInstallmentsModal() {
+    const modal = document.getElementById('selectInstallmentsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Cargar cuotas pendientes
+        loadInstallmentsForModal();
+    }
+}
+
+/**
+ * Oculta el modal de selección de cuotas
+ */
+function hideSelectInstallmentsModal() {
+    const modal = document.getElementById('selectInstallmentsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: loadInstallmentsForModal()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Carga y muestra todas las cuotas pendientes de pago para una factura específica
+ * en el modal de selección de cuotas. Calcula los saldos restantes considerando
+ * pagos parciales previos.
+ * 
+ * FUNCIONALIDAD:
+ * 1. Obtiene el número de factura del formulario
+ * 2. Busca la información del plan asociado a la factura
+ * 3. Calcula los pagos ya realizados por cada cuota (considerando pagos parciales)
+ * 4. Calcula el saldo restante de cada cuota
+ * 5. Renderiza una tabla con todas las cuotas pendientes
+ * 
+ * NOTA PARA BACKEND:
+ * - Actualmente obtiene datos de localStorage
+ * - CONEXIÓN BACKEND: Reemplazar las llamadas a localStorage por llamadas API:
+ *   * localStorage.getItem('invoicesByCity') → API: GET /api/invoices?city={city}
+ *   * localStorage.getItem('contratos_{city}') → API: GET /api/contracts?city={city}
+ *   * localStorage.getItem('planesData') → API: GET /api/plans
+ *   * localStorage.getItem('ingresosCaja_{city}') → API: GET /api/cash-inflows?city={city}&invoice={invoiceNumber}
+ * 
+ * @returns {void}
+ */
+function loadInstallmentsForModal() {
+    const invoiceInput = document.getElementById('invoiceNumber');
+    const invoiceSelect = document.getElementById('invoiceNumberSelect');
+    const tableBody = document.getElementById('selectInstallmentsTableBody');
+    const modalInvoiceNumber = document.getElementById('modalInvoiceNumber');
+    const modalHolderName = document.getElementById('modalHolderName');
+    
+    if (!tableBody) return;
+    
+    // Obtener número de factura
+    let invoiceNumber = '';
+    if (invoiceSelect && invoiceSelect.style.display !== 'none' && invoiceSelect.value) {
+        const selectedValue = invoiceSelect.value.trim();
+        // Intentar extraer el número de factura de diferentes formatos
+        let match = selectedValue.match(/Factura\s+(\d+)/i);
+        if (!match) {
+            // Intentar con formato "Factura: 123" o solo números
+            match = selectedValue.match(/(\d+)/);
+        }
+        invoiceNumber = match ? match[1] : selectedValue;
+        // Limpiar el número (remover ceros a la izquierda para comparación)
+        invoiceNumber = invoiceNumber.replace(/^0+/, '') || invoiceNumber;
+    } else if (invoiceInput) {
+        invoiceNumber = invoiceInput.value.trim().replace(/^0+/, '') || invoiceInput.value.trim();
+    }
+    
+    if (!invoiceNumber) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 30px;">
+                    <p style="margin: 0; color: #6c757d;">No se ha seleccionado una factura</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Actualizar información del modal
+    if (modalInvoiceNumber) {
+        modalInvoiceNumber.textContent = invoiceNumber;
+    }
+    
+    const holderNameInput = document.getElementById('holderName');
+    if (modalHolderName && holderNameInput) {
+        modalHolderName.textContent = holderNameInput.value || '-';
+    }
+    
+    // Obtener información del plan
+    console.log('loadInstallmentsForModal: Buscando plan para factura:', invoiceNumber);
+    const planInfo = getPlanInfoFromInvoice(invoiceNumber);
+    if (!planInfo) {
+        console.error('loadInstallmentsForModal: No se pudo obtener información del plan para factura:', invoiceNumber);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 30px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo obtener la información del plan.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    console.log('loadInstallmentsForModal: Plan info obtenida:', planInfo);
+    let mensualidad = planInfo.mensualidad || 0;
+    let numCuotas = planInfo.numCuotas || 0;
+    const cuotasPagadas = planInfo.cuotasPagadas || 0;
+    
+    console.log('loadInstallmentsForModal: Valores extraídos:', { mensualidad, numCuotas, cuotasPagadas });
+    
+    if (!mensualidad || mensualidad <= 0 || !numCuotas || numCuotas <= 0) {
+        console.error('loadInstallmentsForModal: Datos del plan inválidos:', { mensualidad, numCuotas });
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 30px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo determinar el valor de la cuota o número de cuotas.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Calcular cuotas pendientes
+    const city = getSelectedCityCode();
+    const inflowsRaw = localStorage.getItem(`ingresosCaja_${city}`);
+    const inflows = inflowsRaw ? JSON.parse(inflowsRaw) : [];
+    const pagosPorCuota = {};
+    
+    if (Array.isArray(inflows)) {
+        inflows.forEach(i => {
+            const sameInvoice = String(i.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
+            const isActive = (i.estado || 'activo') === 'activo';
+            if (sameInvoice && isActive) {
+                // Si existe detalleCuotas, usar esa información (más precisa)
+                if (i.detalleCuotas && Array.isArray(i.detalleCuotas)) {
+                    i.detalleCuotas.forEach(detalle => {
+                        const cuotaNum = parseInt(detalle.cuota) || 0;
+                        if (cuotaNum > 0) {
+                            if (!pagosPorCuota[cuotaNum]) {
+                                pagosPorCuota[cuotaNum] = 0;
+                            }
+                            pagosPorCuota[cuotaNum] += parseFloat(detalle.valorPagar || 0);
+                        }
+                    });
+                } else {
+                    // Procesar el campo cuota que puede ser un string con múltiples cuotas separadas por comas
+                    const cuotaField = String(i.cuota || '');
+                    const valorTotal = parseFloat(i.valor || 0);
+                    
+                    if (cuotaField.includes(',')) {
+                        // Si hay múltiples cuotas, dividir el valor entre todas
+                        const cuotas = cuotaField.split(',').map(c => parseInt(c.trim())).filter(c => !isNaN(c) && c > 0);
+                        if (cuotas.length > 0) {
+                            const valorPorCuota = valorTotal / cuotas.length;
+                            cuotas.forEach(cuotaNum => {
+                                if (!pagosPorCuota[cuotaNum]) {
+                                    pagosPorCuota[cuotaNum] = 0;
+                                }
+                                pagosPorCuota[cuotaNum] += valorPorCuota;
+                            });
+                        }
+                    } else {
+                        // Una sola cuota
+                        const cuotaNum = parseInt(cuotaField) || 0;
+                        if (cuotaNum > 0) {
+                            if (!pagosPorCuota[cuotaNum]) {
+                                pagosPorCuota[cuotaNum] = 0;
+                            }
+                            pagosPorCuota[cuotaNum] += valorTotal;
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Empezar desde la cuota 1 (la cuota 0 es la cuota inicial)
+    // Mostrar todas las cuotas que tengan saldo pendiente, incluso si tienen pagos parciales
+    const cuotasPendientes = [];
+    
+    for (let i = 1; i <= numCuotas; i++) {
+        const pagado = pagosPorCuota[i] || 0;
+        const saldo = Math.max(0, mensualidad - pagado);
+        
+        // Mostrar la cuota si tiene saldo pendiente (incluso si tiene pagos parciales)
+        if (saldo > 0) {
+            cuotasPendientes.push({
+                cuota: i,
+                valorCuota: mensualidad,
+                valorPagado: pagado,
+                saldo: saldo
+            });
+        }
+    }
+    
+    if (cuotasPendientes.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 30px;">
+                    <p style="margin: 0; color: #6c757d;">Todas las cuotas están pagadas</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Renderizar tabla
+    console.log('loadInstallmentsForModal: Renderizando', cuotasPendientes.length, 'cuotas pendientes');
+    console.log('loadInstallmentsForModal: Mensualidad usada para renderizar:', mensualidad);
+    tableBody.innerHTML = '';
+    cuotasPendientes.forEach(inst => {
+        console.log('loadInstallmentsForModal: Renderizando cuota', inst.cuota, 'con valorCuota:', inst.valorCuota, 'saldo:', inst.saldo);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="text-align: center; padding: 12px;">
+                <input type="checkbox" class="installment-checkbox" 
+                       data-cuota="${inst.cuota}" 
+                       data-valor-cuota="${inst.valorCuota}" 
+                       data-saldo="${inst.saldo}"
+                       style="cursor: pointer;">
+            </td>
+            <td style="padding: 12px;">${inst.cuota}/${numCuotas}</td>
+            <td style="padding: 12px; text-align: right;">
+                <input type="text"
+                       class="valor-pagar-input numeric-input"
+                       data-cuota="${inst.cuota}"
+                       data-valor-cuota="${inst.valorCuota}"
+                       data-saldo="${inst.saldo}"
+                       value="${formatNumberValue(inst.saldo)}"
+                       placeholder="${formatNumberValue(inst.valorCuota)}"
+                       style="width: 100%; text-align: right; border: 1px solid #dcdcdc; border-radius: 4px; padding: 6px;">
+            </td>
+            <td style="padding: 12px; text-align: center;">
+                <span class="status-badge" style="font-size: 0.85em; background-color: #d1ecf1; color: #0c5460;">PENDIENTE</span>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // Guardar información de cuotas
+    window.modalInstallments = cuotasPendientes;
+    window.modalPlanInfo = { mensualidad, numCuotas };
+    
+    // Limpiar campo de valor deseado
+    const desiredValueInput = document.getElementById('desiredTotalValue');
+    if (desiredValueInput) {
+        desiredValueInput.value = '';
+    }
+    
+    // Inicializar formato y eventos para inputs
+    initializeValorPagarInputs();
+    initializeInstallmentModalEvents();
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: initializeInstallmentModalEvents()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Inicializa todos los event listeners del modal de selección de cuotas.
+ * Maneja la interacción del usuario con checkboxes, inputs de valores y
+ * el campo de valor total deseado.
+ * 
+ * EVENTOS MANEJADOS:
+ * - Checkbox "Seleccionar todas": Marca/desmarca todas las cuotas
+ * - Checkboxes individuales: Marca/desmarca cuotas específicas
+ * - Inputs de valor a pagar: Permite editar el valor de cada cuota
+ * - Campo "Valor Total Deseado": Distribuye automáticamente el valor entre cuotas
+ * 
+ * @returns {void}
+ */
+function initializeInstallmentModalEvents() {
+    // Checkbox "Seleccionar todas"
+    const selectAllCheckbox = document.getElementById('selectAllInstallmentsModal');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.onchange = function() {
+            const checkboxes = document.querySelectorAll('.installment-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+                handleModalInstallmentCheckboxChange(cb, { skipSummary: true });
+            });
+        };
+    }
+    
+    // Checkboxes individuales
+    document.querySelectorAll('.installment-checkbox').forEach(checkbox => {
+        checkbox.onchange = function() {
+            handleModalInstallmentCheckboxChange(checkbox);
+        };
+    });
+    
+    // Inputs de valor a pagar
+    document.querySelectorAll('.valor-pagar-input').forEach(input => {
+        input.addEventListener('change', () => handleModalValorPagarChange(input));
+        input.addEventListener('blur', () => handleModalValorPagarBlur(input));
+    });
+    
+    // Campo de valor deseado
+    const desiredValueInput = document.getElementById('desiredTotalValue');
+    if (desiredValueInput) {
+        // Formato numérico
+        desiredValueInput.addEventListener('input', function() {
+            const cursorPosition = this.selectionStart;
+            const originalValue = this.value;
+            const numbersOnly = this.value.replace(/[^\d]/g, '');
+            
+            if (!numbersOnly) {
+                this.value = '';
+                return;
+            }
+            
+            const numValue = parseInt(numbersOnly, 10);
+            if (!isNaN(numValue)) {
+                const formatted = new Intl.NumberFormat('es-CO', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(numValue);
+                
+                this.value = formatted;
+                
+                // Ajustar cursor
+                const beforeCursor = originalValue.substring(0, cursorPosition);
+                const digitsBeforeCursor = beforeCursor.replace(/[^\d]/g, '').length;
+                let digitsFound = 0;
+                let newCursorPosition = formatted.length;
+                for (let i = 0; i < formatted.length; i++) {
+                    if (formatted[i] >= '0' && formatted[i] <= '9') {
+                        digitsFound++;
+                        if (digitsFound === digitsBeforeCursor) {
+                            newCursorPosition = i + 1;
+                            break;
+                        }
+                    }
+                }
+                this.setSelectionRange(newCursorPosition, newCursorPosition);
+            }
+            
+            autoDistributeDesiredValue();
+        });
+        
+        desiredValueInput.addEventListener('blur', function() {
+            formatNumericInput(this);
+            autoDistributeDesiredValue();
+        });
+    }
+    
+    // Botón confirmar
+    const confirmButton = document.getElementById('bConfirmInstallments');
+    if (confirmButton) {
+        confirmButton.onclick = confirmInstallmentSelection;
+    }
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: handleModalInstallmentCheckboxChange()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Maneja el evento cuando el usuario marca o desmarca un checkbox de cuota.
+ * Si se marca, establece el valor del input al saldo restante de la cuota.
+ * Si se desmarca, limpia el valor del input.
+ * 
+ * @param {HTMLInputElement} checkbox - El checkbox que fue marcado/desmarcado
+ * @param {Object} options - Opciones adicionales (skipSummary: true para no actualizar resumen)
+ * @returns {void}
+ */
+function handleModalInstallmentCheckboxChange(checkbox, options = {}) {
+    const cuota = parseInt(checkbox.dataset.cuota);
+    const saldo = parseFloat(checkbox.dataset.saldo || 0);
+    const input = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+    
+    if (!input) return;
+    
+    if (checkbox.checked) {
+        const currentValue = parseFormattedNumber(input.value) || 0;
+        if (currentValue <= 0) {
+            input.value = formatNumberValue(saldo);
+        }
+    } else {
+        input.value = '0';
+    }
+    
+    updateModalInstallmentRowState(cuota);
+    
+    if (!options.skipSummary) {
+        syncSelectAllInstallmentsState();
+    }
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: handleModalValorPagarChange()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Maneja cuando el usuario edita manualmente el valor a pagar de una cuota.
+ * Valida que el valor no exceda el saldo disponible y actualiza el estado
+ * del checkbox y la fila correspondiente.
+ * 
+ * @param {HTMLInputElement} input - El input de valor a pagar que fue modificado
+ * @returns {void}
+ */
+function handleModalValorPagarChange(input) {
+    let valor = parseFormattedNumber(input.value) || 0;
+    const saldo = parseFloat(input.dataset.saldo || 0);
+    const cuota = parseInt(input.dataset.cuota);
+    const checkbox = document.querySelector(`.installment-checkbox[data-cuota="${cuota}"]`);
+    
+    if (valor > saldo) {
+        valor = saldo;
+        input.value = formatNumberValue(valor);
+        showNotification(`El valor no puede exceder el saldo de ${formatNumberValue(saldo)}`, 'warning');
+    }
+    
+    if (checkbox) {
+        checkbox.checked = valor > 0;
+    }
+    
+    updateModalInstallmentRowState(cuota);
+    syncSelectAllInstallmentsState();
+}
+
+/**
+ * Maneja el blur en los inputs para re-formatear y recalcular
+ */
+function handleModalValorPagarBlur(input) {
+    formatNumericInput(input);
+    handleModalValorPagarChange(input);
+}
+
+/**
+ * Marca o desmarca el checkbox general según la selección actual
+ */
+function syncSelectAllInstallmentsState() {
+    const selectAllCheckbox = document.getElementById('selectAllInstallmentsModal');
+    if (!selectAllCheckbox) return;
+    
+    const checkboxes = document.querySelectorAll('.installment-checkbox');
+    const checkedCount = document.querySelectorAll('.installment-checkbox:checked').length;
+    
+    if (checkboxes.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+        return;
+    }
+    
+    selectAllCheckbox.checked = checkedCount === checkboxes.length;
+    selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: autoDistributeDesiredValue()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Distribuye automáticamente el valor total deseado ingresado por el usuario
+ * entre las cuotas disponibles, empezando desde la primera cuota pendiente.
+ * 
+ * LÓGICA:
+ * 1. Lee el valor total deseado del campo "Valor Total Deseado a Pagar"
+ * 2. Recorre las cuotas en orden cronológico (1, 2, 3, ...)
+ * 3. Asigna a cada cuota el valor mínimo entre su saldo restante y el valor restante
+ * 4. Actualiza los inputs y checkboxes correspondientes
+ * 
+ * EJEMPLO:
+ * - Valor deseado: 500,000
+ * - Cuota 1 saldo: 118,000 → Asigna 118,000
+ * - Cuota 2 saldo: 118,000 → Asigna 118,000
+ * - Cuota 3 saldo: 118,000 → Asigna 118,000
+ * - Cuota 4 saldo: 118,000 → Asigna 118,000
+ * - Cuota 5 saldo: 118,000 → Asigna 28,000 (parcial)
+ * 
+ * @returns {void}
+ */
+function autoDistributeDesiredValue() {
+    const desiredValueInput = document.getElementById('desiredTotalValue');
+    if (!desiredValueInput) {
+        return;
+    }
+    
+    const desiredValue = parseFormattedNumber(desiredValueInput.value) || 0;
+    const checkboxes = Array.from(document.querySelectorAll('.installment-checkbox'));
+    
+    if (checkboxes.length === 0) {
+        return;
+    }
+    
+    // Ordenar por número de cuota para distribuir en orden cronológico
+    checkboxes.sort((a, b) => parseInt(a.dataset.cuota) - parseInt(b.dataset.cuota));
+    
+    let valorRestante = desiredValue;
+    
+    checkboxes.forEach(checkbox => {
+        const cuota = parseInt(checkbox.dataset.cuota);
+        const saldo = parseFloat(checkbox.dataset.saldo || 0);
+        const input = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+        if (!input) return;
+        
+        if (valorRestante > 0) {
+            const valorAsignado = Math.min(saldo, valorRestante);
+            input.value = formatNumberValue(valorAsignado);
+            checkbox.checked = valorAsignado > 0;
+            valorRestante -= valorAsignado;
+        } else {
+            checkbox.checked = false;
+            input.value = '0';
+        }
+        
+        updateModalInstallmentRowState(cuota);
+    });
+    
+    syncSelectAllInstallmentsState();
+}
+
+/**
+ * Actualiza el estado visual de una fila (pendiente, parcial, completa)
+ */
+function updateModalInstallmentRowState(cuota) {
+    const row = document.querySelector(`.installment-checkbox[data-cuota="${cuota}"]`)?.closest('tr');
+    if (!row) return;
+    
+    const input = row.querySelector('.valor-pagar-input');
+    const estadoCell = row.querySelector('td:last-child');
+    const saldo = input ? parseFloat(input.dataset.saldo || 0) : 0;
+    const valor = input ? parseFormattedNumber(input.value) || 0 : 0;
+    
+    if (!estadoCell) return;
+    
+    if (valor === 0) {
+        estadoCell.innerHTML = '<span class="status-badge" style="font-size: 0.85em; background-color: #d1ecf1; color: #0c5460;">PENDIENTE</span>';
+        row.style.backgroundColor = '';
+    } else if (valor < saldo) {
+        estadoCell.innerHTML = '<span class="status-badge warning" style="font-size: 0.85em;">PARCIAL</span>';
+        row.style.backgroundColor = '#fff8e1';
+    } else {
+        estadoCell.innerHTML = '<span class="status-badge success" style="font-size: 0.85em;">COMPLETA</span>';
+        row.style.backgroundColor = '';
+    }
+}
+
+/**
+ * Actualiza el resumen de selección en el modal
+ */
+function updateInstallmentModalSummary() {
+    // Función vacía - los elementos de resumen fueron eliminados
+}
+
+/**
+ * Actualiza la sugerencia de cuotas basada en el valor deseado
+ */
+function updateInstallmentSuggestion() {
+    // Función vacía - el mensaje de sugerencia fue eliminado
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: confirmInstallmentSelection()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Confirma la selección de cuotas realizada en el modal y actualiza el formulario
+ * principal con los valores seleccionados. Guarda la información de las cuotas
+ * seleccionadas para que se use al crear el ingreso.
+ * 
+ * FUNCIONALIDAD:
+ * 1. Valida que haya al menos una cuota seleccionada
+ * 2. Calcula el valor total de todas las cuotas seleccionadas
+ * 3. Actualiza el campo "Valor Total a Pagar" en el formulario principal
+ * 4. Actualiza el campo "Cuota" con todas las cuotas seleccionadas (ej: "2, 3, 4, 5")
+ * 5. Guarda el detalle de cuotas en window.calculatedInstallments para usarlo al guardar
+ * 6. Cierra el modal de selección
+ * 
+ * NOTA PARA BACKEND:
+ * - Actualmente guarda en window.calculatedInstallments
+ * - CONEXIÓN BACKEND: Esta función prepara los datos que luego se enviarán al backend
+ *   en confirmCreateInflow(). Los datos se envían en el formato:
+ *   {
+ *     ...datosBasicos,
+ *     valor: totalValue,
+ *     cuota: "2, 3, 4, 5",
+ *     detalleCuotas: [
+ *       { cuota: 2, valorPagar: 118000, esParcial: false },
+ *       { cuota: 3, valorPagar: 118000, esParcial: false },
+ *       ...
+ *     ]
+ *   }
+ * 
+ * @returns {void}
+ */
+function confirmInstallmentSelection() {
+    const selectedCheckboxes = Array.from(document.querySelectorAll('.installment-checkbox:checked'));
+    
+    if (selectedCheckboxes.length === 0) {
+        showNotification('Por favor, seleccione al menos una cuota', 'warning');
+        return;
+    }
+    
+    // Calcular valores
+    let totalValue = 0;
+    const installments = [];
+    
+    selectedCheckboxes.sort((a, b) => {
+        return parseInt(a.dataset.cuota) - parseInt(b.dataset.cuota);
+    });
+    
+    selectedCheckboxes.forEach(checkbox => {
+        const cuota = parseInt(checkbox.dataset.cuota);
+        const valorCuota = parseFloat(checkbox.dataset.valorCuota || 0);
+        const saldo = parseFloat(checkbox.dataset.saldo || 0);
+        const input = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+        let valorSeleccionado = input ? parseFormattedNumber(input.value) || 0 : saldo;
+        
+        if (valorSeleccionado <= 0) {
+            valorSeleccionado = saldo;
+        }
+        if (valorSeleccionado > saldo) {
+            valorSeleccionado = saldo;
+        }
+        
+        totalValue += valorSeleccionado;
+        installments.push({
+            cuota: cuota,
+            valorCuota: valorCuota,
+            valorPagar: valorSeleccionado,
+            saldo: saldo,
+            esParcial: valorSeleccionado < saldo
+        });
+    });
+    
+    if (totalValue <= 0) {
+        showNotification('El total seleccionado debe ser mayor a cero', 'warning');
+        return;
+    }
+    
+    // Actualizar campo de valor total en el formulario principal
+    const valorInput = document.getElementById('inflowValue');
+    if (valorInput) {
+        valorInput.value = formatNumberValue(totalValue);
+        formatNumericInput(valorInput);
+    }
+    
+    // Actualizar campo de cuota (todas las cuotas seleccionadas)
+    const cuotaInput = document.getElementById('cuota');
+    if (cuotaInput && installments.length > 0) {
+        // Mostrar todas las cuotas separadas por comas
+        const cuotasNumeros = installments.map(inst => inst.cuota).join(', ');
+        cuotaInput.value = cuotasNumeros;
+    }
+    
+    // Guardar cuotas calculadas
+    window.calculatedInstallments = installments;
+    
+    // Cerrar modal
+    hideSelectInstallmentsModal();
+    
+    showNotification(`Se seleccionaron ${installments.length} cuota(s) por un total de ${formatNumberValue(totalValue)}`, 'success');
+}
+
 function clearCreateInflowDetailsForm() {
     const form = document.getElementById('createInflowDetailsForm');
     if (form) form.reset();
@@ -497,6 +1214,27 @@ function clearCreateInflowDetailsForm() {
         executiveNameDisplay.textContent = '';
         executiveNameDisplay.classList.remove('error-text', 'success-text');
     }
+    
+    // Limpiar tabla de cuotas
+    const installmentsTableBody = document.getElementById('installmentsTableBody');
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    if (installmentsTableBody) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Seleccione una factura para ver las cuotas pendientes</p>
+                </td>
+            </tr>
+        `;
+    }
+    if (installmentsTableFooter) {
+        installmentsTableFooter.style.display = 'none';
+    }
+    
+    // Limpiar datos calculados
+    window.calculatedInstallments = null;
+    window.pendingInstallments = null;
+    window.planInfo = null;
     
     // Limpiar validación de factura y restaurar campo a input
     clearInvoiceValidation();
@@ -547,9 +1285,10 @@ function handleNextStepInflow() {
     hideCreateInflowModal();
     showCreateInflowDetailsModal();
     
-    // Actualizar label del recibo oficial según el tipo de ingreso
+    // Actualizar labels según el tipo de ingreso
     setTimeout(() => {
         updateReciboOficialLabel();
+        updateCuotaFieldLabel();
     }, 100);
     
     // Si ya hay un titular ingresado, recargar contratos/facturas con el nuevo tipo de ingreso
@@ -592,8 +1331,9 @@ function handleNextStepInflow() {
         setVal('recordProduccion', editData.recordProduccion);
         setProductionRecordField(editData.recordProduccion || '');
         
-        // Actualizar label del recibo oficial según el tipo de ingreso
+        // Actualizar labels según el tipo de ingreso
         updateReciboOficialLabel();
+        updateCuotaFieldLabel();
         
         // Mostrar displays de nombres si existen
         if (editData.holderName) {
@@ -1229,12 +1969,10 @@ function loadInvoicesForTitularInInflow(cedula, city) {
                 // Validar la factura
                 validateInvoiceNumber(selectedValue);
 
-                // Autollenar cuota y valor según cuotas pendientes
-                try {
-                    autoSetInstallmentFromInvoice(selectedValue);
-                } catch (e) {
-                    console.warn('No se pudo autollenar cuota/valor desde la selección:', e);
-                }
+                // Abrir modal de selección de cuotas
+                setTimeout(() => {
+                    showSelectInstallmentsModal();
+                }, 300);
                 
                 const selectedOption = this.options[this.selectedIndex];
                 const productionRecord = selectedOption?.dataset?.productionRecord || '';
@@ -1543,8 +2281,45 @@ function initializeInvoiceValidation() {
         const invoiceNumber = this.value.trim();
         if (invoiceNumber) {
             validateInvoiceNumber(invoiceNumber);
+            // Abrir modal de selección de cuotas cuando se ingresa una factura
+            setTimeout(() => {
+                showSelectInstallmentsModal();
+            }, 300);
         }
     });
+    
+    // También escuchar cambios en el select de factura si existe
+    const invoiceSelect = document.getElementById('invoiceNumberSelect');
+    if (invoiceSelect) {
+        invoiceSelect.addEventListener('change', function() {
+            if (this.value) {
+                setTimeout(() => {
+                    showSelectInstallmentsModal();
+                }, 200);
+            }
+        });
+    }
+    
+    // Evento para seleccionar/deseleccionar todas las cuotas
+    const selectAllCheckbox = document.getElementById('selectAllInstallments');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+                if (!this.checked) {
+                    // Limpiar valor si se deselecciona
+                    const cuota = parseInt(cb.dataset.cuota);
+                    const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+                    if (valorPagarInput) {
+                        valorPagarInput.value = '0';
+                        formatNumericInput(valorPagarInput);
+                    }
+                }
+            });
+            distributeValueToSelectedInstallments();
+        });
+    }
 }
 
 function validateInvoiceNumber(invoiceNumber) {
@@ -1902,6 +2677,17 @@ function initializeNumericFormatting() {
         
         valorInput.addEventListener('blur', function() {
             formatNumericInput(this);
+            // Distribuir valor cuando se pierde el foco
+            distributeValueToSelectedInstallments();
+        });
+        
+        // Distribuir valor cuando cambia (con debounce)
+        let calculateTimeout;
+        valorInput.addEventListener('input', function() {
+            clearTimeout(calculateTimeout);
+            calculateTimeout = setTimeout(() => {
+                distributeValueToSelectedInstallments();
+            }, 500); // Esperar 500ms después de que el usuario deje de escribir
         });
         
         // Prevenir pegar texto no numérico
@@ -1930,6 +2716,8 @@ function initializeNumericFormatting() {
         });
         cuotaInput.addEventListener('blur', function() {
             formatNumericInput(this);
+            // Recalcular cuotas cuando cambie la cuota inicial
+            calculateInstallmentsFromValue();
         });
     }
 }
@@ -2039,7 +2827,24 @@ function updateInflowSearchPlaceholder() {
 
 function clearCreateInflowForm() {
     const form = document.getElementById('createInflowForm');
-    if (form) form.reset();
+    if (form) {
+        // Guardar el número actual antes de resetear
+        const numberInput = document.getElementById('inflowNumber');
+        const currentNumber = numberInput ? numberInput.value : null;
+        
+        // Resetear el formulario
+        form.reset();
+        
+        // Restaurar el número inmediatamente después del reset
+        if (numberInput) {
+            if (currentNumber) {
+                numberInput.value = currentNumber;
+            } else {
+                // Si no había número, cargar el siguiente
+                loadNextInflowNumber();
+            }
+        }
+    }
     
     // Limpiar display de nombre del tipo de ingreso
     const incomeTypeNameDisplay = document.getElementById('incomeTypeNameDisplay');
@@ -2104,7 +2909,11 @@ function loadNextInflowNumber() {
     
     const numberInput = document.getElementById('inflowNumber');
     if (numberInput) {
-        numberInput.value = String(nextNumber).padStart(8, '0');
+        const formattedNumber = String(nextNumber).padStart(8, '0');
+        numberInput.value = formattedNumber;
+        console.log('loadNextInflowNumber: Número cargado:', formattedNumber, 'para ciudad:', city);
+    } else {
+        console.error('loadNextInflowNumber: No se encontró el campo inflowNumber');
     }
 }
 
@@ -2327,6 +3136,52 @@ function updateReciboOficialLabel() {
     }
 }
 
+/**
+ * Actualiza el label y configuración del campo de cuota según el tipo de ingreso
+ * - CR: "Cuota *" (requerido)
+ * - CI: "Cuota Inicial *" (requerido)
+ */
+function updateCuotaFieldLabel() {
+    const tipoIngresoCodigo = window.tempInflowBasicData?.tipoIngresoCodigo || '';
+    const category = getIncomeTypeCategory(tipoIngresoCodigo);
+    const label = document.getElementById('cuotaLabel');
+    const input = document.getElementById('cuota');
+    const helpText = document.getElementById('cuotaHelpText');
+    
+    if (category === 'CI') {
+        // Para CI: "Cuota Inicial *"
+        if (label) label.textContent = 'Cuota Inicial *';
+        if (input) {
+            input.placeholder = 'CUOTA INICIAL';
+            input.required = true;
+        }
+        if (helpText) {
+            helpText.textContent = 'Deje vacío para comenzar desde la próxima cuota pendiente';
+            helpText.style.display = 'block';
+        }
+    } else if (category === 'CR') {
+        // Para CR: "Cuota *"
+        if (label) label.textContent = 'Cuota *';
+        if (input) {
+            input.placeholder = 'CUOTA';
+            input.required = true;
+        }
+        if (helpText) {
+            helpText.style.display = 'none';
+        }
+    } else {
+        // Por defecto: "Cuota *"
+        if (label) label.textContent = 'Cuota *';
+        if (input) {
+            input.placeholder = 'CUOTA';
+            input.required = true;
+        }
+        if (helpText) {
+            helpText.style.display = 'none';
+        }
+    }
+}
+
 function setInflowInitialValue(value) {
     const valueInput = document.getElementById('inflowValue');
     const cuotaInput = document.getElementById('cuota');
@@ -2478,16 +3333,1604 @@ function autoSetInstallmentFromInvoice(invoiceNumber) {
         return;
     }
 
-    // Establecer próxima cuota y valor mensual
+    // Establecer próxima cuota y valor mensual (sugeridos, pero editables)
     if (cuotaInput) {
         cuotaInput.value = formatNumberValue(proximaCuota);
-        cuotaInput.readOnly = true;
+        cuotaInput.readOnly = false; // Permitir edición manual
+        // Agregar evento para recalcular cuando cambie la cuota inicial
+        cuotaInput.removeEventListener('blur', handleCuotaInicialChange);
+        cuotaInput.addEventListener('blur', handleCuotaInicialChange);
     }
     if (valorInput) {
-        valorInput.value = formatNumberValue(mensualidad || 0);
-        valorInput.readOnly = true;
+        // Solo establecer valor sugerido si está vacío
+        if (!valorInput.value || parseFormattedNumber(valorInput.value) === 0) {
+            valorInput.value = formatNumberValue(mensualidad || 0);
+        }
+        valorInput.readOnly = false; // Permitir edición manual del valor
+    }
+    
+    // Cargar cuotas pendientes automáticamente
+    setTimeout(() => {
+        loadPendingInstallments();
+    }, 100);
+}
+
+/**
+ * Maneja el cambio en el campo de cuota inicial y recarga las cuotas
+ */
+function handleCuotaInicialChange() {
+    loadPendingInstallments();
+}
+
+/**
+ * Carga todas las cuotas pendientes y las muestra en la tabla con checkboxes
+ */
+function loadPendingInstallments() {
+    const invoiceInput = document.getElementById('invoiceNumber');
+    const invoiceSelect = document.getElementById('invoiceNumberSelect');
+    const installmentsTableBody = document.getElementById('installmentsTableBody');
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    const selectAllCheckbox = document.getElementById('selectAllInstallments');
+    
+    if (!installmentsTableBody) return;
+    
+    // Obtener número de factura
+    let invoiceNumber = '';
+    if (invoiceSelect && invoiceSelect.style.display !== 'none' && invoiceSelect.value) {
+        const selectedValue = invoiceSelect.value.trim();
+        const match = selectedValue.match(/Factura\s+(\d+)/i);
+        invoiceNumber = match ? match[1] : selectedValue;
+    } else if (invoiceInput) {
+        invoiceNumber = invoiceInput.value.trim();
+    }
+    
+    if (!invoiceNumber) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Seleccione una factura para ver las cuotas pendientes</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    // Obtener información del plan
+    const planInfo = getPlanInfoFromInvoice(invoiceNumber);
+    if (!planInfo) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo obtener la información del plan.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    let mensualidad = planInfo.mensualidad || 0;
+    let numCuotas = planInfo.numCuotas || 0;
+    const valorPlan = planInfo.valorPlan || 0;
+    const cuotaInicialPlan = planInfo.cuotaInicial || 0;
+    const cuotasPagadas = planInfo.cuotasPagadas || 0;
+    
+    // Calcular mensualidad si no existe
+    if (!mensualidad && valorPlan && numCuotas) {
+        const saldo = Math.max(0, valorPlan - (cuotaInicialPlan || 0));
+        mensualidad = Math.floor(saldo / numCuotas);
+    }
+    
+    if (!mensualidad || mensualidad <= 0 || !numCuotas || numCuotas <= 0) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo determinar el valor de la cuota o número de cuotas.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    // Calcular cuotas pendientes
+    const cuotaInicial = cuotasPagadas + 1;
+    const cuotasPendientes = [];
+    
+    // Obtener cuotas ya pagadas con sus valores para calcular saldos
+    const city = getSelectedCityCode();
+    const inflowsRaw = localStorage.getItem(`ingresosCaja_${city}`);
+    const inflows = inflowsRaw ? JSON.parse(inflowsRaw) : [];
+    const pagosPorCuota = {};
+    
+    if (Array.isArray(inflows)) {
+        inflows.forEach(i => {
+            const sameInvoice = String(i.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
+            const isActive = (i.estado || 'activo') === 'activo';
+            if (sameInvoice && isActive) {
+                const cuotaNum = parseInt(i.cuota) || 0;
+                if (!pagosPorCuota[cuotaNum]) {
+                    pagosPorCuota[cuotaNum] = 0;
+                }
+                pagosPorCuota[cuotaNum] += parseFloat(i.valor || 0);
+            }
+        });
+    }
+    
+    // Crear lista de cuotas pendientes
+    for (let i = cuotaInicial; i <= numCuotas; i++) {
+        const pagado = pagosPorCuota[i] || 0;
+        const saldo = Math.max(0, mensualidad - pagado);
+        
+        if (saldo > 0) {
+            cuotasPendientes.push({
+                cuota: i,
+                valorCuota: mensualidad,
+                valorPagado: pagado,
+                saldo: saldo
+            });
+        }
+    }
+    
+    if (cuotasPendientes.length === 0) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Todas las cuotas están pagadas</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    // Renderizar tabla
+    installmentsTableBody.innerHTML = '';
+    cuotasPendientes.forEach(inst => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="text-align: center;">
+                <input type="checkbox" data-cuota="${inst.cuota}" data-valor-cuota="${inst.valorCuota}" data-saldo="${inst.saldo}" 
+                       onchange="distributeValueToSelectedInstallments()" style="cursor: pointer;">
+            </td>
+            <td>${inst.cuota}/${numCuotas}</td>
+            <td>${formatNumberValue(inst.valorCuota)}</td>
+            <td>
+                <input type="text" class="valor-pagar-input numeric-input" data-cuota="${inst.cuota}" 
+                       data-valor-cuota="${inst.valorCuota}" data-saldo="${inst.saldo}"
+                       value="0" style="width: 100%; border: 1px solid #ddd; padding: 4px; text-align: right;"
+                       onchange="handleValorPagarChange(this)" onblur="handleValorPagarBlur(this)">
+            </td>
+            <td>${formatNumberValue(inst.saldo)}</td>
+            <td>
+                <span class="status-badge" style="font-size: 0.85em; background-color: #d1ecf1; color: #0c5460;">PENDIENTE</span>
+            </td>
+        `;
+        installmentsTableBody.appendChild(row);
+    });
+    
+    // Guardar información de cuotas pendientes
+    window.pendingInstallments = cuotasPendientes;
+    window.planInfo = { mensualidad, numCuotas, valorPlan };
+    
+    // Inicializar formato numérico en los inputs de valor a pagar
+    initializeValorPagarInputs();
+    
+    // Distribuir valor si hay uno ingresado
+    distributeValueToSelectedInstallments();
+    
+    if (installmentsTableFooter) installmentsTableFooter.style.display = '';
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+}
+
+/**
+ * Maneja el cambio en un checkbox de cuota
+ */
+function handleInstallmentCheckboxChange(checkbox) {
+    const cuota = parseInt(checkbox.dataset.cuota);
+    const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+    
+    if (!checkbox.checked) {
+        // Si se deselecciona, limpiar el valor
+        if (valorPagarInput) {
+            valorPagarInput.value = '0';
+            formatNumericInput(valorPagarInput);
+        }
+    }
+    
+    // Recalcular distribución
+    distributeValueToSelectedInstallments();
+}
+
+/**
+ * Maneja el cambio en un input de valor a pagar
+ */
+function handleValorPagarChange(input) {
+    const valor = parseFormattedNumber(input.value) || 0;
+    const saldo = parseFloat(input.dataset.saldo || 0);
+    
+    // Validar que no exceda el saldo
+    if (valor > saldo) {
+        input.value = formatNumberValue(saldo);
+        showNotification(`El valor no puede exceder el saldo de ${formatNumberValue(saldo)}`, 'warning');
+    }
+    
+    // Actualizar checkbox si hay valor
+    const cuota = parseInt(input.dataset.cuota);
+    const checkbox = document.querySelector(`input[type="checkbox"][data-cuota="${cuota}"]`);
+    if (checkbox) {
+        checkbox.checked = valor > 0;
+    }
+    
+    // Actualizar estado y recalcular
+    updateInstallmentRowState(cuota);
+    updateInstallmentsTotals();
+    updateCalculatedInstallments();
+}
+
+/**
+ * Maneja el blur en un input de valor a pagar
+ */
+function handleValorPagarBlur(input) {
+    formatNumericInput(input);
+    handleValorPagarChange(input);
+}
+
+/**
+ * Inicializa el formato numérico en los inputs de valor a pagar
+ */
+function initializeValorPagarInputs() {
+    document.querySelectorAll('.valor-pagar-input').forEach(input => {
+        // Formatear en tiempo real
+        input.addEventListener('input', function() {
+            const cursorPosition = this.selectionStart;
+            const originalValue = this.value;
+            const numbersOnly = this.value.replace(/[^\d]/g, '');
+            
+            if (!numbersOnly) {
+                this.value = '0';
+                return;
+            }
+            
+            const numValue = parseInt(numbersOnly, 10);
+            if (!isNaN(numValue)) {
+                const formatted = new Intl.NumberFormat('es-CO', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(numValue);
+                
+                this.value = formatted;
+                
+                // Ajustar cursor
+                const beforeCursor = originalValue.substring(0, cursorPosition);
+                const digitsBeforeCursor = beforeCursor.replace(/[^\d]/g, '').length;
+                let digitsFound = 0;
+                let newCursorPosition = formatted.length;
+                for (let i = 0; i < formatted.length; i++) {
+                    if (formatted[i] >= '0' && formatted[i] <= '9') {
+                        digitsFound++;
+                        if (digitsFound === digitsBeforeCursor) {
+                            newCursorPosition = i + 1;
+                            break;
+                        }
+                    }
+                }
+                this.setSelectionRange(newCursorPosition, newCursorPosition);
+            }
+        });
+    });
+}
+
+/**
+ * Actualiza el estado visual de una fila de cuota
+ */
+function updateInstallmentRowState(cuota) {
+    const row = document.querySelector(`input[type="checkbox"][data-cuota="${cuota}"]`)?.closest('tr');
+    if (!row) return;
+    
+    const valorPagarInput = row.querySelector('.valor-pagar-input');
+    const estadoCell = row.querySelector('td:last-child');
+    const valorPagar = valorPagarInput ? parseFormattedNumber(valorPagarInput.value) : 0;
+    const saldo = valorPagarInput ? parseFloat(valorPagarInput.dataset.saldo || 0) : 0;
+    
+    if (estadoCell) {
+        if (valorPagar === 0) {
+            estadoCell.innerHTML = '<span class="status-badge" style="font-size: 0.85em; background-color: #d1ecf1; color: #0c5460;">PENDIENTE</span>';
+            row.style.backgroundColor = '';
+        } else if (valorPagar < saldo) {
+            estadoCell.innerHTML = '<span class="status-badge warning" style="font-size: 0.85em;">PARCIAL</span>';
+            row.style.backgroundColor = '#fff3cd';
+        } else {
+            estadoCell.innerHTML = '<span class="status-badge success" style="font-size: 0.85em;">COMPLETA</span>';
+            row.style.backgroundColor = '';
+        }
     }
 }
+
+/**
+ * Actualiza las cuotas calculadas desde los valores en los inputs
+ */
+function updateCalculatedInstallments() {
+    const installments = [];
+    
+    document.querySelectorAll('.valor-pagar-input').forEach(input => {
+        const valorPagar = parseFormattedNumber(input.value) || 0;
+        if (valorPagar > 0) {
+            const cuota = parseInt(input.dataset.cuota);
+            const valorCuota = parseFloat(input.dataset.valorCuota || 0);
+            const saldo = parseFloat(input.dataset.saldo || 0);
+            
+            installments.push({
+                cuota: cuota,
+                valorCuota: valorCuota,
+                valorPagar: valorPagar,
+                saldo: saldo,
+                esParcial: valorPagar < saldo
+            });
+        }
+    });
+    
+    // Ordenar por número de cuota
+    installments.sort((a, b) => a.cuota - b.cuota);
+    
+    window.calculatedInstallments = installments;
+}
+
+/**
+ * Distribuye el valor total ingresado entre las cuotas seleccionadas
+ */
+function distributeValueToSelectedInstallments() {
+    const valorInput = document.getElementById('inflowValue');
+    const installmentsTableBody = document.getElementById('installmentsTableBody');
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    
+    if (!valorInput || !installmentsTableBody) return;
+    
+    const valorTotal = parseFormattedNumber(valorInput.value) || 0;
+    
+    if (valorTotal <= 0) {
+        // Limpiar todos los valores si no hay valor total
+        document.querySelectorAll('.valor-pagar-input').forEach(input => {
+            input.value = '0';
+            formatNumericInput(input);
+        });
+        document.querySelectorAll('input[type="checkbox"][data-cuota]').forEach(cb => {
+            cb.checked = false;
+        });
+        document.querySelectorAll('#installmentsTableBody tr').forEach(row => {
+            const checkbox = row.querySelector('input[type="checkbox"][data-cuota]');
+            if (checkbox) {
+                updateInstallmentRowState(parseInt(checkbox.dataset.cuota));
+            }
+        });
+        updateInstallmentsTotals();
+        updateCalculatedInstallments();
+        return;
+    }
+    
+    // Obtener cuotas seleccionadas
+    let selectedCheckboxes = Array.from(document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]:checked'));
+    
+    // Si no hay cuotas seleccionadas pero hay valor, seleccionar automáticamente desde la primera
+    if (selectedCheckboxes.length === 0 && valorTotal > 0) {
+        const allCheckboxes = Array.from(document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]'));
+        if (allCheckboxes.length > 0) {
+            // Seleccionar automáticamente las cuotas necesarias
+            let valorAcumulado = 0;
+            for (const checkbox of allCheckboxes) {
+                const saldo = parseFloat(checkbox.dataset.saldo || 0);
+                if (valorAcumulado < valorTotal) {
+                    checkbox.checked = true;
+                    selectedCheckboxes.push(checkbox);
+                    valorAcumulado += saldo;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (selectedCheckboxes.length === 0) {
+        updateInstallmentsTotals();
+        updateCalculatedInstallments();
+        return;
+    }
+    
+    // Ordenar por número de cuota
+    selectedCheckboxes.sort((a, b) => {
+        return parseInt(a.dataset.cuota) - parseInt(b.dataset.cuota);
+    });
+    
+    // Distribuir valor
+    let valorRestante = valorTotal;
+    const installments = [];
+    
+    selectedCheckboxes.forEach((checkbox, index) => {
+        const cuota = parseInt(checkbox.dataset.cuota);
+        const valorCuota = parseFloat(checkbox.dataset.valorCuota);
+        const saldo = parseFloat(checkbox.dataset.saldo);
+        
+        // Calcular valor a pagar para esta cuota
+        let valorPagar = 0;
+        if (index === selectedCheckboxes.length - 1) {
+            // Última cuota seleccionada: usar todo el valor restante
+            valorPagar = Math.min(valorRestante, saldo);
+        } else {
+            // Cuotas intermedias: pagar el saldo completo o el valor restante, lo que sea menor
+            valorPagar = Math.min(valorRestante, saldo);
+        }
+        
+        valorPagar = Math.max(0, Math.min(valorPagar, saldo)); // Asegurar que no exceda el saldo
+        
+        installments.push({
+            cuota: cuota,
+            valorCuota: valorCuota,
+            valorPagar: valorPagar,
+            saldo: saldo,
+            esParcial: valorPagar < saldo
+        });
+        
+        valorRestante -= valorPagar;
+    });
+    
+    // Si sobra valor, ajustar la última cuota seleccionada
+    if (valorRestante > 0 && installments.length > 0) {
+        const lastInst = installments[installments.length - 1];
+        const ajustePosible = lastInst.saldo - lastInst.valorPagar;
+        if (ajustePosible > 0) {
+            const ajuste = Math.min(valorRestante, ajustePosible);
+            lastInst.valorPagar += ajuste;
+            lastInst.esParcial = lastInst.valorPagar < lastInst.saldo;
+            valorRestante -= ajuste;
+        }
+    }
+    
+    // Si aún sobra valor, mostrar advertencia
+    if (valorRestante > 0) {
+        showNotification(`El valor ingresado excede el total de las cuotas seleccionadas. Sobra: ${formatNumberValue(valorRestante)}`, 'warning');
+    }
+    
+    // Actualizar tabla
+    installments.forEach(inst => {
+        const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${inst.cuota}"]`);
+        
+        if (valorPagarInput) {
+            valorPagarInput.value = formatNumberValue(inst.valorPagar);
+            
+            // Actualizar estado de la fila
+            updateInstallmentRowState(inst.cuota);
+        }
+    });
+    
+    // Limpiar cuotas no seleccionadas
+    document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]:not(:checked)').forEach(checkbox => {
+        const cuota = parseInt(checkbox.dataset.cuota);
+        const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+        if (valorPagarInput) {
+            valorPagarInput.value = '0';
+            formatNumericInput(valorPagarInput);
+        }
+        updateInstallmentRowState(cuota);
+    });
+    
+    // Actualizar cuotas calculadas y totales
+    updateCalculatedInstallments();
+    updateInstallmentsTotals();
+}
+
+/**
+ * Actualiza los totales en el footer de la tabla
+ */
+function updateInstallmentsTotals() {
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    if (!installmentsTableFooter) return;
+    
+    let totalCuotas = 0;
+    let totalPagar = 0;
+    let totalSaldo = 0;
+    
+    document.querySelectorAll('#installmentsTableBody tr').forEach(row => {
+        const checkbox = row.querySelector('input[type="checkbox"][data-cuota]');
+        if (checkbox) {
+            const valorCuota = parseFloat(checkbox.dataset.valorCuota || 0);
+            const saldo = parseFloat(checkbox.dataset.saldo || 0);
+            const valorPagarInput = row.querySelector('.valor-pagar-input');
+            const valorPagar = valorPagarInput ? parseFormattedNumber(valorPagarInput.value) : 0;
+            
+            totalCuotas += valorCuota;
+            totalPagar += valorPagar;
+            totalSaldo += saldo;
+        }
+    });
+    
+    const totalCuotasCell = document.getElementById('totalCuotasValue');
+    const totalPagarCell = document.getElementById('totalPagarValue');
+    const totalSaldoCell = document.getElementById('totalSaldoValue');
+    
+    if (totalCuotasCell) totalCuotasCell.textContent = formatNumberValue(totalCuotas);
+    if (totalPagarCell) totalPagarCell.textContent = formatNumberValue(totalPagar);
+    if (totalSaldoCell) totalSaldoCell.textContent = formatNumberValue(totalSaldo);
+}
+
+/**
+ * Calcula automáticamente la distribución de cuotas basándose en el valor total ingresado
+ * y la información del plan de la factura seleccionada
+ */
+function calculateInstallmentsFromValue() {
+    const valorInput = document.getElementById('inflowValue');
+    const invoiceInput = document.getElementById('invoiceNumber');
+    const invoiceSelect = document.getElementById('invoiceNumberSelect');
+    const cuotaInicialInput = document.getElementById('cuota');
+    const installmentsTableBody = document.getElementById('installmentsTableBody');
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    
+    if (!valorInput || !installmentsTableBody) return;
+    
+    // Obtener valor ingresado
+    const valorTotal = parseFormattedNumber(valorInput.value);
+    if (!valorTotal || valorTotal <= 0) {
+        // Limpiar tabla si no hay valor
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Ingrese el valor total para calcular las cuotas</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    // Obtener número de factura (del select si existe, sino del input)
+    let invoiceNumber = '';
+    if (invoiceSelect && invoiceSelect.style.display !== 'none' && invoiceSelect.value) {
+        // Si hay select visible, obtener el valor del select
+        const selectedValue = invoiceSelect.value.trim();
+        // El valor del select puede ser "Factura X - Contrato Y", extraer solo el número de factura
+        // También puede ser solo el número de factura
+        const match = selectedValue.match(/Factura\s+(\d+)/i);
+        if (match) {
+            invoiceNumber = match[1];
+        } else {
+            // Si no hay match, puede ser que el valor sea directamente el número
+            invoiceNumber = selectedValue;
+        }
+    } else if (invoiceInput) {
+        invoiceNumber = invoiceInput.value.trim();
+    }
+    
+    console.log('Calculando cuotas - Factura:', invoiceNumber, 'Valor:', valorTotal);
+    
+    if (!invoiceNumber) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Seleccione una factura primero</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    // Obtener información del plan
+    const planInfo = getPlanInfoFromInvoice(invoiceNumber);
+    console.log('calculateInstallmentsFromValue: planInfo recibido', planInfo);
+    
+    if (!planInfo) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo obtener la información del plan. Verifique que la factura tenga un contrato y plan asociado.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    // Validar que tengamos al menos mensualidad o numCuotas
+    if ((!planInfo.mensualidad || planInfo.mensualidad <= 0) && (!planInfo.numCuotas || planInfo.numCuotas <= 0)) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">El plan no tiene información de cuotas o mensualidad. Verifique el contrato asociado.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    let mensualidad = planInfo.mensualidad || 0;
+    let numCuotas = planInfo.numCuotas || 0;
+    const valorPlan = planInfo.valorPlan || 0;
+    const cuotaInicialPlan = planInfo.cuotaInicial || 0;
+    const cuotasPagadas = planInfo.cuotasPagadas || 0;
+    const cuotaInicialManual = cuotaInicialInput ? parseFormattedNumber(cuotaInicialInput.value) : null;
+    
+    // Si no hay mensualidad pero hay valorPlan y numCuotas, calcular
+    if (!mensualidad && valorPlan && numCuotas) {
+        const saldo = Math.max(0, valorPlan - (cuotaInicialPlan || 0));
+        mensualidad = Math.floor(saldo / numCuotas);
+        console.log('calculateInstallmentsFromValue: Mensualidad calculada', mensualidad);
+    }
+    
+    // Si aún no hay mensualidad, no podemos continuar
+    if (!mensualidad || mensualidad <= 0) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo determinar el valor de la cuota. Verifique que el plan tenga mensualidad o valor total y número de cuotas.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    // Si no hay numCuotas, usar un número grande para permitir pagos
+    if (!numCuotas || numCuotas <= 0) {
+        numCuotas = 999; // Número grande para permitir pagos sin límite
+        console.log('calculateInstallmentsFromValue: numCuotas no definido, usando 999');
+    }
+    
+    // Determinar cuota inicial
+    let cuotaInicial = cuotaInicialManual || (cuotasPagadas + 1);
+    
+    // Validar que la cuota inicial no exceda el número total de cuotas
+    if (numCuotas < 999 && cuotaInicial > numCuotas) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">Todas las cuotas de esta factura están pagadas</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    // Calcular distribución de cuotas
+    const installments = [];
+    let valorRestante = valorTotal;
+    let cuotaActual = cuotaInicial;
+    
+    while (valorRestante > 0 && cuotaActual <= numCuotas) {
+        const valorCuota = Math.min(valorRestante, mensualidad);
+        installments.push({
+            cuota: cuotaActual,
+            valorCuota: mensualidad,
+            valorPagar: valorCuota,
+            esParcial: valorCuota < mensualidad
+        });
+        
+        valorRestante -= valorCuota;
+        cuotaActual++;
+    }
+    
+    // Si sobra valor, mostrar advertencia
+    if (valorRestante > 0) {
+        showNotification(`El valor ingresado excede el total de cuotas pendientes. Sobra: ${formatNumberValue(valorRestante)}`, 'warning');
+    }
+    
+    // Renderizar tabla de cuotas
+    if (installments.length === 0) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">No hay cuotas para distribuir</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        return;
+    }
+    
+    // Limpiar tabla
+    installmentsTableBody.innerHTML = '';
+    
+    // Calcular totales
+    let totalCuotas = 0;
+    let totalPagar = 0;
+    
+    // Renderizar filas
+    installments.forEach(inst => {
+        totalCuotas += inst.valorCuota;
+        totalPagar += inst.valorPagar;
+        
+        const row = document.createElement('tr');
+        row.style.backgroundColor = inst.esParcial ? '#fff3cd' : '';
+        row.innerHTML = `
+            <td>${inst.cuota}/${numCuotas}</td>
+            <td>${formatNumberValue(inst.valorCuota)}</td>
+            <td style="font-weight: ${inst.esParcial ? 'bold' : 'normal'};">
+                ${formatNumberValue(inst.valorPagar)}
+                ${inst.esParcial ? '<span style="color: #856404; font-size: 0.85em;"> (Parcial)</span>' : ''}
+            </td>
+            <td>
+                <span class="status-badge ${inst.esParcial ? 'warning' : 'success'}" style="font-size: 0.85em;">
+                    ${inst.esParcial ? 'PARCIAL' : 'COMPLETA'}
+                </span>
+            </td>
+        `;
+        installmentsTableBody.appendChild(row);
+    });
+    
+    // Mostrar totales
+    if (installmentsTableFooter) {
+        installmentsTableFooter.style.display = '';
+        const totalCuotasCell = document.getElementById('totalCuotasValue');
+        const totalPagarCell = document.getElementById('totalPagarValue');
+        if (totalCuotasCell) totalCuotasCell.textContent = formatNumberValue(totalCuotas);
+        if (totalPagarCell) totalPagarCell.textContent = formatNumberValue(totalPagar);
+    }
+    
+    // Guardar información de cuotas calculadas para usar al guardar
+    window.calculatedInstallments = installments;
+}
+
+/**
+ * ========================================
+ * FUNCIÓN: getPlanInfoFromInvoice()
+ * ========================================
+ * 
+ * DESCRIPCIÓN:
+ * Obtiene la información completa del plan de pago asociado a una factura.
+ * Busca la factura, luego el contrato asociado, y finalmente el plan del contrato.
+ * 
+ * PROCESO:
+ * 1. Busca la factura en localStorage por número
+ * 2. Busca el contrato asociado a la factura
+ * 3. Obtiene el planData del contrato
+ * 4. Si no hay planData, busca el plan en planesData usando planCode o nombre
+ * 5. Extrae: numCuotas, mensualidad, valorPlan, cuotaInicial
+ * 6. Calcula cuotas pagadas contando ingresos activos de la factura
+ * 
+ * FALLBACKS:
+ * - Si numCuotas es 0, intenta usar mesesAsesoria del plan
+ * - Si mensualidad es igual a valorPlan, recalcula basándose en numCuotas
+ * - Si no encuentra planData, busca en campos directos de factura/contrato
+ * 
+ * NOTA PARA BACKEND:
+ * - Actualmente obtiene datos de localStorage
+ * - CONEXIÓN BACKEND: Reemplazar por llamadas API:
+ *   * GET /api/invoices/{invoiceNumber}?city={city}
+ *   * GET /api/contracts/{contractId}
+ *   * GET /api/plans/{planCode}
+ *   * GET /api/cash-inflows?invoice={invoiceNumber}&city={city} (para calcular cuotas pagadas)
+ * 
+ * @param {string} invoiceNumber - Número de factura
+ * @returns {Object|null} - Objeto con {numCuotas, mensualidad, valorPlan, cuotaInicial, cuotasPagadas} o null si no se encuentra
+ */
+function getPlanInfoFromInvoice(invoiceNumber) {
+    const city = getSelectedCityCode();
+    if (!city || !invoiceNumber) {
+        console.log('getPlanInfoFromInvoice: Falta city o invoiceNumber', { city, invoiceNumber });
+        return null;
+    }
+    
+    try {
+        // Buscar la factura
+        const invoicesRaw = localStorage.getItem('invoicesByCity');
+        if (!invoicesRaw) {
+            console.log('getPlanInfoFromInvoice: No hay invoicesByCity en localStorage');
+            return null;
+        }
+        const invoicesByCity = JSON.parse(invoicesRaw);
+        const invoices = Array.isArray(invoicesByCity[city]) ? invoicesByCity[city] : [];
+        // Normalizar el número de factura a buscar (remover ceros a la izquierda)
+        const searchNumNormalized = String(invoiceNumber).trim().replace(/^0+/, '') || String(invoiceNumber).trim();
+        const invoice = invoices.find(inv => {
+            const invNum = String(inv.invoiceNumber || '').trim();
+            const invNumNormalized = invNum.replace(/^0+/, '') || invNum;
+            // Comparar tanto con ceros como sin ceros
+            return invNum === String(invoiceNumber).trim() || 
+                   invNumNormalized === searchNumNormalized ||
+                   invNum === searchNumNormalized ||
+                   invNumNormalized === String(invoiceNumber).trim();
+        });
+        
+        if (!invoice) {
+            console.log('getPlanInfoFromInvoice: Factura no encontrada', invoiceNumber);
+            return null;
+        }
+        
+        console.log('getPlanInfoFromInvoice: Factura encontrada', invoice);
+        
+        // Obtener plan del contrato
+        let numCuotas = 0;
+        let mensualidad = 0;
+        let valorPlan = 0;
+        let cuotaInicial = 0;
+        let contract = null;
+        
+        const contractsRaw = localStorage.getItem(`contratos_${city}`);
+        const contracts = contractsRaw ? JSON.parse(contractsRaw) : [];
+        
+        if (Array.isArray(contracts)) {
+            // Buscar contrato por múltiples métodos
+            contract = contracts.find(c => {
+                // Por ID del contrato
+                const byId = String(c.id) === String(invoice.contractId);
+                // Por número de contrato
+                const contractNum = String(c.contractNumber || c.numero || c.numeroContrato || '').trim();
+                const invoiceContractNum = String(invoice.contractNumber || invoice.contractId || '').trim();
+                const byNum = contractNum && (contractNum === invoiceContractNum || 
+                    contractNum.replace(/^0+/, '') === invoiceContractNum.replace(/^0+/, ''));
+                // Por número de factura en el contrato (algunos contratos tienen facturas asociadas)
+                const byInvoiceInContract = c.invoices && Array.isArray(c.invoices) && 
+                    c.invoices.some(inv => String(inv.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, ''));
+                
+                return byId || byNum || byInvoiceInContract;
+            });
+        }
+        
+        if (contract) {
+            console.log('getPlanInfoFromInvoice: Contrato encontrado', contract);
+            console.log('getPlanInfoFromInvoice: Campos del contrato', Object.keys(contract));
+            console.log('getPlanInfoFromInvoice: planCode', contract.planCode, 'plan', contract.plan);
+            console.log('getPlanInfoFromInvoice: Contrato completo', JSON.stringify(contract, null, 2));
+            
+            let pd = typeof contract.planData === 'string' ? JSON.parse(contract.planData) : contract.planData;
+            
+            // Si no hay planData, buscar el plan usando planCode o plan (nombre)
+            if (!pd || typeof pd !== 'object') {
+                console.log('getPlanInfoFromInvoice: planData no encontrado, buscando plan en planesData...');
+                
+                try {
+                    const planesData = localStorage.getItem('planesData');
+                    if (planesData) {
+                        const planes = JSON.parse(planesData);
+                        
+                        // Buscar por planCode primero
+                        if (contract.planCode) {
+                            console.log('getPlanInfoFromInvoice: Buscando plan por código:', contract.planCode);
+                            pd = planes[contract.planCode] || 
+                                 Object.values(planes).find(p => 
+                                     String(p.codigo || '').trim() === String(contract.planCode).trim()
+                                 );
+                        }
+                        
+                        // Si no se encontró, buscar por nombre del plan
+                        if (!pd && contract.plan) {
+                            console.log('getPlanInfoFromInvoice: Buscando plan por nombre:', contract.plan);
+                            pd = Object.values(planes).find(p => {
+                                const nombre = String(p.nombre || '').trim().toLowerCase();
+                                const searchName = String(contract.plan).trim().toLowerCase();
+                                return nombre === searchName || 
+                                       nombre.includes(searchName) || 
+                                       searchName.includes(nombre);
+                            });
+                        }
+                        
+                        if (pd) {
+                            console.log('getPlanInfoFromInvoice: Plan encontrado en planesData', pd);
+                        } else {
+                            console.log('getPlanInfoFromInvoice: Plan no encontrado en planesData');
+                        }
+                    }
+                } catch (e) {
+                    console.error('getPlanInfoFromInvoice: Error buscando plan en planesData:', e);
+                }
+            }
+            
+            if (pd && typeof pd === 'object') {
+                console.log('getPlanInfoFromInvoice: planData encontrado', pd);
+                console.log('getPlanInfoFromInvoice: Campos del planData', Object.keys(pd));
+                console.log('getPlanInfoFromInvoice: planData completo', JSON.stringify(pd, null, 2));
+                
+                // Buscar número de cuotas con diferentes nombres posibles
+                numCuotas = Number(
+                    pd.numCuotas || 
+                    pd.numeroCuotas || 
+                    pd.cuotas || 
+                    pd.totalCuotas || 
+                    pd.cantidadCuotas ||
+                    pd.numeroDeCuotas ||
+                    pd.numero_cuotas ||
+                    pd.cantidad_cuotas ||
+                    pd.total_cuotas ||
+                    0
+                ) || 0;
+                
+                // Si numCuotas es 0, intentar usar mesesAsesoria como número de cuotas
+                if (!numCuotas && pd.mesesAsesoria) {
+                    numCuotas = Number(pd.mesesAsesoria) || 0;
+                    if (numCuotas) {
+                        console.log('getPlanInfoFromInvoice: Usando mesesAsesoria como numCuotas', numCuotas);
+                    }
+                }
+                
+                // Buscar mensualidad
+                mensualidad = Number(
+                    pd.mensualidad != null ? pd.mensualidad : (
+                        pd.valorCuota || 
+                        pd.cuota || 
+                        pd.valor_cuota ||
+                        pd.valorMensual ||
+                        pd.valor_mensual ||
+                        0
+                    )
+                ) || 0;
+                
+                // Si la mensualidad es igual al valorPlan, probablemente está mal configurada
+                // Recalcular si tenemos numCuotas y valorPlan
+                if (mensualidad && valorPlan && mensualidad === valorPlan && numCuotas > 0) {
+                    const saldo = Math.max(0, valorPlan - (cuotaInicial || 0));
+                    if (saldo > 0) {
+                        mensualidad = Math.floor(saldo / numCuotas);
+                        console.log('getPlanInfoFromInvoice: Mensualidad recalculada (era igual a valorPlan)', mensualidad);
+                    } else if (cuotaInicial === valorPlan && numCuotas > 0) {
+                        // Si la cuota inicial es igual al valorPlan pero hay numCuotas (mesesAsesoria),
+                        // calcular la mensualidad como valorPlan / numCuotas para permitir pagos parciales
+                        mensualidad = Math.floor(valorPlan / numCuotas);
+                        console.log('getPlanInfoFromInvoice: Plan con cuota inicial completa pero con mesesAsesoria, calculando mensualidad como valorPlan/numCuotas', mensualidad);
+                    }
+                }
+                
+                // Buscar valor del plan
+                valorPlan = Number(
+                    pd.valorPlan != null ? pd.valorPlan : (
+                        pd.valorTotal || 
+                        pd.total || 
+                        pd.valor_total ||
+                        pd.valor ||
+                        pd.precio ||
+                        0
+                    )
+                ) || 0;
+                
+                // Buscar cuota inicial
+                cuotaInicial = Number(
+                    pd.cuotaInicial != null ? pd.cuotaInicial : (
+                        pd.cuotaInicialValor || 
+                        pd.valorInicial || 
+                        pd.cuota_inicial ||
+                        pd.valor_inicial ||
+                        pd.inicial ||
+                        0
+                    )
+                ) || 0;
+                
+                console.log('getPlanInfoFromInvoice: Datos extraídos', { numCuotas, mensualidad, valorPlan, cuotaInicial });
+            } else {
+                console.log('getPlanInfoFromInvoice: planData no válido o vacío después de buscar', pd);
+            }
+        } else {
+            console.log('getPlanInfoFromInvoice: Contrato no encontrado. Invoice:', {
+                contractId: invoice.contractId,
+                contractNumber: invoice.contractNumber,
+                totalContracts: contracts.length
+            });
+            
+            // Fallback: Intentar obtener información del plan directamente de la factura
+            if (invoice.planData) {
+                try {
+                    let pd = typeof invoice.planData === 'string' ? JSON.parse(invoice.planData) : invoice.planData;
+                    if (pd && typeof pd === 'object') {
+                        numCuotas = Number(pd.numCuotas || pd.numeroCuotas || pd.cuotas || pd.totalCuotas || pd.cantidadCuotas || 0) || 0;
+                        mensualidad = Number(pd.mensualidad != null ? pd.mensualidad : (pd.valorCuota || pd.cuota || 0)) || 0;
+                        valorPlan = Number(pd.valorPlan != null ? pd.valorPlan : (pd.valorTotal || pd.total || 0)) || 0;
+                        cuotaInicial = Number(pd.cuotaInicial != null ? pd.cuotaInicial : (pd.cuotaInicialValor || pd.valorInicial || 0)) || 0;
+                        console.log('getPlanInfoFromInvoice: Datos obtenidos de factura.planData', { numCuotas, mensualidad, valorPlan, cuotaInicial });
+                    }
+                } catch (e) {
+                    console.error('getPlanInfoFromInvoice: Error parseando planData de factura:', e);
+                }
+            }
+            
+            // Fallback: Intentar obtener información de campos directos de la factura
+            if (!numCuotas && invoice.numCuotas) {
+                numCuotas = Number(invoice.numCuotas) || 0;
+            }
+            if (!mensualidad && invoice.mensualidad) {
+                mensualidad = Number(invoice.mensualidad) || 0;
+            }
+            if (!valorPlan && invoice.valorPlan) {
+                valorPlan = Number(invoice.valorPlan) || 0;
+            }
+            if (!cuotaInicial && invoice.cuotaInicial) {
+                cuotaInicial = Number(invoice.cuotaInicial) || 0;
+            }
+        }
+        
+        // Fallback: Si no hay mensualidad pero hay valorPlan y numCuotas, calcular
+        if (!mensualidad && valorPlan && numCuotas) {
+            const saldo = Math.max(0, valorPlan - (cuotaInicial || 0));
+            if (saldo > 0 && numCuotas > 0) {
+                mensualidad = Math.floor(saldo / numCuotas);
+                console.log('getPlanInfoFromInvoice: Mensualidad calculada desde plan', mensualidad);
+            }
+        }
+        
+        // Fallback adicional: Si no hay planData pero la factura tiene valor, intentar usar ese
+        if (!valorPlan && invoice.value != null) {
+            valorPlan = Number(invoice.value) || 0;
+            console.log('getPlanInfoFromInvoice: Usando valor de factura como fallback', valorPlan);
+        }
+        
+        // Fallback final: Si aún no tenemos numCuotas, intentar obtenerlo del contrato o factura
+        if (!numCuotas && contract) {
+            numCuotas = Number(
+                contract.numCuotas || 
+                contract.numeroCuotas || 
+                contract.cuotas || 
+                contract.totalCuotas ||
+                contract.cantidadCuotas ||
+                contract.numeroDeCuotas ||
+                0
+            ) || 0;
+            if (numCuotas) {
+                console.log('getPlanInfoFromInvoice: numCuotas obtenido del contrato', numCuotas);
+            }
+        }
+        if (!numCuotas && invoice.numCuotas) {
+            numCuotas = Number(invoice.numCuotas) || 0;
+            if (numCuotas) {
+                console.log('getPlanInfoFromInvoice: numCuotas obtenido de la factura', numCuotas);
+            }
+        }
+        
+        // Si aún no tenemos numCuotas pero tenemos valorPlan y mensualidad, calcular
+        if (!numCuotas && valorPlan && mensualidad && mensualidad > 0) {
+            const saldo = Math.max(0, valorPlan - (cuotaInicial || 0));
+            numCuotas = Math.floor(saldo / mensualidad);
+            if (numCuotas > 0) {
+                console.log('getPlanInfoFromInvoice: numCuotas calculado desde valorPlan y mensualidad', numCuotas);
+            }
+        }
+        
+        // Contar cuotas ya pagadas (cuotas únicas)
+        const cuotasUnicasPagadas = new Set();
+        const inflowsRaw = localStorage.getItem(`ingresosCaja_${city}`);
+        const inflows = inflowsRaw ? JSON.parse(inflowsRaw) : [];
+        if (Array.isArray(inflows)) {
+            inflows.forEach(i => {
+                const sameInvoice = String(i.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
+                const isActive = (i.estado || 'activo') === 'activo';
+                if (sameInvoice && isActive) {
+                    // Si existe detalleCuotas, usar esa información
+                    if (i.detalleCuotas && Array.isArray(i.detalleCuotas)) {
+                        i.detalleCuotas.forEach(detalle => {
+                            const cuotaNum = parseInt(detalle.cuota) || 0;
+                            if (cuotaNum > 0) {
+                                cuotasUnicasPagadas.add(cuotaNum);
+                            }
+                        });
+                    } else {
+                        // Procesar el campo cuota que puede ser un string con múltiples cuotas separadas por comas
+                        const cuotaField = String(i.cuota || '');
+                        if (cuotaField.includes(',')) {
+                            cuotaField.split(',').forEach(c => {
+                                const cuotaNum = parseInt(c.trim());
+                                if (!isNaN(cuotaNum) && cuotaNum > 0) {
+                                    cuotasUnicasPagadas.add(cuotaNum);
+                                }
+                            });
+                        } else {
+                            const cuotaNum = parseInt(cuotaField);
+                            if (!isNaN(cuotaNum) && cuotaNum > 0) {
+                                cuotasUnicasPagadas.add(cuotaNum);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        const cuotasPagadas = cuotasUnicasPagadas.size;
+        
+        const result = {
+            numCuotas,
+            mensualidad,
+            valorPlan,
+            cuotaInicial,
+            cuotasPagadas
+        };
+        
+        console.log('getPlanInfoFromInvoice: Resultado final', result);
+        
+        return result;
+    } catch (e) {
+        console.error('Error al obtener información del plan:', e);
+        return null;
+    }
+}
+
+/**
+ * Carga todas las cuotas pendientes y las muestra en la tabla con checkboxes
+ */
+function loadPendingInstallments() {
+    const invoiceInput = document.getElementById('invoiceNumber');
+    const invoiceSelect = document.getElementById('invoiceNumberSelect');
+    const installmentsTableBody = document.getElementById('installmentsTableBody');
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    const selectAllCheckbox = document.getElementById('selectAllInstallments');
+    
+    if (!installmentsTableBody) return;
+    
+    // Obtener número de factura
+    let invoiceNumber = '';
+    if (invoiceSelect && invoiceSelect.style.display !== 'none' && invoiceSelect.value) {
+        const selectedValue = invoiceSelect.value.trim();
+        const match = selectedValue.match(/Factura\s+(\d+)/i);
+        invoiceNumber = match ? match[1] : selectedValue;
+    } else if (invoiceInput) {
+        invoiceNumber = invoiceInput.value.trim();
+    }
+    
+    if (!invoiceNumber) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Seleccione una factura para ver las cuotas pendientes</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    // Obtener información del plan
+    const planInfo = getPlanInfoFromInvoice(invoiceNumber);
+    if (!planInfo) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo obtener la información del plan.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    let mensualidad = planInfo.mensualidad || 0;
+    let numCuotas = planInfo.numCuotas || 0;
+    const valorPlan = planInfo.valorPlan || 0;
+    const cuotaInicialPlan = planInfo.cuotaInicial || 0;
+    const cuotasPagadas = planInfo.cuotasPagadas || 0;
+    
+    // Calcular mensualidad si no existe
+    if (!mensualidad && valorPlan && numCuotas) {
+        const saldo = Math.max(0, valorPlan - (cuotaInicialPlan || 0));
+        mensualidad = Math.floor(saldo / numCuotas);
+    }
+    
+    if (!mensualidad || mensualidad <= 0 || !numCuotas || numCuotas <= 0) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #d32f2f;">No se pudo determinar el valor de la cuota o número de cuotas.</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    // Calcular cuotas pendientes
+    const cuotaInicial = cuotasPagadas + 1;
+    const cuotasPendientes = [];
+    
+    // Obtener cuotas ya pagadas con sus valores para calcular saldos
+    const city = getSelectedCityCode();
+    const inflowsRaw = localStorage.getItem(`ingresosCaja_${city}`);
+    const inflows = inflowsRaw ? JSON.parse(inflowsRaw) : [];
+    const pagosPorCuota = {};
+    
+    if (Array.isArray(inflows)) {
+        inflows.forEach(i => {
+            const sameInvoice = String(i.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
+            const isActive = (i.estado || 'activo') === 'activo';
+            if (sameInvoice && isActive) {
+                const cuotaNum = parseInt(i.cuota) || 0;
+                if (!pagosPorCuota[cuotaNum]) {
+                    pagosPorCuota[cuotaNum] = 0;
+                }
+                pagosPorCuota[cuotaNum] += parseFloat(i.valor || 0);
+            }
+        });
+    }
+    
+    // Crear lista de cuotas pendientes
+    for (let i = cuotaInicial; i <= numCuotas; i++) {
+        const pagado = pagosPorCuota[i] || 0;
+        const saldo = Math.max(0, mensualidad - pagado);
+        
+        if (saldo > 0) {
+            cuotasPendientes.push({
+                cuota: i,
+                valorCuota: mensualidad,
+                valorPagado: pagado,
+                saldo: saldo
+            });
+        }
+    }
+    
+    if (cuotasPendientes.length === 0) {
+        installmentsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-data-message" style="text-align: center; padding: 15px;">
+                    <p style="margin: 0; color: #6c757d;">Todas las cuotas están pagadas</p>
+                </td>
+            </tr>
+        `;
+        if (installmentsTableFooter) installmentsTableFooter.style.display = 'none';
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        return;
+    }
+    
+    // Renderizar tabla
+    installmentsTableBody.innerHTML = '';
+    cuotasPendientes.forEach(inst => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="text-align: center;">
+                <input type="checkbox" data-cuota="${inst.cuota}" data-valor-cuota="${inst.valorCuota}" data-saldo="${inst.saldo}" 
+                       onchange="distributeValueToSelectedInstallments()" style="cursor: pointer;">
+            </td>
+            <td>${inst.cuota}/${numCuotas}</td>
+            <td>${formatNumberValue(inst.valorCuota)}</td>
+            <td>
+                <input type="text" class="valor-pagar-input numeric-input" data-cuota="${inst.cuota}" 
+                       data-valor-cuota="${inst.valorCuota}" data-saldo="${inst.saldo}"
+                       value="0" style="width: 100%; border: 1px solid #ddd; padding: 4px; text-align: right;"
+                       onchange="handleValorPagarChange(this)" onblur="handleValorPagarBlur(this)">
+            </td>
+            <td>${formatNumberValue(inst.saldo)}</td>
+            <td>
+                <span class="status-badge" style="font-size: 0.85em; background-color: #d1ecf1; color: #0c5460;">PENDIENTE</span>
+            </td>
+        `;
+        installmentsTableBody.appendChild(row);
+    });
+    
+    // Guardar información de cuotas pendientes
+    window.pendingInstallments = cuotasPendientes;
+    window.planInfo = { mensualidad, numCuotas, valorPlan };
+    
+    // Distribuir valor si hay uno ingresado
+    distributeValueToSelectedInstallments();
+    
+    if (installmentsTableFooter) installmentsTableFooter.style.display = '';
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+}
+
+/**
+ * Maneja el cambio en un checkbox de cuota
+ */
+function handleInstallmentCheckboxChange(checkbox) {
+    const cuota = parseInt(checkbox.dataset.cuota);
+    const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+    
+    if (!checkbox.checked) {
+        // Si se deselecciona, limpiar el valor
+        if (valorPagarInput) {
+            valorPagarInput.value = '0';
+            formatNumericInput(valorPagarInput);
+        }
+    }
+    
+    // Recalcular distribución
+    distributeValueToSelectedInstallments();
+}
+
+/**
+ * Maneja el cambio en un input de valor a pagar
+ */
+function handleValorPagarChange(input) {
+    const valor = parseFormattedNumber(input.value) || 0;
+    const saldo = parseFloat(input.dataset.saldo || 0);
+    
+    // Validar que no exceda el saldo
+    if (valor > saldo) {
+        input.value = formatNumberValue(saldo);
+        showNotification(`El valor no puede exceder el saldo de ${formatNumberValue(saldo)}`, 'warning');
+    }
+    
+    // Actualizar checkbox si hay valor
+    const cuota = parseInt(input.dataset.cuota);
+    const checkbox = document.querySelector(`input[type="checkbox"][data-cuota="${cuota}"]`);
+    if (checkbox) {
+        checkbox.checked = valor > 0;
+    }
+    
+    // Actualizar estado y recalcular
+    updateInstallmentRowState(cuota);
+    updateInstallmentsTotals();
+    updateCalculatedInstallments();
+}
+
+/**
+ * Maneja el blur en un input de valor a pagar
+ */
+function handleValorPagarBlur(input) {
+    formatNumericInput(input);
+    handleValorPagarChange(input);
+}
+
+/**
+ * Inicializa el formato numérico en los inputs de valor a pagar
+ */
+function initializeValorPagarInputs() {
+    document.querySelectorAll('.valor-pagar-input').forEach(input => {
+        // Formatear en tiempo real
+        input.addEventListener('input', function() {
+            const cursorPosition = this.selectionStart;
+            const originalValue = this.value;
+            const numbersOnly = this.value.replace(/[^\d]/g, '');
+            
+            if (!numbersOnly) {
+                this.value = '0';
+                return;
+            }
+            
+            const numValue = parseInt(numbersOnly, 10);
+            if (!isNaN(numValue)) {
+                const formatted = new Intl.NumberFormat('es-CO', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(numValue);
+                
+                this.value = formatted;
+                
+                // Ajustar cursor
+                const beforeCursor = originalValue.substring(0, cursorPosition);
+                const digitsBeforeCursor = beforeCursor.replace(/[^\d]/g, '').length;
+                let digitsFound = 0;
+                let newCursorPosition = formatted.length;
+                for (let i = 0; i < formatted.length; i++) {
+                    if (formatted[i] >= '0' && formatted[i] <= '9') {
+                        digitsFound++;
+                        if (digitsFound === digitsBeforeCursor) {
+                            newCursorPosition = i + 1;
+                            break;
+                        }
+                    }
+                }
+                this.setSelectionRange(newCursorPosition, newCursorPosition);
+            }
+        });
+    });
+}
+
+/**
+ * Actualiza el estado visual de una fila de cuota
+ */
+function updateInstallmentRowState(cuota) {
+    const row = document.querySelector(`input[type="checkbox"][data-cuota="${cuota}"]`)?.closest('tr');
+    if (!row) return;
+    
+    const valorPagarInput = row.querySelector('.valor-pagar-input');
+    const estadoCell = row.querySelector('td:last-child');
+    const valorPagar = valorPagarInput ? parseFormattedNumber(valorPagarInput.value) : 0;
+    const saldo = valorPagarInput ? parseFloat(valorPagarInput.dataset.saldo || 0) : 0;
+    const valorCuota = valorPagarInput ? parseFloat(valorPagarInput.dataset.valorCuota || 0) : 0;
+    
+    if (estadoCell) {
+        if (valorPagar === 0) {
+            estadoCell.innerHTML = '<span class="status-badge" style="font-size: 0.85em; background-color: #d1ecf1; color: #0c5460;">PENDIENTE</span>';
+            row.style.backgroundColor = '';
+        } else if (valorPagar < saldo) {
+            estadoCell.innerHTML = '<span class="status-badge warning" style="font-size: 0.85em;">PARCIAL</span>';
+            row.style.backgroundColor = '#fff3cd';
+        } else {
+            estadoCell.innerHTML = '<span class="status-badge success" style="font-size: 0.85em;">COMPLETA</span>';
+            row.style.backgroundColor = '';
+        }
+    }
+}
+
+/**
+ * Actualiza las cuotas calculadas desde los valores en los inputs
+ */
+function updateCalculatedInstallments() {
+    const installments = [];
+    
+    document.querySelectorAll('.valor-pagar-input').forEach(input => {
+        const valorPagar = parseFormattedNumber(input.value) || 0;
+        if (valorPagar > 0) {
+            const cuota = parseInt(input.dataset.cuota);
+            const valorCuota = parseFloat(input.dataset.valorCuota || 0);
+            const saldo = parseFloat(input.dataset.saldo || 0);
+            
+            installments.push({
+                cuota: cuota,
+                valorCuota: valorCuota,
+                valorPagar: valorPagar,
+                saldo: saldo,
+                esParcial: valorPagar < saldo
+            });
+        }
+    });
+    
+    // Ordenar por número de cuota
+    installments.sort((a, b) => a.cuota - b.cuota);
+    
+    window.calculatedInstallments = installments;
+}
+
+/**
+ * Distribuye el valor total ingresado entre las cuotas seleccionadas
+ */
+function distributeValueToSelectedInstallments() {
+    const valorInput = document.getElementById('inflowValue');
+    const installmentsTableBody = document.getElementById('installmentsTableBody');
+    
+    if (!valorInput || !installmentsTableBody) return;
+    
+    const valorTotal = parseFormattedNumber(valorInput.value) || 0;
+    
+    if (valorTotal <= 0) {
+        // Limpiar todos los valores si no hay valor total
+        document.querySelectorAll('.valor-pagar-input').forEach(input => {
+            input.value = '0';
+            formatNumericInput(input);
+        });
+        document.querySelectorAll('input[type="checkbox"][data-cuota]').forEach(cb => {
+            cb.checked = false;
+        });
+        document.querySelectorAll('#installmentsTableBody tr').forEach(row => {
+            updateInstallmentRowState(parseInt(row.querySelector('input[type="checkbox"][data-cuota]')?.dataset.cuota || 0));
+        });
+        updateInstallmentsTotals();
+        updateCalculatedInstallments();
+        return;
+    }
+    
+    // Obtener cuotas seleccionadas
+    let selectedCheckboxes = Array.from(document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]:checked'));
+    
+    // Si no hay cuotas seleccionadas pero hay valor, seleccionar automáticamente desde la primera
+    if (selectedCheckboxes.length === 0 && valorTotal > 0) {
+        const allCheckboxes = Array.from(document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]'));
+        if (allCheckboxes.length > 0) {
+            // Seleccionar automáticamente las cuotas necesarias
+            let valorAcumulado = 0;
+            for (const checkbox of allCheckboxes) {
+                const saldo = parseFloat(checkbox.dataset.saldo || 0);
+                if (valorAcumulado < valorTotal) {
+                    checkbox.checked = true;
+                    selectedCheckboxes.push(checkbox);
+                    valorAcumulado += saldo;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (selectedCheckboxes.length === 0) {
+        updateInstallmentsTotals();
+        updateCalculatedInstallments();
+        return;
+    }
+    
+    // Ordenar por número de cuota
+    selectedCheckboxes.sort((a, b) => {
+        return parseInt(a.dataset.cuota) - parseInt(b.dataset.cuota);
+    });
+    
+    // Distribuir valor
+    let valorRestante = valorTotal;
+    const installments = [];
+    
+    selectedCheckboxes.forEach((checkbox, index) => {
+        const cuota = parseInt(checkbox.dataset.cuota);
+        const valorCuota = parseFloat(checkbox.dataset.valorCuota);
+        const saldo = parseFloat(checkbox.dataset.saldo);
+        
+        // Calcular valor a pagar para esta cuota
+        let valorPagar = 0;
+        if (index === selectedCheckboxes.length - 1) {
+            // Última cuota seleccionada: usar todo el valor restante
+            valorPagar = Math.min(valorRestante, saldo);
+        } else {
+            // Cuotas intermedias: pagar el saldo completo o el valor restante, lo que sea menor
+            valorPagar = Math.min(valorRestante, saldo);
+        }
+        
+        valorPagar = Math.max(0, Math.min(valorPagar, saldo)); // Asegurar que no exceda el saldo
+        
+        installments.push({
+            cuota: cuota,
+            valorCuota: valorCuota,
+            valorPagar: valorPagar,
+            saldo: saldo,
+            esParcial: valorPagar < saldo
+        });
+        
+        valorRestante -= valorPagar;
+    });
+    
+    // Si sobra valor, ajustar la última cuota seleccionada
+    if (valorRestante > 0 && installments.length > 0) {
+        const lastInst = installments[installments.length - 1];
+        const ajustePosible = lastInst.saldo - lastInst.valorPagar;
+        if (ajustePosible > 0) {
+            const ajuste = Math.min(valorRestante, ajustePosible);
+            lastInst.valorPagar += ajuste;
+            lastInst.esParcial = lastInst.valorPagar < lastInst.saldo;
+            valorRestante -= ajuste;
+        }
+    }
+    
+    // Si aún sobra valor, mostrar advertencia
+    if (valorRestante > 0) {
+        showNotification(`El valor ingresado excede el total de las cuotas seleccionadas. Sobra: ${formatNumberValue(valorRestante)}`, 'warning');
+    }
+    
+    // Actualizar tabla
+    installments.forEach(inst => {
+        const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${inst.cuota}"]`);
+        
+        if (valorPagarInput) {
+            valorPagarInput.value = formatNumberValue(inst.valorPagar);
+            
+            // Actualizar estado de la fila
+            updateInstallmentRowState(inst.cuota);
+        }
+    });
+    
+    // Limpiar cuotas no seleccionadas
+    document.querySelectorAll('#installmentsTableBody input[type="checkbox"][data-cuota]:not(:checked)').forEach(checkbox => {
+        const cuota = parseInt(checkbox.dataset.cuota);
+        const valorPagarInput = document.querySelector(`.valor-pagar-input[data-cuota="${cuota}"]`);
+        if (valorPagarInput) {
+            valorPagarInput.value = '0';
+            formatNumericInput(valorPagarInput);
+        }
+        updateInstallmentRowState(cuota);
+    });
+    
+    // Actualizar cuotas calculadas y totales
+    updateCalculatedInstallments();
+    updateInstallmentsTotals();
+}
+
+/**
+ * Actualiza los totales en el footer de la tabla
+ */
+function updateInstallmentsTotals() {
+    const installmentsTableFooter = document.getElementById('installmentsTableFooter');
+    if (!installmentsTableFooter) return;
+    
+    let totalCuotas = 0;
+    let totalPagar = 0;
+    let totalSaldo = 0;
+    
+    document.querySelectorAll('#installmentsTableBody tr').forEach(row => {
+        const checkbox = row.querySelector('input[type="checkbox"][data-cuota]');
+        if (checkbox) {
+            const valorCuota = parseFloat(checkbox.dataset.valorCuota || 0);
+            const saldo = parseFloat(checkbox.dataset.saldo || 0);
+            const valorPagarInput = row.querySelector('.valor-pagar-input');
+            const valorPagar = valorPagarInput ? parseFormattedNumber(valorPagarInput.value) : 0;
+            
+            totalCuotas += valorCuota;
+            totalPagar += valorPagar;
+            totalSaldo += saldo;
+        }
+    });
+    
+    const totalCuotasCell = document.getElementById('totalCuotasValue');
+    const totalPagarCell = document.getElementById('totalPagarValue');
+    const totalSaldoCell = document.getElementById('totalSaldoValue');
+    
+    if (totalCuotasCell) totalCuotasCell.textContent = formatNumberValue(totalCuotas);
+    if (totalPagarCell) totalPagarCell.textContent = formatNumberValue(totalPagar);
+    if (totalSaldoCell) totalSaldoCell.textContent = formatNumberValue(totalSaldo);
+}
+
 // ========================================
 // MANEJO DE EVENTOS
 // ========================================
@@ -2719,13 +5162,31 @@ function handleCreateInflow() {
     const reciboOficial = document.getElementById('reciboOficial')?.value.trim();
     const recordProduccion = document.getElementById('recordProduccion')?.value.trim();
     
-    // Procesar cuota: si es "Cuota Inicial", se guarda como 0
-    const cuota = (cuotaRaw && cuotaRaw.toLowerCase() === 'cuota inicial') ? '0' : cuotaRaw;
-    
-    if (!holderId || !holderName || !valor || !cuota || !executiveId || !executiveName) {
+    // Validar campos básicos
+    if (!holderId || !holderName || !valor || !executiveId || !executiveName) {
         showNotification('Por favor, complete todos los campos requeridos', 'warning');
         return;
     }
+    
+    // Validar que haya cuotas seleccionadas con valores a pagar
+    const calculatedInstallments = window.calculatedInstallments;
+    if (!calculatedInstallments || calculatedInstallments.length === 0) {
+        showNotification('Por favor, seleccione al menos una cuota y ingrese un valor válido', 'warning');
+        const valorInput = document.getElementById('inflowValue');
+        if (valorInput) valorInput.focus();
+        return;
+    }
+    
+    // Validar que el valor total coincida con la suma de valores a pagar
+    const totalCalculado = calculatedInstallments.reduce((sum, inst) => sum + (inst.valorPagar || 0), 0);
+    const valorIngresado = parseFormattedNumber(valor);
+    if (Math.abs(totalCalculado - valorIngresado) > 1) { // Permitir diferencia de 1 por redondeo
+        showNotification(`El valor ingresado (${formatNumberValue(valorIngresado)}) no coincide con la suma de las cuotas seleccionadas (${formatNumberValue(totalCalculado)})`, 'warning');
+        return;
+    }
+    
+    // Procesar cuota inicial (opcional): si es "Cuota Inicial", se guarda como 0
+    const cuotaInicial = (cuotaRaw && cuotaRaw.toLowerCase() === 'cuota inicial') ? '0' : cuotaRaw;
     
     // Determinar el tipo de ingreso (CI o CR)
     const tipoIngresoCodigo = basicData?.tipoIngresoCodigo || '';
@@ -2798,13 +5259,15 @@ function handleCreateInflow() {
     }
     
     // Guardar todos los datos temporalmente para la confirmación
+    // Incluir las cuotas calculadas para crear múltiples registros
     window.tempInflowData = {
         ...basicData,
         holderId: holderId,
         holderName: holderName,
         invoiceNumber: invoiceNumber,
-        valor: parseFormattedNumber(valor),
-        cuota: parseFormattedNumber(cuota),
+        valor: parseFormattedNumber(valor), // Valor total
+        cuotaInicial: cuotaInicial ? parseFormattedNumber(cuotaInicial) : null,
+        installments: calculatedInstallments, // Array de cuotas calculadas
         executiveId: executiveId,
         executiveName: executiveName,
         letraRecibo: letraRecibo || '',
@@ -3045,38 +5508,149 @@ function confirmCreateInflow() {
         return;
     }
     
-    // Crear objeto de ingreso completo
-    const inflow = {
-        id: Date.now(),
-        tipoIngresoCodigo: inflowData.tipoIngresoCodigo,
-        tipoIngresoNombre: inflowData.tipoIngresoNombre,
-        numero: inflowData.numero,
-        fecha: inflowData.fecha,
-        observaciones: inflowData.observaciones || '',
-        holderId: inflowData.holderId,
-        holderName: inflowData.holderName,
-        invoiceNumber: inflowData.invoiceNumber,
-        valor: inflowData.valor,
-        cuota: inflowData.cuota,
-        executiveId: inflowData.executiveId,
-        executiveName: inflowData.executiveName,
-        letraRecibo: inflowData.letraRecibo || '',
-        reciboOficial: inflowData.reciboOficial || '',
-        recordProduccion: inflowData.recordProduccion || '',
-        estado: 'activo',
-        date: new Date(inflowData.fecha).toISOString()
-    };
+    // Verificar si hay cuotas calculadas (nuevo sistema de múltiples cuotas)
+    const installments = inflowData.installments;
     
-    // Guardar en localStorage
+    if (!installments || installments.length === 0) {
+        // Fallback al sistema antiguo (una sola cuota) si no hay cuotas calculadas
+        const inflow = {
+            id: Date.now(),
+            tipoIngresoCodigo: inflowData.tipoIngresoCodigo,
+            tipoIngresoNombre: inflowData.tipoIngresoNombre,
+            numero: inflowData.numero,
+            fecha: inflowData.fecha,
+            observaciones: inflowData.observaciones || '',
+            holderId: inflowData.holderId,
+            holderName: inflowData.holderName,
+            invoiceNumber: inflowData.invoiceNumber,
+            valor: inflowData.valor,
+            cuota: inflowData.cuota || inflowData.cuotaInicial || '1',
+            executiveId: inflowData.executiveId,
+            executiveName: inflowData.executiveName,
+            letraRecibo: inflowData.letraRecibo || '',
+            reciboOficial: inflowData.reciboOficial || '',
+            recordProduccion: inflowData.recordProduccion || '',
+            estado: 'activo',
+            date: new Date(inflowData.fecha).toISOString()
+        };
+        
+        try {
+            const raw = localStorage.getItem(`ingresosCaja_${inflowData.city}`);
+            const list = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(list)) list = [];
+            list.push(inflow);
+            localStorage.setItem(`ingresosCaja_${inflowData.city}`, JSON.stringify(list));
+            
+            const numeroIngreso = parseInt(inflowData.numero, 10) || 0;
+            if (numeroIngreso > 0) {
+                localStorage.setItem(`nextInflowNumber_${inflowData.city}`, String(numeroIngreso + 1));
+            }
+            
+            window.tempInflowData = null;
+            window.tempInflowBasicData = null;
+            hideCreateInflowDetailsModal();
+            showSuccessCreateInflowModal();
+            loadCashInflowData();
+        } catch (e) {
+            console.error('Error al guardar ingreso a caja:', e);
+            showNotification('Error al guardar el ingreso a caja', 'error');
+        }
+        return;
+    }
+    
+    // ========================================
+    // NUEVO SISTEMA: Crear un solo registro con múltiples cuotas
+    // ========================================
+    // 
+    // DESCRIPCIÓN:
+    // Crea un único registro de ingreso que puede cubrir múltiples cuotas.
+    // Esto permite que un solo pago se distribuya entre varias cuotas,
+    // incluyendo pagos parciales.
+    //
+    // ESTRUCTURA DEL REGISTRO:
+    // - valor: Suma total de todas las cuotas seleccionadas
+    // - cuota: String con todas las cuotas separadas por comas (ej: "2, 3, 4, 5")
+    // - detalleCuotas: Array con el detalle de cada cuota y su valor a pagar
+    //
+    // EJEMPLO:
+    // Si el usuario paga 500,000 y selecciona cuotas 2, 3, 4, 5 con valores:
+    // - Cuota 2: 118,000 (completa)
+    // - Cuota 3: 118,000 (completa)
+    // - Cuota 4: 118,000 (completa)
+    // - Cuota 5: 146,000 (parcial, saldo restante)
+    //
+    // El registro guardado será:
+    // {
+    //   valor: 500000,
+    //   cuota: "2, 3, 4, 5",
+    //   detalleCuotas: [
+    //     { cuota: 2, valorPagar: 118000, esParcial: false },
+    //     { cuota: 3, valorPagar: 118000, esParcial: false },
+    //     { cuota: 4, valorPagar: 118000, esParcial: false },
+    //     { cuota: 5, valorPagar: 146000, esParcial: true }
+    //   ]
+    // }
+    //
+    // NOTA PARA BACKEND:
+    // - Actualmente guarda en localStorage
+    // - CONEXIÓN BACKEND: Reemplazar localStorage por llamada API:
+    //   POST /api/cash-inflows
+    //   Body: {
+    //     ...inflow (todos los campos del objeto inflow)
+    //   }
+    //   Response: { success: true, id: nuevoId }
+    //
     try {
         const raw = localStorage.getItem(`ingresosCaja_${inflowData.city}`);
         const list = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(list)) list = [];
+        
+        // Obtener número de ingreso
+        let numeroIngreso = parseInt(inflowData.numero, 10) || 0;
+        
+        // Obtener todas las cuotas como string separadas por comas
+        // Ejemplo: "2, 3, 4, 5"
+        const cuotasNumeros = installments.map(inst => String(inst.cuota)).join(', ');
+        
+        // Calcular valor total (suma de todas las cuotas seleccionadas)
+        const valorTotal = installments.reduce((sum, inst) => sum + (inst.valorPagar || 0), 0);
+        
+        // Crear un solo registro de ingreso con el detalle de múltiples cuotas
+        const inflow = {
+            id: Date.now(),
+            tipoIngresoCodigo: inflowData.tipoIngresoCodigo,
+            tipoIngresoNombre: inflowData.tipoIngresoNombre,
+            numero: String(numeroIngreso),
+            fecha: inflowData.fecha,
+            observaciones: inflowData.observaciones || '',
+            holderId: inflowData.holderId,
+            holderName: inflowData.holderName,
+            invoiceNumber: inflowData.invoiceNumber,
+            valor: valorTotal, // Valor total de todas las cuotas seleccionadas
+            cuota: cuotasNumeros, // Todas las cuotas separadas por comas (ej: "2, 3, 4, 5")
+            executiveId: inflowData.executiveId,
+            executiveName: inflowData.executiveName,
+            letraRecibo: inflowData.letraRecibo || '',
+            reciboOficial: inflowData.reciboOficial || '',
+            recordProduccion: inflowData.recordProduccion || '',
+            estado: 'activo',
+            date: new Date(inflowData.fecha).toISOString(),
+            // IMPORTANTE: Guardar detalle de cuotas para calcular saldos correctamente
+            // Este array contiene el valor exacto pagado por cada cuota
+            detalleCuotas: installments.map(inst => ({
+                cuota: inst.cuota,           // Número de cuota
+                valorPagar: inst.valorPagar, // Valor pagado en esta cuota
+                esParcial: inst.esParcial || false // Si el pago es parcial o completo
+            }))
+        };
+        
         list.push(inflow);
+        
+        // Guardar el registro en localStorage
+        // BACKEND: Reemplazar por POST /api/cash-inflows
         localStorage.setItem(`ingresosCaja_${inflowData.city}`, JSON.stringify(list));
         
         // Actualizar el puntero del siguiente número consecutivo
-        const numeroIngreso = parseInt(inflowData.numero, 10) || 0;
         if (numeroIngreso > 0) {
             localStorage.setItem(`nextInflowNumber_${inflowData.city}`, String(numeroIngreso + 1));
         }
@@ -3084,6 +5658,7 @@ function confirmCreateInflow() {
         // Limpiar datos temporales
         window.tempInflowData = null;
         window.tempInflowBasicData = null;
+        window.calculatedInstallments = null;
         
         // Cerrar modal de detalles
         hideCreateInflowDetailsModal();
@@ -3099,9 +5674,16 @@ function confirmCreateInflow() {
     }
 }
 
-function showSuccessCreateInflowModal() {
+function showSuccessCreateInflowModal(customMessage) {
     const modal = document.getElementById('successCreateInflowModal');
     if (modal) {
+        // Actualizar mensaje si se proporciona uno personalizado
+        const messageEl = modal.querySelector('.modal-message');
+        if (messageEl && customMessage) {
+            messageEl.textContent = customMessage;
+        } else if (messageEl) {
+            messageEl.textContent = '¡El ingreso a caja fue creado correctamente!';
+        }
         modal.style.display = 'flex';
         modal.style.zIndex = '25000';
         document.body.style.overflow = 'hidden';

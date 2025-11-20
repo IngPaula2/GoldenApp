@@ -83,13 +83,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-cogs nav-icon"></i>
+                    <a href="../../nomina/nomina-semanal/nomina-semanal.html" class="nav-link">
+                        <i class="fas fa-coins nav-icon"></i>
                         <span>Nómina</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../../cartera/asignar-factura/asignar-factura.html" class="nav-link">
                         <i class="fas fa-wallet nav-icon"></i>
                         <span>Cartera</span>
                     </a>
@@ -393,29 +393,31 @@
                         </div>
                     </div>
                     
-                    <!-- Tercera fila: Nombre del Ejecutivo | Valor -->
+                    <!-- Tercera fila: Nombre del Ejecutivo | Valor Total -->
                     <div class="form-row two-col">
                         <div class="form-group">
                             <label for="executiveName" class="form-label">Nombre del Ejecutivo *</label>
                             <input type="text" id="executiveName" class="form-input" placeholder="NOMBRE DEL EJECUTIVO" readonly required>
                         </div>
                         <div class="form-group">
-                            <label for="inflowValue" class="form-label">Valor *</label>
-                            <input type="text" id="inflowValue" class="form-input numeric-input" placeholder="VALOR" required>
+                            <label for="inflowValue" class="form-label">Valor Total a Pagar *</label>
+                            <input type="text" id="inflowValue" class="form-input numeric-input" placeholder="VALOR TOTAL" required>
                         </div>
                     </div>
                     
                     <!-- Cuarta fila: Cuota | Letra Recibo -->
                     <div class="form-row two-col">
                         <div class="form-group">
-                            <label for="cuota" class="form-label">Cuota *</label>
+                            <label for="cuota" id="cuotaLabel" class="form-label">Cuota *</label>
                             <input type="text" id="cuota" class="form-input numeric-input" placeholder="CUOTA" required>
+                            <small class="form-help-text" id="cuotaHelpText" style="display: none;"></small>
                         </div>
                         <div class="form-group">
                             <label for="letraRecibo" class="form-label">Letra Recibo</label>
                             <input type="text" id="letraRecibo" class="form-input uppercase-input" placeholder="LETRA RECIBO" maxlength="10">
                         </div>
                     </div>
+                    
                     
                     <!-- Quinta fila: Recibo Oficial | Record de Producción -->
                     <div class="form-row two-col">
@@ -461,6 +463,71 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideReportModal()">Cancelar</button>
                 <button class="btn btn-primary" id="bGenerarReporte">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Cuotas -->
+    <div class="modal-overlay" id="selectInstallmentsModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONE LAS CUOTAS A PAGAR</h3>
+                <button class="modal-close" onclick="hideSelectInstallmentsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Información de la factura -->
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <strong>Factura:</strong> <span id="modalInvoiceNumber">-</span>
+                        </div>
+                        <div>
+                            <strong>Titular:</strong> <span id="modalHolderName">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Campo de valor total deseado -->
+                <div class="form-row" style="margin-bottom: 20px;">
+                    <div class="form-group" style="width: 100%;">
+                        <label for="desiredTotalValue" class="form-label">Valor Total Deseado a Pagar</label>
+                        <input type="text" id="desiredTotalValue" class="form-input numeric-input" placeholder="INGRESE EL VALOR TOTAL DESEADO">
+                    </div>
+                </div>
+                
+                <!-- Tabla de cuotas -->
+                <div class="form-row">
+                    <div class="form-group" style="width: 100%;">
+                        <label class="form-label">Cuotas Disponibles</label>
+                        <div class="installments-table-container" style="max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px;">
+                            <table class="table" id="selectInstallmentsTable" style="margin: 0; width: 100%; border-collapse: collapse;">
+                                <thead style="position: sticky; top: 0; background-color: #f8f8f8; z-index: 10;">
+                                    <tr>
+                                        <th style="width: 50px; text-align: center; padding: 12px; border-bottom: 2px solid #e0e0e0;">
+                                            <input type="checkbox" id="selectAllInstallmentsModal" title="Seleccionar todas" style="cursor: pointer;">
+                                        </th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Cuota</th>
+                                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Valor Cuota</th>
+                                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="selectInstallmentsTableBody">
+                                    <tr>
+                                        <td colspan="4" class="no-data-message" style="text-align: center; padding: 30px;">
+                                            <p style="margin: 0; color: #6c757d;">Cargando cuotas...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSelectInstallmentsModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bConfirmInstallments">Confirmar Selección</button>
             </div>
         </div>
     </div>
