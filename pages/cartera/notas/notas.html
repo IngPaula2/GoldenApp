@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<!--
+    CARTERA - NOTAS - GOLDEN APP
+    
+    Este archivo contiene la página del módulo de notas dentro de cartera.
+    Incluye gestión de notas con tabla y operaciones CRUD.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2025
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Notas</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/administrativo/main.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/cartera/notas/notas.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="../../administrativo/admin-titulares.html" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../facturacion/contratos/fac-contratos.html" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../tesoreria/ingreso-caja/ingreso-caja.html" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../nomina/nomina-semanal/nomina-semanal.html" class="nav-link">
+                        <i class="fas fa-coins nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="../asignar-factura/asignar-factura.html" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item">
+                    <a href="../asignar-factura/asignar-factura.html" class="top-nav-link">Asignar Factura</a>
+                </li>
+                <li class="top-nav-item active">
+                    <a href="notas.html" class="top-nav-link">Notas</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../estado-cuenta/estado-cuenta.html" class="top-nav-link">Estado de Cuenta</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Notas -->
+            <section class="notes-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Notas</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showSelectCityModal()">
+                            Cambiar Ciudad
+                        </button>
+                        <button class="btn btn-primary" onclick="showSearchNoteModal()">
+                            Buscar Nota
+                        </button>
+                        <button class="btn btn-primary" onclick="showCreateNoteModal()">
+                            Crear Nota
+                        </button>
+                        <button class="btn btn-primary" onclick="showReportModal()">
+                            Reporte
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table class="table" id="notesTable">
+                        <thead>
+                            <tr>
+                                <th>Número de Nota</th>
+                                <th>Tipo de Nota</th>
+                                <th>Fecha</th>
+                                <th>Identificación Titular</th>
+                                <th>Nombre Titular</th>
+                                <th>Valor</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notesTableBody">
+                            <tr>
+                                <td colspan="9" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-sticky-note"></i>
+                                        <p>No existen registros de notas</p>
+                                        <small>Haz clic en "Crear Nota" para crear el primer registro</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES DE INTERACCIÓN
+         ======================================== -->
+    
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+        <div class="modal" style="max-width: 520px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad <span style="color: #dc2626;">*</span></label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select" required>
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Nota -->
+    <div class="modal-overlay" id="searchNoteModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR NOTA</h3>
+                <button class="modal-close" onclick="hideSearchNoteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="noteSearchType" class="form-label">Tipo de Búsqueda *</label>
+                        <div class="select-container">
+                            <select id="noteSearchType" class="form-select">
+                                <option value="noteNumber">Número de Nota</option>
+                                <option value="holderName">Nombre Titular</option>
+                                <option value="holderId">Identificación Titular</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchNoteValue" id="noteSearchLabel" class="form-label">Valor de Búsqueda *</label>
+                        <input type="text" id="searchNoteValue" class="form-input" placeholder="Ingrese el valor a buscar">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideSearchNoteModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscarNota">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Nota -->
+    <div class="modal-overlay" id="createNoteModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR NOTA</h3>
+                <button class="modal-close" onclick="hideCreateNoteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createNoteForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="noteNumber" class="form-label">Número de Nota *</label>
+                            <input type="text" id="noteNumber" class="form-input numeric-input" placeholder="NÚMERO DE NOTA" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="noteType" class="form-label">Tipo de Nota *</label>
+                            <div class="select-container">
+                                <select id="noteType" class="form-select" required>
+                                    <option value="">Seleccione el tipo</option>
+                                    <option value="CREDITO">Crédito</option>
+                                    <option value="DEBITO">Débito</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="noteDate" class="form-label">Fecha *</label>
+                            <input type="date" id="noteDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="noteValue" class="form-label">Valor *</label>
+                            <input type="text" id="noteValue" class="form-input numeric-input" placeholder="VALOR" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="holderId" class="form-label">Identificación del Titular *</label>
+                            <input type="text" id="holderId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required>
+                            <div id="holderNameDisplay" class="holder-name-display" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="holderName" class="form-label">Nombre del Titular *</label>
+                            <input type="text" id="holderName" class="form-input" placeholder="NOMBRE DEL TITULAR" readonly required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="noteDescription" class="form-label">Descripción *</label>
+                            <textarea id="noteDescription" class="form-input" rows="3" placeholder="DESCRIPCIÓN" maxlength="500" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="noteStatus" class="form-label">Estado *</label>
+                            <div class="select-container">
+                                <select id="noteStatus" class="form-select" required>
+                                    <option value="">Seleccione el estado</option>
+                                    <option value="ACTIVA">Activa</option>
+                                    <option value="ANULADA">Anulada</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreateNoteModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrearNota">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte -->
+    <div class="modal-overlay" id="reportModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">GENERAR REPORTE</h3>
+                <button class="modal-close" onclick="hideReportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate" class="form-label">Fecha Inicio *</label>
+                        <input type="date" id="startDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate" class="form-label">Fecha Fin *</label>
+                        <input type="date" id="endDate" class="form-input" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideReportModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bGenerarReporte">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Crear Nota -->
+    <div class="modal-overlay" id="confirmCreateNoteModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreateNote()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea crear esta nota?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateNote()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateNote()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Nota -->
+    <div class="modal-overlay" id="successCreateNoteModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreateNoteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La nota fue creada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCreateNoteModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- JavaScript -->
+    <script src="../../../assets/js/accessibility.js"></script>
+    <script src="../../../assets/js/cartera/notas/notas.js"></script>
+</body>
+</html>
+

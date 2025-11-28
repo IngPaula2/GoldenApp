@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<!--
+    ====================================================================================
+    NÓMINA - NÓMINA SEMANAL - GOLDEN APP
+    ====================================================================================
+    
+    Este archivo contiene la página principal del módulo de nómina semanal.
+    Incluye gestión completa de nóminas semanales con tabla y operaciones CRUD.
+    
+    ESTRUCTURA DE LA PÁGINA:
+    - Sidebar de navegación
+    - Header con título y botones de acción
+    - Tabla principal de nóminas semanales
+    - Modales para crear/editar nóminas
+    - Modales para crear/editar facturas
+    - Modales para editar escalas
+    - Modales para reportes (semanal, cuadre, comprobante por ejecutivo)
+    - Modales de confirmación y notificaciones
+    
+    INTEGRACIÓN CON BACKEND:
+    - Este archivo HTML carga el JavaScript en: assets/js/nomina/nomina-semanal/nomina-semanal.js
+    - Todas las operaciones de datos se realizan desde el archivo JavaScript
+    - El JavaScript actualmente usa localStorage, pero debe ser reemplazado con llamadas API
+    - Ver el archivo JavaScript para instrucciones detalladas de integración con backend
+    
+    MODALES INCLUIDOS:
+    1. Modal de selección de ciudad (se muestra al cargar la página)
+    2. Modal de crear nómina semanal
+    3. Modal de crear factura
+    4. Modal de editar escalas
+    5. Modal de búsqueda de nómina
+    6. Modal de reporte semanal
+    7. Modal de reporte cuadre
+    8. Modal de comprobante por ejecutivo
+    9. Modales de confirmación y éxito
+    
+    ====================================================================================
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2025
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Nómina Semanal</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/administrativo/main.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/nomina/nomina-semanal/nomina-semanal.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="../../administrativo/admin-titulares.html" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../facturacion/contratos/fac-contratos.html" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../tesoreria/ingreso-caja/ingreso-caja.html" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="nomina-semanal.html" class="nav-link">
+                        <i class="fas fa-coins nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../cartera/asignar-factura/asignar-factura.html" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item active">
+                    <a href="nomina-semanal.html" class="top-nav-link">Nomina Semanal</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Nómina Semanal -->
+            <section class="payroll-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Nómina Semanal</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <div class="action-buttons-top">
+                            <button class="btn btn-primary" onclick="showCreatePayrollModal()">
+                                Crear Nómina Semanal
+                            </button>
+                        </div>
+                        <div class="action-buttons-bottom">
+                            <button class="btn btn-primary" id="changeCityButton" onclick="showSelectCityModal()">
+                                Cambiar Ciudad
+                            </button>
+                            <button class="btn btn-primary" onclick="showSearchNominaModal()">
+                                Buscar Nómina
+                            </button>
+                            <button class="btn btn-primary" onclick="showReporteSemanalModal()">
+                                Reporte Semanal
+                            </button>
+                            <button class="btn btn-primary" onclick="showReporteCuadreModal()">
+                                Reporte Cuadre
+                            </button>
+                            <button class="btn btn-primary" onclick="showComprobanteEjecutivoModal()">
+                                Comprobante por Ejecutivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Lista de Nóminas Semanales -->
+                <div id="payrollListContainer" class="payroll-list-container">
+                    <div class="data-table">
+                        <table class="table" id="payrollTable">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Ciudad</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th># Semana</th>
+                                    <th># Facturas</th>
+                                    <th class="options-column">OPCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payrollTableBody">
+                                <tr>
+                                    <td colspan="7" class="no-data-message">
+                                        <div class="no-data-content">
+                                            <i class="fas fa-coins"></i>
+                                            <p>No existen registros de nómina semanal</p>
+                                            <small>Haz clic en "Crear Nómina Semanal" para crear el primer registro</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Vista de Detalle de Nómina (con facturas) -->
+                <div id="payrollDetailContainer" class="payroll-detail-container" style="display: none;">
+                    <div class="detail-header">
+                        <button class="btn btn-secondary" onclick="backToPayrollList()">
+                            Volver a Nóminas
+                        </button>
+                        <h3 id="detailPayrollTitle">Detalle de Nómina Semanal</h3>
+                    </div>
+                    
+                    <div class="payroll-info-card">
+                        <div class="info-row">
+                            <span class="info-label">Código:</span>
+                            <span class="info-value" id="detailPayrollCode">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ciudad:</span>
+                            <span class="info-value" id="detailPayrollCity">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha Inicio:</span>
+                            <span class="info-value" id="detailPayrollStartDate">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha Fin:</span>
+                            <span class="info-value" id="detailPayrollEndDate">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label"># Semana:</span>
+                            <span class="info-value" id="detailPayrollWeek">-</span>
+                        </div>
+                    </div>
+
+                    <div class="invoices-section">
+                        <div class="section-header-small">
+                            <h4>Facturas de esta Nómina</h4>
+                            <button class="btn btn-primary" onclick="showCreateInvoiceModal()">
+                                Crear Factura
+                            </button>
+                        </div>
+
+                        <div class="data-table">
+                            <table class="table" id="invoicesTable">
+                                <thead>
+                                    <tr>
+                                        <th># Factura</th>
+                                        <th># Contrato</th>
+                                        <th>Cuota Inicial</th>
+                                        <th>Fecha Final</th>
+                                        <th>Total Escalas</th>
+                                        <th class="options-column">OPCIONES</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoicesTableBody">
+                                    <tr>
+                                        <td colspan="6" class="no-data-message">
+                                            <div class="no-data-content">
+                                                <i class="fas fa-file-invoice"></i>
+                                                <p>No hay facturas creadas para esta nómina</p>
+                                                <small>Haz clic en "Crear Factura" para agregar la primera</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES DE INTERACCIÓN
+         ======================================== -->
+    
+    <!-- Modal de Selección de Ciudad (al ingresar) -->
+    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+        <div class="modal" style="max-width: 520px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
+                <button class="modal-close" onclick="hideSelectCityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad <span style="color: #dc2626;">*</span></label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select" required>
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Nómina Semanal -->
+    <div class="modal-overlay" id="createPayrollModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR NÓMINA SEMANAL</h3>
+                <button class="modal-close" onclick="hideCreatePayrollModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createPayrollForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="payrollCityCode" class="form-label">Código Ciudad <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="payrollCityCode" class="form-input" placeholder="Código de la ciudad" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="payrollWeek" class="form-label"># Semana <span style="color: #dc2626;">*</span></label>
+                            <input type="number" id="payrollWeek" class="form-input" placeholder="Número de semana" min="1" max="52" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="payrollStartDate" class="form-label">Fecha Inicio <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="payrollStartDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="payrollEndDate" class="form-label">Fecha Fin <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="payrollEndDate" class="form-input" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreatePayrollModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrearNomina">Crear Nómina</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Factura -->
+    <div class="modal-overlay" id="createInvoiceModal" style="display: none;">
+        <div class="modal modal-large" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR FACTURA</h3>
+                <button class="modal-close" onclick="hideCreateInvoiceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createInvoiceForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="invoiceNumber" class="form-label"># Factura <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="invoiceNumber" class="form-input" placeholder="Ingrese o seleccione el número de factura" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="invoiceContract" class="form-label"># Contrato <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="invoiceContract" class="form-input" placeholder="Se cargará automáticamente al ingresar el número de factura" readonly required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="invoiceInitialQuota" class="form-label">Cuota Inicial <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="invoiceInitialQuota" class="form-input numeric-input" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="invoiceEndDate" class="form-label">Fecha Final <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="invoiceEndDate" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <!-- Sección de Escalas -->
+                    <div class="scales-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h4 class="scales-title" style="margin: 0;">Escalas del Plan</h4>
+                            <button type="button" class="btn btn-primary" id="btnEditarEscalas" style="display: none;">
+                                <i class="fas fa-edit"></i> Editar Escalas
+                            </button>
+                        </div>
+                        <div class="scales-container" id="scalesContainer">
+                            <div class="no-scales-message">
+                                <p>Seleccione un contrato para cargar las escalas del plan</p>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreateInvoiceModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bCrearFactura">Crear Factura</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES DE CONFIRMACIÓN
+         ======================================== -->
+    
+    <!-- Modal de Confirmación para Crear Nómina -->
+    <div class="modal-overlay" id="confirmCreatePayrollModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreatePayroll()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea crear esta Nómina Semanal?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreatePayroll()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreatePayroll()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Nómina -->
+    <div class="modal-overlay" id="successCreatePayrollModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreatePayrollModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La nómina semanal fue creada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCreatePayrollModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Actualizar Nómina -->
+    <div class="modal-overlay" id="confirmUpdatePayrollModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelUpdatePayroll()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea actualizar esta Nómina Semanal?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdatePayroll()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdatePayroll()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar Nómina -->
+    <div class="modal-overlay" id="successUpdatePayrollModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessUpdatePayrollModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La nómina semanal fue actualizada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdatePayrollModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Crear Factura -->
+    <div class="modal-overlay" id="confirmCreateInvoiceModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelCreateInvoice()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea crear esta Factura?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelCreateInvoice()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCreateInvoice()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Crear Factura -->
+    <div class="modal-overlay" id="successCreateInvoiceModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessCreateInvoiceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La factura fue creada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessCreateInvoiceModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Actualizar Factura -->
+    <div class="modal-overlay" id="confirmUpdateInvoiceModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelUpdateInvoice()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea actualizar esta Factura?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdateInvoice()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmUpdateInvoice()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Actualizar Factura -->
+    <div class="modal-overlay" id="successUpdateInvoiceModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessUpdateInvoiceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La factura fue actualizada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessUpdateInvoiceModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Aviso - Factura ya liquidada -->
+    <div class="modal-overlay" id="warningInvoiceExistsModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">AVISO</h3>
+                <button class="modal-close" onclick="closeWarningInvoiceExistsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="warningInvoiceExistsMessage">La factura YA liquidada en la fecha inicial: <strong id="warningInvoiceFechaInicio"></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeWarningInvoiceExistsModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar Nómina -->
+    <div class="modal-overlay" id="confirmDeletePayrollModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelDeletePayroll()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea eliminar esta Nómina Semanal?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeletePayroll()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeletePayroll()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Eliminar Nómina -->
+    <div class="modal-overlay" id="successDeletePayrollModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessDeletePayrollModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La nómina semanal fue eliminada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeletePayrollModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar Factura -->
+    <div class="modal-overlay" id="confirmDeleteInvoiceModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelDeleteInvoice()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea eliminar esta Factura?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteInvoice()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteInvoice()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar Escala -->
+    <div class="modal-overlay" id="confirmDeleteScaleModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMACIÓN</h3>
+                <button class="modal-close" onclick="cancelDeleteScale()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está segur@ que desea eliminar esta escala?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelDeleteScale()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteScale()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Eliminar Escala -->
+    <div class="modal-overlay" id="successDeleteScaleModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessDeleteScaleModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡Escala eliminada exitosamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteScaleModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito para Eliminar Factura -->
+    <div class="modal-overlay" id="successDeleteInvoiceModal" style="display: none;">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3 class="modal-title">ÉXITO</h3>
+                <button class="modal-close" onclick="closeSuccessDeleteInvoiceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¡La factura fue eliminada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closeSuccessDeleteInvoiceModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte Semanal -->
+    <div class="modal-overlay" id="reporteSemanalModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">REPORTE SEMANAL</h3>
+                <button class="modal-close" onclick="hideReporteSemanalModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="reporteSemanalForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="reporteSemanalCodigoCiudad" class="form-label">Código Ciudad <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="reporteSemanalCodigoCiudad" class="form-input" placeholder="Ingrese el código de ciudad" required>
+                            <div id="reporteSemanalCiudadDisplay" style="margin-top: 5px; padding: 5px; border-radius: 4px; display: none; font-size: 12px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporteSemanalFechaInicio" class="form-label">Fecha Inicio <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="reporteSemanalFechaInicio" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="reporteSemanalFechaFin" class="form-label">Fecha Fin <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="reporteSemanalFechaFin" class="form-input" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideReporteSemanalModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bGenerarReporteSemanal">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Cerrar Sesión -->
+    <div id="confirmLogoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmar Cerrar Sesión</h3>
+                <button class="modal-close" onclick="cancelLogout()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro de que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte Cuadre -->
+    <div class="modal-overlay" id="reporteCuadreModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">REPORTE CUADRE</h3>
+                <button class="modal-close" onclick="hideReporteCuadreModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="reporteCuadreForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="reporteCuadreCodigoCiudad" class="form-label">Código Ciudad <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="reporteCuadreCodigoCiudad" class="form-input" placeholder="Ingrese el código de ciudad" required>
+                            <div id="reporteCuadreCiudadDisplay" style="margin-top: 5px; padding: 5px; border-radius: 4px; display: none; font-size: 12px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporteCuadreFechaInicio" class="form-label">Fecha Inicio <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="reporteCuadreFechaInicio" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="reporteCuadreFechaFin" class="form-label">Fecha Fin <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="reporteCuadreFechaFin" class="form-input" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideReporteCuadreModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bGenerarReporteCuadre">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Comprobante por Ejecutivo -->
+    <div class="modal-overlay" id="comprobanteEjecutivoModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">COMPROBANTE POR EJECUTIVO</h3>
+                <button class="modal-close" onclick="hideComprobanteEjecutivoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="comprobanteEjecutivoForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="comprobanteEjecutivoFechaInicio" class="form-label">Fecha Inicio <span style="color: #dc2626;">*</span></label>
+                            <input type="date" id="comprobanteEjecutivoFechaInicio" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comprobanteEjecutivoTipoBusqueda" class="form-label">Tipo de Búsqueda <span style="color: #dc2626;">*</span></label>
+                            <select id="comprobanteEjecutivoTipoBusqueda" class="form-select" required>
+                                <option value="">Seleccione el tipo</option>
+                                <option value="ejecutivo">Por Ejecutivo</option>
+                                <option value="ciudad">Por Ciudad</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" id="comprobanteEjecutivoPorEjecutivoRow" style="display: none;">
+                        <div class="form-group">
+                            <label for="comprobanteEjecutivoIdentificacion" class="form-label">Identificación <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="comprobanteEjecutivoIdentificacion" class="form-input" placeholder="Ingrese la identificación del ejecutivo">
+                            <div id="comprobanteEjecutivoNombreDisplay" style="margin-top: 5px; padding: 5px; border-radius: 4px; display: none; font-size: 12px;"></div>
+                        </div>
+                    </div>
+                    <div class="form-row" id="comprobanteEjecutivoPorCiudadRow" style="display: none;">
+                        <div class="form-group">
+                            <label for="comprobanteEjecutivoCiudad" class="form-label">Ciudad <span style="color: #dc2626;">*</span></label>
+                            <select id="comprobanteEjecutivoCiudad" class="form-select">
+                                <option value="">Seleccione la ciudad</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideComprobanteEjecutivoModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bGenerarComprobanteEjecutivo">Generar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Editar Escalas -->
+    <div class="modal-overlay" id="editScalesModal" style="display: none;">
+        <div class="modal modal-large" style="max-width: 1200px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">EDITAR ESCALAS</h3>
+                <button class="modal-close" onclick="hideEditScalesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre de la Escala</th>
+                                <th>Identificación</th>
+                                <th>Nombre del Ejecutivo</th>
+                                <th>Valor de la Comisión</th>
+                            </tr>
+                        </thead>
+                        <tbody id="editScalesTableBody">
+                            <!-- Las filas se generarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="bCancelarEditarEscalas">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bGuardarEscalas">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Nómina -->
+    <div class="modal-overlay" id="searchNominaModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR NÓMINA</h3>
+                <button class="modal-close" onclick="hideSearchNominaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="searchNominaForm">
+                    <div class="form-group">
+                        <label for="searchNominaFechaInicio" class="form-label">Fecha de Inicio <span style="color: #dc2626;">*</span></label>
+                        <input type="date" id="searchNominaFechaInicio" class="form-input" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSearchNominaModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bBuscarNomina">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda de Nómina -->
+    <div class="modal-overlay" id="nominaResultsModal" style="display: none;">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - NÓMINA</h3>
+                <button class="modal-close" onclick="hideNominaResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Ciudad</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th># Semana</th>
+                                <th># Facturas</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nominaSearchResultsBody">
+                            <tr>
+                                <td colspan="7" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otra fecha de inicio</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideNominaResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <!-- JavaScript -->
+    <script src="../../../assets/js/accessibility.js"></script>
+    <script src="../../../assets/js/nomina/nomina-semanal/nomina-semanal.js"></script>
+</body>
+</html>
+

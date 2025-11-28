@@ -16,7 +16,38 @@ function renderInvoicesTable(list) {
         `;
         return;
     }
+    
+    // Obtener contratos para buscar ejecutivo actualizado al renderizar
+    const city = getSelectedCityCode();
+    let contratos = [];
+    try {
+        const contratosRaw = localStorage.getItem(`contratos_${city}`);
+        contratos = contratosRaw ? JSON.parse(contratosRaw) : [];
+    } catch (e) {
+        console.error('Error cargando contratos para renderizar:', e);
+    }
+    
     list.forEach(invoice => {
+        // Buscar ejecutivo actualizado desde el contrato al momento de renderizar
+        let ejecutivoDisplay = invoice.executive || '';
+        if (invoice.contractNumber || invoice.contractId) {
+            const contractNumber = invoice.contractNumber || invoice.contractId || '';
+            const contractId = invoice.contractId || '';
+            
+            const match = Array.isArray(contratos) ? contratos.find(c => {
+                return String(c.id) === String(contractId) ||
+                       String(c.contractNumber || c.numero || c.numeroContrato) === String(contractNumber) ||
+                       String(c.contractNumber || c.numero || c.numeroContrato) === String(contractId);
+            }) : null;
+            
+            if (match) {
+                const ejecutivoActualizado = getExecutiveNameFromContract(match, city);
+                if (ejecutivoActualizado) {
+                    ejecutivoDisplay = ejecutivoActualizado;
+                }
+            }
+        }
+        
         const row = document.createElement('tr');
         row.className = `status-${invoice.estado === 'activo' ? 'active' : 'inactive'}`;
         row.innerHTML = `
@@ -27,7 +58,7 @@ function renderInvoicesTable(list) {
             <td>${invoice.clientName || ''}</td>
             <td class="invoice-value">$${formatNumber(invoice.value || 0)}</td>
             <td>${invoice.firstPaymentDate ? formatDate(invoice.firstPaymentDate) : '—'}</td>
-            <td>${invoice.executive || ''}</td>
+            <td>${ejecutivoDisplay}</td>
             <td><span class="status-badge ${invoice.estado === 'activo' ? 'active' : 'inactive'}">${invoice.estado === 'activo' ? 'ACTIVO' : 'ANULADO'}</span></td>
             <td>
                 <div class="action-buttons-cell status-toggle-container">
@@ -90,6 +121,91 @@ function getPlanValorByName(planName) {
         }
     } catch (e) {}
     return 0;
+}
+
+/**
+ * Obtiene el nombre del ejecutivo desde el contrato, buscando por su ID en empleadosByCity
+ * @param {Object} contract - Objeto del contrato
+ * @param {string} cityCode - Código de la ciudad
+ * @returns {string} Nombre del ejecutivo o cadena vacía si no se encuentra
+ */
+function getExecutiveNameFromContract(contract, cityCode) {
+    if (!contract || !cityCode) return '';
+    
+    try {
+        // Obtener el ID del ejecutivo del contrato
+        const ejecutivoId = contract.executiveId || 
+                           contract.ejecutivoId || 
+                           contract.executive || 
+                           contract.ejecutivo || 
+                           contract.ejecutivoCedula ||
+                           contract.executiveCedula || '';
+        
+        if (!ejecutivoId) {
+            // Si no hay ID, intentar usar el nombre directamente del contrato
+            return contract.ejecutivo || contract.executive || contract.ejecutivoNombre || contract.nombreEjecutivo || '';
+        }
+        
+        // Buscar el empleado en empleadosByCity
+        const empleadosByCityRaw = localStorage.getItem('empleadosByCity');
+        if (!empleadosByCityRaw) {
+            // Fallback al nombre del contrato si no hay datos de empleados
+            return contract.ejecutivo || contract.executive || contract.ejecutivoNombre || contract.nombreEjecutivo || '';
+        }
+        
+        const empleadosByCity = JSON.parse(empleadosByCityRaw);
+        const empleados = empleadosByCity[cityCode] || {};
+        
+        // Limpiar y normalizar la identificación
+        const ejecutivoIdClean = String(ejecutivoId).trim();
+        
+        // Buscar el empleado por identificación (exacta, numérica, sin espacios)
+        let empleado = empleados[ejecutivoIdClean];
+        
+        if (!empleado) {
+            // Buscar por coincidencia numérica o sin espacios
+            for (const [cedula, emp] of Object.entries(empleados)) {
+                const cedulaClean = String(cedula).trim();
+                const cedulaNumeric = cedulaClean.replace(/\D/g, '');
+                const ejecutivoIdNumeric = ejecutivoIdClean.replace(/\D/g, '');
+                
+                if (cedulaClean === ejecutivoIdClean || 
+                    cedulaNumeric === ejecutivoIdNumeric ||
+                    cedulaClean.replace(/\s/g, '') === ejecutivoIdClean.replace(/\s/g, '')) {
+                    empleado = emp;
+                    break;
+                }
+                
+                // También verificar el campo identificacion dentro del objeto empleado
+                const empId = String(emp.identificacion || '').trim();
+                const empIdNumeric = empId.replace(/\D/g, '');
+                if (empId === ejecutivoIdClean || empIdNumeric === ejecutivoIdNumeric) {
+                    empleado = emp;
+                    break;
+                }
+            }
+        }
+        
+        if (empleado) {
+            // Construir nombre completo
+            const nombreCompleto = [
+                empleado.tPrimerNombre || empleado.primerNombre || empleado.nombre1,
+                empleado.tSegundoNombre || empleado.segundoNombre || empleado.nombre2,
+                empleado.tPrimerApellido || empleado.primerApellido || empleado.apellido1,
+                empleado.tSegundoApellido || empleado.segundoApellido || empleado.apellido2
+            ].filter(Boolean).join(' ').toUpperCase();
+            
+            return nombreCompleto || '';
+        }
+        
+        // Fallback al nombre del contrato si no se encuentra el empleado
+        return contract.ejecutivo || contract.executive || contract.ejecutivoNombre || contract.nombreEjecutivo || '';
+        
+    } catch (e) {
+        console.error('Error obteniendo nombre del ejecutivo desde el contrato:', e);
+        // Fallback al nombre del contrato en caso de error
+        return contract.ejecutivo || contract.executive || contract.ejecutivoNombre || contract.nombreEjecutivo || '';
+    }
 }
 
 // Obtiene contratos ACTIVOS del titular desde el storage por ciudad
@@ -653,27 +769,46 @@ function loadInvoicesData() {
         // Asegurar defaults
         invoicesData = invoicesData.map(inv => ({ estado: (inv.estado || 'activo'), ...inv }));
 
-        // Enriquecer con # de contrato si faltara (migración de datos viejos)
+        // Enriquecer con # de contrato y ejecutivo actualizado desde el contrato
         const contratosRaw = localStorage.getItem(`contratos_${city}`);
         const contratos = contratosRaw ? JSON.parse(contratosRaw) : [];
         let changed = false;
         invoicesData.forEach(inv => {
-            if (!inv.contractNumber) {
-                const match = Array.isArray(contratos) ? contratos.find(c => {
-                    return String(c.id) === String(inv.contractId) ||
-                           String(c.contractNumber || c.numero || c.numeroContrato) === String(inv.contractId);
-                }) : null;
-                if (match) {
+            // Buscar el contrato correspondiente
+            const contractNumber = inv.contractNumber || inv.contractId || '';
+            const contractId = inv.contractId || '';
+            
+            const match = Array.isArray(contratos) ? contratos.find(c => {
+                return String(c.id) === String(contractId) ||
+                       String(c.contractNumber || c.numero || c.numeroContrato) === String(contractNumber) ||
+                       String(c.contractNumber || c.numero || c.numeroContrato) === String(contractId);
+            }) : null;
+            
+            if (match) {
+                // Actualizar número de contrato si faltaba
+                if (!inv.contractNumber) {
                     inv.contractNumber = match.contractNumber || match.numero || match.numeroContrato || '';
                     changed = true;
                 }
+                
+                // Actualizar ejecutivo desde el contrato (siempre para tener la versión más reciente)
+                const ejecutivoActualizado = getExecutiveNameFromContract(match, city);
+                if (ejecutivoActualizado && ejecutivoActualizado !== inv.executive) {
+                    inv.executive = ejecutivoActualizado;
+                    changed = true;
+                    console.log('✅ Ejecutivo actualizado en factura:', inv.invoiceNumber, 'Nuevo ejecutivo:', ejecutivoActualizado);
+                }
             }
         });
+        
+        // Guardar cambios si hubo actualizaciones
         if (changed) {
             byCity[city] = invoicesData;
             localStorage.setItem('invoicesByCity', JSON.stringify(byCity));
         }
-    } catch (e) { /* mantener invoicesData actual */ }
+    } catch (e) { 
+        console.error('Error cargando datos de facturas:', e);
+    }
     
     if (invoicesData.length === 0) {
         tbody.innerHTML = `
@@ -1091,7 +1226,37 @@ function renderInvoiceSearchResults(list){
             </tr>`;
         return;
     }
+    // Obtener contratos para buscar ejecutivo actualizado al renderizar
+    const city = getSelectedCityCode();
+    let contratos = [];
+    try {
+        const contratosRaw = localStorage.getItem(`contratos_${city}`);
+        contratos = contratosRaw ? JSON.parse(contratosRaw) : [];
+    } catch (e) {
+        console.error('Error cargando contratos para renderizar resultados de búsqueda:', e);
+    }
+    
     list.forEach(inv => {
+        // Buscar ejecutivo actualizado desde el contrato al momento de renderizar
+        let ejecutivoDisplay = inv.executive || '';
+        if (inv.contractNumber || inv.contractId) {
+            const contractNumber = inv.contractNumber || inv.contractId || '';
+            const contractId = inv.contractId || '';
+            
+            const match = Array.isArray(contratos) ? contratos.find(c => {
+                return String(c.id) === String(contractId) ||
+                       String(c.contractNumber || c.numero || c.numeroContrato) === String(contractNumber) ||
+                       String(c.contractNumber || c.numero || c.numeroContrato) === String(contractId);
+            }) : null;
+            
+            if (match) {
+                const ejecutivoActualizado = getExecutiveNameFromContract(match, city);
+                if (ejecutivoActualizado) {
+                    ejecutivoDisplay = ejecutivoActualizado;
+                }
+            }
+        }
+        
         const row = document.createElement('tr');
         row.setAttribute('data-id', String(inv.id));
         row.innerHTML = `
@@ -1102,7 +1267,7 @@ function renderInvoiceSearchResults(list){
             <td>${inv.clientName || ''}</td>
             <td class="invoice-value">$${formatNumber(inv.value || 0)}</td>
             <td data-first-cell>${inv.firstPaymentDate ? formatDate(inv.firstPaymentDate) : '—'}</td>
-            <td>${inv.executive || ''}</td>
+            <td>${ejecutivoDisplay}</td>
             <td><span class="status-badge ${inv.estado === 'activo' ? 'active' : 'inactive'}" data-status>${inv.estado === 'activo' ? 'ACTIVO' : 'ANULADO'}</span></td>
             <td>
                 <div class="action-buttons-cell">

@@ -683,21 +683,85 @@ function editContract(id) {
     document.getElementById('clientId').value = contract.clientId;
     document.getElementById('clientName').value = contract.clientName;
     document.getElementById('plan').value = contract.plan;
-    document.getElementById('executiveName').value = contract.executive;
     document.getElementById('contractDate').value = contract.contractDate;
     
-    // Si no hay executiveId guardado, intentar buscarlo por el nombre
+    // Manejar ejecutivo: primero cargar la identificación
+    const executiveIdInput = document.getElementById('executiveId');
+    const executiveNameInput = document.getElementById('executiveName');
+    
     if (contract.executiveId) {
-        document.getElementById('executiveId').value = contract.executiveId;
-    } else {
-        // Buscar la identificación del ejecutivo por el nombre
+        // Si hay executiveId guardado, usarlo y buscar el nombre
+        executiveIdInput.value = contract.executiveId;
+        
+        // Buscar el nombre del ejecutivo por su identificación
+        console.log('🔍 Buscando ejecutivo al editar contrato con ID:', contract.executiveId);
+        const ejecutivo = findExecutiveByIdentification(contract.executiveId);
+        
+        if (ejecutivo) {
+            // Construir nombre completo
+            const nombreCompleto = [
+                ejecutivo.tPrimerNombre || ejecutivo.primerNombre,
+                ejecutivo.tSegundoNombre || ejecutivo.segundoNombre,
+                ejecutivo.tPrimerApellido || ejecutivo.primerApellido,
+                ejecutivo.tSegundoApellido || ejecutivo.segundoApellido
+            ].filter(Boolean).join(' ').toUpperCase();
+            
+            executiveNameInput.value = nombreCompleto;
+            console.log('✅ Nombre del ejecutivo cargado:', nombreCompleto);
+            
+            // Mostrar mensaje de confirmación
+            const executiveNameDisplay = document.getElementById('executiveNameDisplay');
+            if (executiveNameDisplay) {
+                executiveNameDisplay.textContent = `Ejecutivo encontrado: ${nombreCompleto}`;
+                executiveNameDisplay.style.display = 'block';
+                executiveNameDisplay.style.backgroundColor = '#d4edda';
+                executiveNameDisplay.style.borderColor = '#c3e6cb';
+                executiveNameDisplay.style.color = '#155724';
+            }
+        } else {
+            // Si no se encuentra, usar el nombre guardado si existe
+            if (contract.executive) {
+                executiveNameInput.value = contract.executive;
+                console.log('⚠️ Ejecutivo no encontrado, usando nombre guardado:', contract.executive);
+            } else {
+                executiveNameInput.value = '';
+                console.log('⚠️ No se encontró ejecutivo y no hay nombre guardado');
+            }
+        }
+    } else if (contract.executive) {
+        // Si no hay executiveId pero hay nombre, intentar buscar la identificación
+        executiveNameInput.value = contract.executive;
         findExecutiveIdByName(contract.executive);
+    } else {
+        // Si no hay ni ID ni nombre, dejar vacío
+        executiveIdInput.value = '';
+        executiveNameInput.value = '';
     }
     
     // Actualizar título y botón del modal
     updateModalForEdit();
     
     showCreateContractModal();
+    
+    // Asegurar que se busque el ejecutivo después de abrir el modal
+    // Esto es importante porque los event listeners pueden no estar listos todavía
+    setTimeout(() => {
+        if (contract.executiveId) {
+            const executiveIdInput = document.getElementById('executiveId');
+            const executiveNameInput = document.getElementById('executiveName');
+            
+            // Solo buscar si hay ID pero no hay nombre
+            if (executiveIdInput && executiveNameInput) {
+                const currentId = executiveIdInput.value.trim();
+                const currentName = executiveNameInput.value.trim();
+                
+                if (currentId && !currentName) {
+                    console.log('🔍 Buscando ejecutivo después de abrir modal con ID:', currentId);
+                    searchEjecutivoByCedula(currentId);
+                }
+            }
+        }
+    }, 200);
 }
 
 function deleteContract(id) {
@@ -824,6 +888,29 @@ document.getElementById('bCrearContratoModal')?.addEventListener('click', functi
     const planInput = document.getElementById('plan');
     const planData = planInput.getAttribute('data-plan-data');
     
+    const executiveId = document.getElementById('executiveId').value.trim();
+    let executiveName = document.getElementById('executiveName').value.trim();
+    
+    // Si hay executiveId pero no hay nombre, buscar el nombre del ejecutivo
+    if (executiveId && !executiveName) {
+        const ejecutivo = findExecutiveByIdentification(executiveId);
+        if (ejecutivo) {
+            const nombreCompleto = [
+                ejecutivo.tPrimerNombre || ejecutivo.primerNombre,
+                ejecutivo.tSegundoNombre || ejecutivo.segundoNombre,
+                ejecutivo.tPrimerApellido || ejecutivo.primerApellido,
+                ejecutivo.tSegundoApellido || ejecutivo.segundoApellido
+            ].filter(Boolean).join(' ').toUpperCase();
+            
+            executiveName = nombreCompleto;
+            // Actualizar el campo en el formulario también
+            const executiveNameInput = document.getElementById('executiveName');
+            if (executiveNameInput) {
+                executiveNameInput.value = nombreCompleto;
+            }
+        }
+    }
+    
     const contractData = {
         contractNumber: document.getElementById('contractNumber').value,
         productionRecord: document.getElementById('productionRecord').value,
@@ -832,8 +919,8 @@ document.getElementById('bCrearContratoModal')?.addEventListener('click', functi
         plan: document.getElementById('plan').value,
         planCode: planInput.getAttribute('data-plan-code'),
         planData: planData ? JSON.parse(planData) : null,
-        executiveId: document.getElementById('executiveId').value,
-        executive: document.getElementById('executiveName').value,
+        executiveId: executiveId,
+        executive: executiveName,
         contractDate: document.getElementById('contractDate').value,
         estado: 'activo' // Estado por defecto
     };
@@ -2033,12 +2120,73 @@ function initializeContractForm() {
     // Búsqueda de ejecutivo por cédula
     const executiveIdInput = document.getElementById('executiveId');
     if (executiveIdInput) {
-        executiveIdInput.addEventListener('input', function(e) {
+        // Usar una función nombrada para poder remover el listener si es necesario
+        function handleExecutiveIdInput(e) {
+            const cedula = e.target.value.trim();
+            console.log('🔍 Cambio detectado en executiveId:', cedula);
+            
+            // Buscar siempre que haya al menos 6 caracteres
+            if (cedula.length >= 6) {
+                console.log('🔍 Buscando ejecutivo con cédula:', cedula);
+                // Buscar inmediatamente - usar setTimeout para asegurar que el valor se haya actualizado
+                setTimeout(() => {
+                    searchEjecutivoByCedula(cedula);
+                }, 100);
+            } else if (cedula.length === 0) {
+                // Si se borra completamente, limpiar el nombre también
+                console.log('🧹 Limpiando datos del ejecutivo');
+                clearEjecutivoData();
+            } else {
+                // Si tiene menos de 6 caracteres, limpiar el nombre pero mantener la cédula
+                const executiveNameInput = document.getElementById('executiveName');
+                if (executiveNameInput) {
+                    executiveNameInput.value = '';
+                }
+                const executiveNameDisplay = document.getElementById('executiveNameDisplay');
+                if (executiveNameDisplay) {
+                    executiveNameDisplay.style.display = 'none';
+                }
+            }
+        }
+        
+        // Remover listeners anteriores si existen
+        const oldInputHandler = executiveIdInput._inputHandler;
+        if (oldInputHandler) {
+            executiveIdInput.removeEventListener('input', oldInputHandler);
+        }
+        executiveIdInput._inputHandler = handleExecutiveIdInput;
+        executiveIdInput.addEventListener('input', handleExecutiveIdInput);
+        
+        // También buscar cuando se pierde el foco (blur) por si acaso
+        function handleExecutiveIdBlur(e) {
             const cedula = e.target.value.trim();
             if (cedula.length >= 6) {
-                searchEjecutivoByCedula(cedula);
-            } else {
-                clearEjecutivoData();
+                const executiveNameInput = document.getElementById('executiveName');
+                // Buscar siempre al perder foco si hay cédula válida y no hay nombre
+                if (!executiveNameInput || !executiveNameInput.value.trim()) {
+                    console.log('🔍 Buscando ejecutivo al perder foco:', cedula);
+                    searchEjecutivoByCedula(cedula);
+                } else {
+                    // Si hay nombre pero queremos forzar la búsqueda, verificar que coincida
+                    console.log('🔍 Verificando ejecutivo al perder foco:', cedula);
+                    // Buscar de nuevo para asegurar que el nombre corresponde a la cédula
+                    searchEjecutivoByCedula(cedula);
+                }
+            }
+        }
+        
+        executiveIdInput.removeEventListener('blur', handleExecutiveIdBlur);
+        executiveIdInput.addEventListener('blur', handleExecutiveIdBlur);
+        
+        // También buscar cuando se presiona Enter
+        executiveIdInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const cedula = e.target.value.trim();
+                if (cedula.length >= 6) {
+                    console.log('🔍 Buscando ejecutivo al presionar Enter:', cedula);
+                    searchEjecutivoByCedula(cedula);
+                }
             }
         });
     }
@@ -2143,72 +2291,134 @@ function clearTitularData() {
 // BÚSQUEDA DE EJECUTIVOS
 // ========================================
 
-function searchEjecutivoByCedula(cedula) {
-    // 🔧 BACKEND INTEGRATION POINT - BÚSQUEDA DE EJECUTIVOS
-    // TODO: Reemplazar localStorage con llamada a API
-    // ENDPOINT SUGERIDO: GET /api/empleados?ciudad={selectedCity}&cedula={cedula}
-    // EJEMPLO DE IMPLEMENTACIÓN:
-    // try {
-    //     const selectedCity = getSelectedCityCode();
-    //     const response = await fetch(`/api/empleados?ciudad=${selectedCity}&cedula=${cedula}`);
-    //     const data = await response.json();
-    //     if (data.empleado) {
-    //         displayEjecutivoInfo(data.empleado);
-    //     } else {
-    //         clearEjecutivoData();
-    //     }
-    //     return;
-    // } catch (error) {
-    //     console.error('Error buscando ejecutivo:', error);
-    //     clearEjecutivoData();
-    //     return;
-    // }
+/**
+ * Busca un ejecutivo por identificación y devuelve el objeto del ejecutivo
+ * @param {string} identificacion - Identificación del ejecutivo
+ * @returns {Object|null} Objeto del ejecutivo o null si no se encuentra
+ */
+function findExecutiveByIdentification(identificacion) {
+    if (!identificacion || !identificacion.trim()) {
+        console.log('⚠️ Identificación vacía o inválida');
+        return null;
+    }
     
-    // Buscar en localStorage de empleados
     try {
         const empleadosByCity = localStorage.getItem('empleadosByCity');
         const selectedCity = getSelectedCityCode();
         
-        console.log('🔍 Buscando ejecutivo con cédula:', cedula, 'en ciudad:', selectedCity);
-        console.log('📊 Datos completos de empleadosByCity:', empleadosByCity);
-        console.log('🏙️ Ciudad seleccionada:', selectedCity);
+        console.log('🔍 Buscando ejecutivo:', {
+            identificacion: identificacion.trim(),
+            selectedCity: selectedCity,
+            tieneDatos: !!empleadosByCity
+        });
         
-        let ejecutivo = null;
-        
-        // Buscar SOLO en la ciudad seleccionada
-        if (empleadosByCity && selectedCity) {
-            const data = JSON.parse(empleadosByCity);
-            console.log('📊 Datos de empleados por ciudad:', data);
-            console.log('🏙️ Ciudades disponibles:', Object.keys(data));
-            console.log('👥 Empleados en ciudad seleccionada:', Object.keys(data[selectedCity] || {}));
-            
-            // Buscar únicamente en la ciudad seleccionada
-            if (data[selectedCity] && data[selectedCity][cedula]) {
-                ejecutivo = data[selectedCity][cedula];
-                console.log('✅ Ejecutivo encontrado:', ejecutivo);
-                console.log('📝 Campos de nombre del ejecutivo:', {
-                    tPrimerNombre: ejecutivo.tPrimerNombre,
-                    tSegundoNombre: ejecutivo.tSegundoNombre,
-                    tPrimerApellido: ejecutivo.tPrimerApellido,
-                    tSegundoApellido: ejecutivo.tSegundoApellido
-                });
-            } else {
-                console.log('❌ No se encontró ejecutivo con cédula', cedula, 'en ciudad', selectedCity);
-                console.log('👥 Empleados disponibles en ciudad:', Object.keys(data[selectedCity] || {}));
-            }
-        } else {
-            console.log('⚠️ No hay datos de empleados o ciudad seleccionada');
+        if (!empleadosByCity) {
+            console.log('❌ No hay datos de empleados en localStorage');
+            return null;
         }
         
-        if (ejecutivo) {
-            displayEjecutivoInfo(ejecutivo);
+        if (!selectedCity) {
+            console.log('❌ No hay ciudad seleccionada');
+            return null;
+        }
+        
+        const data = JSON.parse(empleadosByCity);
+        console.log('📊 Ciudades disponibles en datos:', Object.keys(data));
+        
+        // Buscar en la ciudad seleccionada
+        if (data[selectedCity]) {
+            const empleados = data[selectedCity];
+            const idBuscado = String(identificacion).trim();
+            const idBuscadoNum = idBuscado.replace(/\D/g, ''); // Solo números
+            
+            console.log('👥 Empleados en ciudad:', Object.keys(empleados).length);
+            const idsDisponibles = Object.keys(empleados);
+            console.log('🔑 IDs disponibles:', idsDisponibles);
+            console.log('🔍 ID buscado:', idBuscado, '(normalizado:', idBuscadoNum + ')');
+            
+            // Buscar coincidencia exacta (como string)
+            if (empleados[idBuscado]) {
+                console.log('✅ Ejecutivo encontrado (coincidencia exacta string):', empleados[idBuscado]);
+                return empleados[idBuscado];
+            }
+            
+            // Buscar en cada empleado - comparar de múltiples formas
+            for (const [id, empleado] of Object.entries(empleados)) {
+                const idNormalizado = String(id).trim();
+                const idSoloNumeros = idNormalizado.replace(/\D/g, '');
+                
+                // Comparar como string exacto
+                if (idNormalizado === idBuscado) {
+                    console.log('✅ Ejecutivo encontrado (coincidencia string):', empleado);
+                    return empleado;
+                }
+                
+                // Comparar solo números
+                if (idSoloNumeros && idSoloNumeros === idBuscadoNum) {
+                    console.log('✅ Ejecutivo encontrado (coincidencia numérica):', empleado);
+                    return empleado;
+                }
+                
+                // Comparar sin espacios
+                if (idNormalizado.replace(/\s+/g, '') === idBuscado.replace(/\s+/g, '')) {
+                    console.log('✅ Ejecutivo encontrado (coincidencia sin espacios):', empleado);
+                    return empleado;
+                }
+                
+                // También verificar la identificación dentro del objeto empleado
+                const empId = empleado.identificacion ? String(empleado.identificacion).trim() : '';
+                const empIdNum = empId.replace(/\D/g, '');
+                
+                if (empId === idBuscado || empIdNum === idBuscadoNum) {
+                    console.log('✅ Ejecutivo encontrado (coincidencia en campo identificacion):', empleado);
+                    return empleado;
+                }
+            }
+            
+            console.log('❌ No se encontró ejecutivo con identificación:', idBuscado);
+            console.log('📋 Detalles de búsqueda:', {
+                idBuscado: idBuscado,
+                idBuscadoNum: idBuscadoNum,
+                idsDisponibles: idsDisponibles,
+                primerEmpleado: empleados[idsDisponibles[0]] ? {
+                    id: idsDisponibles[0],
+                    identificacion: empleados[idsDisponibles[0]].identificacion,
+                    nombre: empleados[idsDisponibles[0]].tPrimerNombre + ' ' + empleados[idsDisponibles[0]].tPrimerApellido
+                } : null
+            });
         } else {
-            clearEjecutivoData();
+            console.log('❌ No hay empleados para la ciudad:', selectedCity);
+            console.log('📋 Ciudades disponibles:', Object.keys(data));
         }
     } catch (error) {
-        console.error('❌ Error al buscar ejecutivo:', error);
+        console.error('❌ Error buscando ejecutivo por identificación:', error);
+    }
+    return null;
+}
+
+function searchEjecutivoByCedula(cedula) {
+    if (!cedula || !cedula.trim()) {
+        console.log('⚠️ Cédula vacía');
+        clearEjecutivoData();
+        return;
+    }
+    
+    const cedulaLimpia = String(cedula).trim();
+    console.log('🔍 ===== BUSCANDO EJECUTIVO =====');
+    console.log('🔍 Cédula:', cedulaLimpia);
+    
+    // Usar la función findExecutiveByIdentification que ya tiene la lógica mejorada
+    const ejecutivo = findExecutiveByIdentification(cedulaLimpia);
+    
+    if (ejecutivo) {
+        console.log('✅ Ejecutivo encontrado, mostrando información...');
+        displayEjecutivoInfo(ejecutivo);
+    } else {
+        console.log('❌ Ejecutivo no encontrado, limpiando datos...');
         clearEjecutivoData();
     }
+    
+    console.log('🔍 ===== FIN BÚSQUEDA =====');
 }
 
 function displayEjecutivoInfo(ejecutivo) {
@@ -2223,40 +2433,77 @@ function displayEjecutivoInfo(ejecutivo) {
         executiveNameDisplay: !!executiveNameDisplay
     });
     
-    if (executiveNameInput && executiveIdInput && executiveNameDisplay) {
-        // Construir nombre completo usando los campos correctos de empleados y convertir a mayúsculas
-        const nombreCompleto = [
-            ejecutivo.tPrimerNombre || ejecutivo.primerNombre,
-            ejecutivo.tSegundoNombre || ejecutivo.segundoNombre,
-            ejecutivo.tPrimerApellido || ejecutivo.primerApellido,
-            ejecutivo.tSegundoApellido || ejecutivo.segundoApellido
-        ].filter(Boolean).join(' ').toUpperCase();
-        
-        console.log('📝 Nombre completo construido:', nombreCompleto);
-        console.log('🆔 Identificación del ejecutivo:', ejecutivo.identificacion);
-        
-        // Llenar tanto el nombre como la identificación
+    if (!ejecutivo) {
+        console.error('❌ No se proporcionó información del ejecutivo');
+        return;
+    }
+    
+    // Construir nombre completo usando los campos correctos de empleados y convertir a mayúsculas
+    const nombreCompleto = [
+        ejecutivo.tPrimerNombre || ejecutivo.primerNombre,
+        ejecutivo.tSegundoNombre || ejecutivo.segundoNombre,
+        ejecutivo.tPrimerApellido || ejecutivo.primerApellido,
+        ejecutivo.tSegundoApellido || ejecutivo.segundoApellido
+    ].filter(Boolean).join(' ').toUpperCase();
+    
+    console.log('📝 Nombre completo construido:', nombreCompleto);
+    console.log('🆔 Identificación del ejecutivo:', ejecutivo.identificacion);
+    
+    // Actualizar el nombre SIEMPRE, incluso si el campo ya tiene un valor
+    if (executiveNameInput) {
         executiveNameInput.value = nombreCompleto;
-        executiveIdInput.value = ejecutivo.identificacion || '';
+        console.log('✅ Campo executiveName actualizado con:', nombreCompleto);
+    } else {
+        console.error('❌ No se encontró el campo executiveName');
+    }
+    
+    // Actualizar la identificación solo si coincide (para evitar sobrescribir si el usuario está escribiendo)
+    if (executiveIdInput && ejecutivo.identificacion) {
+        const currentId = executiveIdInput.value.trim();
+        const newId = String(ejecutivo.identificacion).trim();
+        // Solo actualizar si está vacío o si coincide (para evitar conflictos)
+        if (!currentId || currentId === newId) {
+            executiveIdInput.value = newId;
+            console.log('✅ Campo executiveId actualizado con:', newId);
+        } else {
+            console.log('⚠️ No se actualizó executiveId porque hay un valor diferente:', currentId, 'vs', newId);
+        }
+    }
+    
+    // Mostrar mensaje de confirmación
+    if (executiveNameDisplay) {
         executiveNameDisplay.textContent = `Ejecutivo encontrado: ${nombreCompleto}`;
         executiveNameDisplay.style.display = 'block';
         executiveNameDisplay.style.backgroundColor = '#d4edda';
         executiveNameDisplay.style.borderColor = '#c3e6cb';
         executiveNameDisplay.style.color = '#155724';
-        
-        console.log('✅ Información del ejecutivo mostrada correctamente');
-    } else {
-        console.error('❌ No se encontraron los elementos del DOM para mostrar la información del ejecutivo');
+        console.log('✅ Mensaje de confirmación mostrado');
     }
+    
+    console.log('✅ Información del ejecutivo mostrada correctamente');
 }
 
 function clearEjecutivoData() {
     const executiveNameInput = document.getElementById('executiveName');
     const executiveNameDisplay = document.getElementById('executiveNameDisplay');
+    const executiveIdInput = document.getElementById('executiveId');
     
-    if (executiveNameInput && executiveNameDisplay) {
+    if (executiveNameInput) {
         executiveNameInput.value = '';
-        executiveNameDisplay.style.display = 'none';
+    }
+    
+    if (executiveNameDisplay) {
+        const currentId = executiveIdInput ? executiveIdInput.value.trim() : '';
+        if (currentId && currentId.length >= 6) {
+            // Si hay un ID válido pero no se encontró, mostrar mensaje de error
+            executiveNameDisplay.textContent = `⚠️ Ejecutivo no encontrado. Verifique que el ejecutivo exista en el módulo de empleados para esta ciudad.`;
+            executiveNameDisplay.style.display = 'block';
+            executiveNameDisplay.style.backgroundColor = '#f8d7da';
+            executiveNameDisplay.style.borderColor = '#f5c6cb';
+            executiveNameDisplay.style.color = '#721c24';
+        } else {
+            executiveNameDisplay.style.display = 'none';
+        }
     }
     // NO limpiar executiveId para permitir escritura libre
 }

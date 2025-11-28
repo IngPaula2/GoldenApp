@@ -1,0 +1,106 @@
+.report-container { max-width: 1400px; margin: 20px auto; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.report-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.report-title { font-size: 18px; font-weight: 700; text-transform: uppercase; }
+.report-subtitle { color: #777; margin-top: 4px; text-transform: uppercase; font-size: 13px; }
+.report-info { color: #777; margin-top: 4px; }
+.toolbar { display: flex; gap: 12px; align-items: center; }
+.btn { padding: 6px 10px; border: 1px solid #ccc; background: #f8f9fa; border-radius: 6px; cursor: pointer; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.pagination-controls, .zoom-controls, .export-controls { display: flex; gap: 6px; align-items: center; }
+#tableWrap { overflow-x: auto; border-top: 1px solid #eee; margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { position: sticky; top: 0; background: #f5f5f5; z-index: 1; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { text-transform: uppercase; font-weight: 600; font-size: 11px; }
+.footer { text-align: center; color: #888; font-size: 11px; margin-top: 12px; }
+
+/* Estilos para contenido de impresión */
+.print-content {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  background: white;
+  z-index: 999999;
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Ocultar todo cuando hay contenido de impresión visible - solo cuando tiene display block inline */
+body:has(#printContent[style*="display: block"]) > *:not(#printContent) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.print-page {
+  padding: 20px 0;
+  margin-bottom: 20px;
+}
+
+/* Ocultar controles de UI al imprimir/guardar como PDF */
+@media print {
+  @page { 
+    size: A4 landscape; 
+    margin: 12mm 8mm; 
+  }
+  .toolbar,
+  .pagination-controls,
+  .zoom-controls,
+  .export-controls,
+  #currentPage { 
+    display: none !important; 
+  }
+  .report-container { 
+    box-shadow: none !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+  }
+  body { 
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact; 
+  }
+  #tableWrap { 
+    overflow: visible !important; 
+  }
+  table { 
+    width: 100% !important; 
+    border-collapse: collapse !important; 
+    table-layout: fixed !important; 
+    font-size: 11px !important; 
+  }
+  th, td { 
+    padding: 6px 4px !important; 
+    word-wrap: break-word !important; 
+    overflow-wrap: break-word !important; 
+  }
+  tr { 
+    page-break-inside: avoid !important; 
+  }
+  /* Estilos para páginas de ejecutivos */
+  .print-page { 
+    page-break-after: always !important; 
+    page-break-inside: avoid !important; 
+    padding: 15px 0 !important;
+  }
+  .print-page:last-child { 
+    page-break-after: auto !important; 
+  }
+  #printContent { 
+    display: block !important; 
+  }
+  /* Ocultar contenido normal cuando hay contenido de impresión */
+  body:has(#printContent) .report-header,
+  body:has(#printContent) .toolbar,
+  body:has(#printContent) #ejecutivoInfoContainer,
+  body:has(#printContent) #tableWrap,
+  body:has(#printContent) .footer { 
+    display: none !important; 
+  }
+}
+

@@ -1531,14 +1531,17 @@ function cargarEscalasExistentes(escalasData) {
 
 /**
  * Busca el nombre del empleado por identificación
- * Esta función se conectará con el backend cuando esté disponible
+ * Busca en localStorage (empleadosByCity) y en empleados locales
  * @param {string} campo - Nombre del campo (asesor, supervisor, etc.)
  */
 function buscarNombreEmpleado(campo) {
     const identificacionInput = document.getElementById(campo);
     const nombreInput = document.getElementById(campo + 'Nombre');
     
-    if (!identificacionInput || !nombreInput) return;
+    if (!identificacionInput || !nombreInput) {
+        console.error('❌ No se encontraron los campos de entrada para:', campo);
+        return;
+    }
     
     const identificacion = identificacionInput.value.trim();
     
@@ -1547,47 +1550,132 @@ function buscarNombreEmpleado(campo) {
         return;
     }
     
-    // TODO: Aquí se conectará con el backend
-    // Por ahora, simulamos la búsqueda en los empleados locales
+    console.log('🔍 Buscando nombre del empleado para campo:', campo, 'con identificación:', identificacion);
+    
+    let empleadoEncontrado = null;
+    
     try {
-        // Buscar en empleados locales como fallback
-        const empleado = userCreatedEmpleados[identificacion];
-        if (empleado) {
+        // PRIORIDAD 1: Buscar en empleados locales (userCreatedEmpleados)
+        if (userCreatedEmpleados && userCreatedEmpleados[identificacion]) {
+            empleadoEncontrado = userCreatedEmpleados[identificacion];
+            console.log('✅ Empleado encontrado en userCreatedEmpleados');
+        }
+        
+        // PRIORIDAD 2: Buscar en localStorage (empleadosByCity)
+        if (!empleadoEncontrado) {
+            const empleadosByCity = localStorage.getItem('empleadosByCity');
+            if (empleadosByCity) {
+                const data = JSON.parse(empleadosByCity);
+                const ciudadActual = getSelectedCity();
+                
+                // Buscar en la ciudad actual primero
+                if (ciudadActual && data[ciudadActual]) {
+                    const empleados = data[ciudadActual];
+                    
+                    // Normalizar la identificación para buscar
+                    const idBuscado = identificacion.trim();
+                    const idBuscadoNum = idBuscado.replace(/\D/g, '');
+                    
+                    // Buscar coincidencia exacta
+                    if (empleados[idBuscado]) {
+                        empleadoEncontrado = empleados[idBuscado];
+                        console.log('✅ Empleado encontrado en ciudad actual:', ciudadActual);
+                    } else {
+                        // Buscar por coincidencia numérica o parcial
+                        for (const [id, emp] of Object.entries(empleados)) {
+                            const idNormalizado = String(id).trim();
+                            const idSoloNumeros = idNormalizado.replace(/\D/g, '');
+                            
+                            if (idNormalizado === idBuscado || 
+                                (idSoloNumeros && idSoloNumeros === idBuscadoNum && idBuscadoNum.length > 0) ||
+                                idNormalizado.replace(/\s+/g, '') === idBuscado.replace(/\s+/g, '')) {
+                                empleadoEncontrado = emp;
+                                console.log('✅ Empleado encontrado por coincidencia en ciudad:', ciudadActual);
+                                break;
+                            }
+                            
+                            // También verificar el campo identificacion del empleado
+                            const empId = emp.identificacion ? String(emp.identificacion).trim() : '';
+                            const empIdNum = empId.replace(/\D/g, '');
+                            
+                            if (empId && (empId === idBuscado || 
+                                (empIdNum && empIdNum === idBuscadoNum && idBuscadoNum.length > 0))) {
+                                empleadoEncontrado = emp;
+                                console.log('✅ Empleado encontrado por campo identificacion en ciudad:', ciudadActual);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Si no se encontró en la ciudad actual, buscar en todas las ciudades
+                if (!empleadoEncontrado) {
+                    console.log('🔍 Buscando en todas las ciudades...');
+                    for (const [city, empleados] of Object.entries(data)) {
+                        const idBuscado = identificacion.trim();
+                        const idBuscadoNum = idBuscado.replace(/\D/g, '');
+                        
+                        // Buscar coincidencia exacta
+                        if (empleados[idBuscado]) {
+                            empleadoEncontrado = empleados[idBuscado];
+                            console.log('✅ Empleado encontrado en ciudad:', city);
+                            break;
+                        }
+                        
+                        // Buscar por coincidencia
+                        for (const [id, emp] of Object.entries(empleados)) {
+                            const idNormalizado = String(id).trim();
+                            const idSoloNumeros = idNormalizado.replace(/\D/g, '');
+                            
+                            if (idNormalizado === idBuscado || 
+                                (idSoloNumeros && idSoloNumeros === idBuscadoNum && idBuscadoNum.length > 0)) {
+                                empleadoEncontrado = emp;
+                                console.log('✅ Empleado encontrado en ciudad:', city);
+                                break;
+                            }
+                            
+                            // Verificar campo identificacion
+                            const empId = emp.identificacion ? String(emp.identificacion).trim() : '';
+                            const empIdNum = empId.replace(/\D/g, '');
+                            
+                            if (empId && (empId === idBuscado || 
+                                (empIdNum && empIdNum === idBuscadoNum && idBuscadoNum.length > 0))) {
+                                empleadoEncontrado = emp;
+                                console.log('✅ Empleado encontrado en ciudad:', city);
+                                break;
+                            }
+                        }
+                        
+                        if (empleadoEncontrado) break;
+                    }
+                }
+            }
+        }
+        
+        // Si se encontró el empleado, construir y mostrar el nombre
+        if (empleadoEncontrado) {
             const nombreCompleto = [
-                empleado.tPrimerNombre,
-                empleado.tSegundoNombre,
-                empleado.tPrimerApellido,
-                empleado.tSegundoApellido
-            ].filter(Boolean).join(' ');
+                empleadoEncontrado.tPrimerNombre || empleadoEncontrado.primerNombre,
+                empleadoEncontrado.tSegundoNombre || empleadoEncontrado.segundoNombre,
+                empleadoEncontrado.tPrimerApellido || empleadoEncontrado.primerApellido,
+                empleadoEncontrado.tSegundoApellido || empleadoEncontrado.segundoApellido
+            ].filter(Boolean).join(' ').toUpperCase();
+            
             nombreInput.value = nombreCompleto;
+            console.log('✅ Nombre encontrado y asignado:', nombreCompleto);
         } else {
             // Limpiar campo si no se encuentra
             nombreInput.value = '';
-            console.log('Empleado no encontrado localmente. Backend connection needed.');
+            console.warn('⚠️ Empleado no encontrado con identificación:', identificacion);
+            console.log('💡 Verifica que:');
+            console.log('   1. La identificación sea correcta');
+            console.log('   2. El empleado esté guardado en localStorage');
+            console.log('   3. El empleado esté en la ciudad correcta');
         }
     } catch (e) {
-        console.error('Error buscando empleado:', e);
+        console.error('❌ Error buscando empleado:', e);
         nombreInput.value = '';
     }
-    
-    // TODO: Implementar llamada al backend cuando esté disponible
-    // Ejemplo de cómo se implementaría:
-    /*
-    fetch(`/api/empleados/buscar/${identificacion}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.empleado) {
-                nombreInput.value = data.empleado.nombreCompleto;
-            } else {
-                nombreInput.value = '';
-                console.log('Empleado no encontrado en el sistema');
-            }
-        })
-        .catch(error => {
-            console.error('Error buscando empleado:', error);
-            nombreInput.value = '';
-        });
-    */
 }
 
 /**
@@ -1705,8 +1793,30 @@ function confirmCreateEmpleadoEscalas() {
         escalasData: escalasData
     };
     
+    // Si es actualización, obtener datos existentes del empleado y combinarlos
+    if (empleadoMode === 'update') {
+        const city = getSelectedCityCode();
+        if (city && empleadosByCity[city] && empleadosByCity[city][empleadoData.identificacion]) {
+            // Obtener datos existentes del empleado
+            const empleadoExistente = empleadosByCity[city][empleadoData.identificacion];
+            // Combinar datos existentes con los nuevos (mantener campos que no se actualizaron)
+            const empleadoActualizado = {
+                ...empleadoExistente,
+                ...empleadoCompleto,
+                escalasData: escalasData // Asegurar que las escalas se actualicen
+            };
+            // Guardar actualización
+            empleadosByCity[city][empleadoData.identificacion] = empleadoActualizado;
+            persistEmpleadosByCity();
+            console.log('✅ Empleado actualizado con escalas en localStorage');
+            // Actualizar en memoria también
+            userCreatedEmpleados[empleadoData.identificacion] = empleadoActualizado;
+        }
+    }
+    
     // Agregar empleado a la tabla correspondiente
-    addEmpleadoToSection(empleadoCompleto, true);
+    // IMPORTANTE: usar false para que se guarde en localStorage (si no es actualización)
+    addEmpleadoToSection(empleadoCompleto, empleadoMode === 'update');
     
     // Cerrar modal de confirmación
     cancelCreateEmpleadoEscalas();
@@ -2021,16 +2131,41 @@ function renderEscalasDelEmpleado(escalasData) {
     // Limpiar contenido anterior
     escalasResultsBody.innerHTML = '';
     
+    console.log('📋 Renderizando escalas del empleado:', escalasData);
+    
     // Crear fila con las escalas (mostrando nombres en lugar de identificaciones)
     const row = document.createElement('tr');
+    
+    // Obtener nombres para cada escala
+    const nombresEscalas = {
+        asesor: obtenerNombrePorIdentificacion(escalasData.asesor),
+        supervisor: obtenerNombrePorIdentificacion(escalasData.supervisor),
+        subgerente: obtenerNombrePorIdentificacion(escalasData.subgerente),
+        gerente: obtenerNombrePorIdentificacion(escalasData.gerente),
+        director: obtenerNombrePorIdentificacion(escalasData.director),
+        subdirectorNacional: obtenerNombrePorIdentificacion(escalasData.subdirectorNacional),
+        directorNacional: obtenerNombrePorIdentificacion(escalasData.directorNacional)
+    };
+    
+    console.log('📋 Nombres encontrados para escalas:', nombresEscalas);
+    console.log('📋 Identificaciones en escalasData:', {
+        asesor: escalasData.asesor,
+        supervisor: escalasData.supervisor,
+        subgerente: escalasData.subgerente,
+        gerente: escalasData.gerente,
+        director: escalasData.director,
+        subdirectorNacional: escalasData.subdirectorNacional,
+        directorNacional: escalasData.directorNacional
+    });
+    
     row.innerHTML = `
-        <td>${obtenerNombrePorIdentificacion(escalasData.asesor) || '-'}</td>
-        <td>${obtenerNombrePorIdentificacion(escalasData.supervisor) || '-'}</td>
-        <td>${obtenerNombrePorIdentificacion(escalasData.subgerente) || '-'}</td>
-        <td>${obtenerNombrePorIdentificacion(escalasData.gerente) || '-'}</td>
-        <td>${obtenerNombrePorIdentificacion(escalasData.director) || '-'}</td>
-        <td>${obtenerNombrePorIdentificacion(escalasData.subdirectorNacional) || '-'}</td>
-        <td>${obtenerNombrePorIdentificacion(escalasData.directorNacional) || '-'}</td>
+        <td>${nombresEscalas.asesor || '-'}</td>
+        <td>${nombresEscalas.supervisor || '-'}</td>
+        <td>${nombresEscalas.subgerente || '-'}</td>
+        <td>${nombresEscalas.gerente || '-'}</td>
+        <td>${nombresEscalas.director || '-'}</td>
+        <td>${nombresEscalas.subdirectorNacional || '-'}</td>
+        <td>${nombresEscalas.directorNacional || '-'}</td>
     `;
     
     escalasResultsBody.appendChild(row);
@@ -2045,15 +2180,79 @@ function obtenerNombrePorIdentificacion(identificacion) {
     if (!identificacion) return null;
     
     try {
+        // Normalizar la identificación para búsqueda
+        const idBuscado = String(identificacion).trim();
+        
         // Buscar en empleados locales primero
-        const empleado = userCreatedEmpleados[identificacion];
+        let empleado = userCreatedEmpleados[idBuscado];
         if (empleado) {
-            return [
-                empleado.tPrimerNombre,
-                empleado.tSegundoNombre,
-                empleado.tPrimerApellido,
-                empleado.tSegundoApellido
-            ].filter(Boolean).join(' ');
+            // Formato: Apellidos primero, luego nombres
+            const nombre = [
+                empleado.tPrimerApellido || empleado.primerApellido,
+                empleado.tSegundoApellido || empleado.segundoApellido,
+                empleado.tPrimerNombre || empleado.primerNombre,
+                empleado.tSegundoNombre || empleado.segundoNombre
+            ].filter(Boolean).join(' ').toUpperCase();
+            if (nombre) return nombre;
+        }
+        
+        // Buscar en empleadosByCity (localStorage)
+        try {
+            const raw = localStorage.getItem('empleadosByCity');
+            if (raw) {
+                const empleadosByCity = JSON.parse(raw);
+                // Buscar en todas las ciudades
+                for (const [city, empleados] of Object.entries(empleadosByCity)) {
+                    if (empleados && typeof empleados === 'object') {
+                        // Buscar por clave exacta
+                        empleado = empleados[idBuscado];
+                        if (empleado) {
+                            // Formato: Apellidos primero, luego nombres
+                            const nombre = [
+                                empleado.tPrimerApellido || empleado.primerApellido,
+                                empleado.tSegundoApellido || empleado.segundoApellido,
+                                empleado.tPrimerNombre || empleado.primerNombre,
+                                empleado.tSegundoNombre || empleado.segundoNombre
+                            ].filter(Boolean).join(' ').toUpperCase();
+                            if (nombre) return nombre;
+                        }
+                        
+                        // Buscar por coincidencia en todos los empleados de la ciudad
+                        for (const [id, emp] of Object.entries(empleados)) {
+                            const idNormalizado = String(id).trim();
+                            const idSoloNumeros = idNormalizado.replace(/\D/g, '');
+                            const idBuscadoNum = idBuscado.replace(/\D/g, '');
+                            
+                            if (idNormalizado === idBuscado || 
+                                (idSoloNumeros && idSoloNumeros === idBuscadoNum)) {
+                                // Formato: Apellidos primero, luego nombres
+                                const nombre = [
+                                    emp.tPrimerApellido || emp.primerApellido,
+                                    emp.tSegundoApellido || emp.segundoApellido,
+                                    emp.tPrimerNombre || emp.primerNombre,
+                                    emp.tSegundoNombre || emp.segundoNombre
+                                ].filter(Boolean).join(' ').toUpperCase();
+                                if (nombre) return nombre;
+                            }
+                            
+                            // También verificar el campo identificacion dentro del objeto
+                            const empId = String(emp.identificacion || '').trim();
+                            if (empId === idBuscado) {
+                                // Formato: Apellidos primero, luego nombres
+                                const nombre = [
+                                    emp.tPrimerApellido || emp.primerApellido,
+                                    emp.tSegundoApellido || emp.segundoApellido,
+                                    emp.tPrimerNombre || emp.primerNombre,
+                                    emp.tSegundoNombre || emp.segundoNombre
+                                ].filter(Boolean).join(' ').toUpperCase();
+                                if (nombre) return nombre;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error buscando en empleadosByCity:', e);
         }
         
         // TODO: Aquí se conectará con el backend para buscar en la base de datos
