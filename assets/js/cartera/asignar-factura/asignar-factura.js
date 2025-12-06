@@ -111,8 +111,15 @@ function initializeModals() {
         bSeleccionarCiudad.addEventListener('click', function() {
             const citySelect = document.getElementById('citySelect');
             if (citySelect && citySelect.value) {
-                sessionStorage.setItem('selectedCity', citySelect.value);
-                sessionStorage.setItem('selectedCityName', citySelect.options[citySelect.selectedIndex].text);
+                const cityCode = citySelect.value;
+                sessionStorage.setItem('selectedCity', cityCode);
+                
+                // Obtener nombre de la ciudad usando la función auxiliar
+                const cityName = getCityNameByCode(cityCode);
+                if (cityName) {
+                    sessionStorage.setItem('selectedCityName', cityName);
+                }
+                
                 hideSelectCityModal();
                 updateCityDisplay();
                 loadAssignments();
@@ -183,34 +190,90 @@ function initializeCitySelection() {
 }
 
 function loadCities() {
-    // TODO: Llamar al backend para cargar ciudades
-    // Por ahora, placeholder
+    // ========================================
+    // CARGAR CIUDADES DESDE LOCALSTORAGE
+    // ========================================
+    // TODO: CONEXIÓN BACKEND - Reemplazar esta función para obtener ciudades desde el servidor
+    // Endpoint sugerido: GET /api/ciudades
+    // Respuesta esperada: { [codigo]: { codigo: string, nombre: string, activo: boolean } }
+    // ========================================
+    
     const citySelect = document.getElementById('citySelect');
-    if (citySelect) {
-        // Limpiar opciones existentes
-        citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
-        
-        // Ejemplo de ciudades
-        const cities = [
-            { code: 'BOG', name: 'Bogotá' },
-            { code: 'MED', name: 'Medellín' },
-            { code: 'CAL', name: 'Cali' }
-        ];
-        
-        cities.forEach(city => {
-            const option = document.createElement('option');
-            option.value = city.code;
-            option.textContent = city.name;
-            citySelect.appendChild(option);
+    if (!citySelect) return;
+
+    let ciudades = {};
+    try {
+        // Intentar obtener ciudades desde función global (si existe)
+        if (typeof window.getCiudadesData === 'function') {
+            ciudades = window.getCiudadesData() || {};
+        } else {
+            // Obtener desde localStorage
+            const raw = localStorage.getItem('ciudadesData');
+            const data = raw ? JSON.parse(raw) : {};
+            ciudades = Object.fromEntries(
+                Object.entries(data).filter(([k, v]) => v && typeof v === 'object' && v.codigo && v.nombre)
+            );
+        }
+    } catch (e) {
+        console.error('Error al cargar ciudades:', e);
+        ciudades = {};
+    }
+
+    // Limpiar opciones existentes
+    citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
+
+    // Agregar ciudades activas, ordenadas por código
+    Object.values(ciudades)
+        .filter(c => c && c.activo !== false)
+        .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+        .forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.codigo;
+            opt.textContent = `${c.codigo} - ${String(c.nombre || '').toUpperCase()}`;
+            citySelect.appendChild(opt);
         });
+}
+
+function getCityNameByCode(cityCode) {
+    // ========================================
+    // OBTENER NOMBRE DE CIUDAD POR CÓDIGO
+    // ========================================
+    // TODO: CONEXIÓN BACKEND - Reemplazar para obtener desde el servidor
+    // Endpoint sugerido: GET /api/ciudades/{codigo}
+    // ========================================
+    
+    try {
+        if (typeof window.getCiudadesData === 'function') {
+            const ciudades = window.getCiudadesData() || {};
+            return ciudades[cityCode]?.nombre || '';
+        }
+        const raw = localStorage.getItem('ciudadesData');
+        if (!raw) return '';
+        const data = JSON.parse(raw);
+        return data && data[cityCode] ? data[cityCode].nombre || '' : '';
+    } catch (e) {
+        return '';
     }
 }
 
 function updateCityDisplay() {
-    const cityName = sessionStorage.getItem('selectedCityName') || 'Seleccione una ciudad';
+    const cityCode = getSelectedCityCode();
+    if (!cityCode) {
+        const currentCityName = document.getElementById('currentCityName');
+        if (currentCityName) {
+            currentCityName.textContent = 'Seleccione una ciudad';
+        }
+        return;
+    }
+    
+    const cityName = getCityNameByCode(cityCode);
     const currentCityName = document.getElementById('currentCityName');
     if (currentCityName) {
-        currentCityName.textContent = cityName;
+        if (cityName) {
+            currentCityName.textContent = `${cityCode} - ${cityName}`.toUpperCase();
+        } else {
+            currentCityName.textContent = cityCode;
+        }
     }
 }
 
