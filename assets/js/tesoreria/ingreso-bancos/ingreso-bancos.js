@@ -1066,6 +1066,16 @@ function confirmCreateInflow() {
     bankInflowData.push(newInflow);
     saveBankInflowData();
     
+    // Actualizar tabla de CARTERA automáticamente si hay cashInflowData
+    try {
+        if (cashInflowData && window.CarteraManager && window.CarteraManager.updateCarteraFromInflow) {
+            const cashInflow = JSON.parse(cashInflowData);
+            window.CarteraManager.updateCarteraFromInflow(cashInflow, city, 'banco');
+        }
+    } catch (e) {
+        console.error('Error actualizando cartera desde ingreso a banco:', e);
+    }
+    
     // Actualizar el puntero del siguiente número consecutivo
     const numeroIngreso = parseInt(numero, 10) || 0;
     if (numeroIngreso > 0) {

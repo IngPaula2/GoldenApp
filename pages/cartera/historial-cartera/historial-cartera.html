@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<!--
+    CARTERA - CARTERA - GOLDEN APP
+    
+    Este archivo contiene la página del módulo de cartera.
+    Incluye visualización y edición del historial completo de cartera de los titulares.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2025
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Cartera</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/administrativo/main.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/cartera/historial-cartera/historial-cartera.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Sección de Perfil de Usuario -->
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            
+            <!-- Menú Desplegable del Usuario -->
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Principal -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="../../administrativo/admin-titulares.html" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../facturacion/contratos/fac-contratos.html" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../tesoreria/ingreso-caja/ingreso-caja.html" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../../nomina/nomina-semanal/nomina-semanal.html" class="nav-link">
+                        <i class="fas fa-coins nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="../asignar-factura/asignar-factura.html" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sección del Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Navegación Superior -->
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item">
+                    <a href="../asignar-factura/asignar-factura.html" class="top-nav-link">Asignar Factura</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../notas/notas.html" class="top-nav-link">Notas</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../estado-cuenta/estado-cuenta.html" class="top-nav-link">Estado de Cuenta</a>
+                </li>
+                <li class="top-nav-item active">
+                    <a href="historial-cartera.html" class="top-nav-link">Cartera</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Área de Contenido -->
+        <div class="content-area">
+            <!-- Sección de Historial de Cartera -->
+            <section class="cartera-history-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Cartera</h2>
+                        <div class="current-city-info" id="currentCityInfo">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showSelectCityModal()">
+                            Cambiar Ciudad
+                        </button>
+                        <button class="btn btn-primary" id="bBuscarTitular">
+                            <i class="fas fa-search"></i>
+                            Buscar Titular
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mensaje inicial -->
+                <div class="search-prompt">
+                    <div class="search-prompt-content">
+                        <i class="fas fa-search"></i>
+                        <h3>Buscar Titular</h3>
+                        <p>Utilice el botón "Buscar Titular" para consultar el historial de cartera</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES
+         ======================================== -->
+
+    <!-- Modal de Selección de Ciudad -->
+    <div class="modal-overlay" id="selectCityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR CIUDAD</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="citySelect">Ciudad</label>
+                    <div class="select-container">
+                        <select class="form-select" id="citySelect">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Búsqueda de Titular -->
+    <div class="modal-overlay" id="searchTitularModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR TITULAR</h3>
+                <button class="modal-close" onclick="hideSearchTitularModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="searchType">Buscar por</label>
+                    <div class="select-container">
+                        <select class="form-select" id="searchType">
+                            <option value="identificacion">Identificación</option>
+                            <option value="nombre">Nombre</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="searchValue">Valor de búsqueda</label>
+                    <input type="text" class="form-input" id="searchValue" placeholder="Ingrese identificación o nombre">
+                </div>
+                <div class="form-group" id="searchContractSelectorGroup" style="display: none;">
+                    <label class="form-label" for="searchContractSelect">Seleccionar Contrato</label>
+                    <div class="select-container">
+                        <select class="form-select" id="searchContractSelect">
+                            <option value="">-- Seleccione un contrato --</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">Si el titular tiene varios contratos, seleccione el que desea consultar</small>
+                </div>
+                <div id="holderNameDisplay" class="holder-name-display" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideSearchTitularModal()">Cancelar</button>
+                <button class="btn btn-primary" id="bBuscar">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Búsqueda -->
+    <div class="modal-overlay" id="resultsModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">HISTORIAL DE CARTERA</h3>
+                <button class="modal-close" onclick="hideResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-scrollable">
+                <div class="titular-info-header">
+                    <div class="titular-info-main">
+                        <i class="fas fa-user-circle"></i>
+                        <div>
+                            <h4 id="resultsTitularName">-</h4>
+                            <p id="resultsTitularId">Identificación: -</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="bEditarRegistro">
+                        <i class="fas fa-edit"></i>
+                        Editar
+                    </button>
+                </div>
+                
+                <div class="results-container" id="resultsContainer">
+                    <!-- Los registros se mostrarán aquí -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Logout -->
+    <div class="modal-overlay" id="confirmLogoutModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">CONFIRMAR CERRAR SESIÓN</h3>
+                <button class="modal-close" onclick="cancelLogout()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Está seguro que desea cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmLogout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <script src="../../../assets/js/cartera/cartera-manager.js"></script>
+    <script src="../../../assets/js/cartera/historial-cartera/historial-cartera.js"></script>
+</body>
+</html>
+

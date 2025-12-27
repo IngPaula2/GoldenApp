@@ -969,6 +969,17 @@ function confirmCreateInvoice() {
             localStorage.setItem(`nextInvoiceNumber_${city}`, String(justUsed + 1));
         }
     } catch (e) {}
+    
+    // Generar registros de cartera automáticamente
+    try {
+        const city = getSelectedCityCode();
+        if (city && window.CarteraManager && window.CarteraManager.generateCarteraFromInvoice) {
+            window.CarteraManager.generateCarteraFromInvoice(invoiceData, city);
+        }
+    } catch (e) {
+        console.error('Error generando cartera desde factura:', e);
+    }
+    
     loadInvoicesData();
     hideCreateInvoiceModal();
     cancelCreateInvoice();

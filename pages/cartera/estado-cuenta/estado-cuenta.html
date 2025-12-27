@@ -135,6 +135,9 @@
                 <li class="top-nav-item active">
                     <a href="estado-cuenta.html" class="top-nav-link">Estado de Cuenta</a>
                 </li>
+                <li class="top-nav-item">
+                    <a href="../historial-cartera/historial-cartera.html" class="top-nav-link">Cartera</a>
+                </li>
             </ul>
         </nav>
 
@@ -160,6 +163,15 @@
                         <button class="btn btn-primary" onclick="showReportModal()">
                             Reporte
                         </button>
+                    </div>
+                </div>
+
+                <!-- Mensaje inicial -->
+                <div class="search-prompt" id="searchPrompt">
+                    <div class="search-prompt-content">
+                        <i class="fas fa-search"></i>
+                        <h3>Consultar Estado de Cuenta</h3>
+                        <p>Utilice el botón "Consultar Estado" para consultar el estado de cuenta de un titular</p>
                     </div>
                 </div>
 
@@ -288,19 +300,18 @@
             </div>
             <div class="modal-body">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="searchAccountType" class="form-label">Tipo de Búsqueda *</label>
-                        <div class="select-container">
-                            <select id="searchAccountType" class="form-select">
-                                <option value="holderId">Identificación del Titular</option>
-                                <option value="holderName">Nombre del Titular</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
+                    <div class="form-group" style="width: 100%;">
+                        <label for="searchAccountHolderId" class="form-label">Identificación del Titular *</label>
+                        <input type="text" id="searchAccountHolderId" class="form-input" placeholder="Ingrese la identificación del titular">
                     </div>
-                    <div class="form-group">
-                        <label for="searchAccountValue" id="accountSearchLabel" class="form-label">Valor de Búsqueda *</label>
-                        <input type="text" id="searchAccountValue" class="form-input" placeholder="Ingrese el valor a buscar">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="width: 100%;" id="searchInvoiceSelectorGroup" style="display: none;">
+                        <label for="searchInvoiceSelect" class="form-label">Seleccionar Factura</label>
+                        <select id="searchInvoiceSelect" class="form-input">
+                            <option value="">-- Seleccione una factura --</option>
+                        </select>
+                        <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">Si el titular tiene varias facturas, seleccione la que desea consultar</small>
                     </div>
                 </div>
             </div>
@@ -313,7 +324,7 @@
 
     <!-- Modal de Reporte -->
     <div class="modal-overlay" id="reportModal" style="display: none;">
-        <div class="modal modal-large">
+        <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title">GENERAR REPORTE</h3>
                 <button class="modal-close" onclick="hideReportModal()">
@@ -322,25 +333,140 @@
             </div>
             <div class="modal-body">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="startDate" class="form-label">Fecha Inicio *</label>
-                        <input type="date" id="startDate" class="form-input" required>
+                    <div class="form-group" style="width: 100%;">
+                        <label for="reportHolderId" class="form-label">Identificación del Titular <span style="color: #dc2626;">*</span></label>
+                        <input type="text" id="reportHolderId" class="form-input" placeholder="Ingrese la identificación del titular" required>
                     </div>
-                    <div class="form-group">
-                        <label for="endDate" class="form-label">Fecha Fin *</label>
-                        <input type="date" id="endDate" class="form-input" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="width: 100%;" id="invoiceSelectorGroup" style="display: none;">
+                        <label for="reportInvoiceSelect" class="form-label">Seleccionar Factura</label>
+                        <select id="reportInvoiceSelect" class="form-input">
+                            <option value="">-- Seleccione una factura --</option>
+                        </select>
+                        <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">Si el titular tiene varias facturas, seleccione la que desea consultar</small>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="reportHolderId" class="form-label">Identificación del Titular (Opcional)</label>
-                        <input type="text" id="reportHolderId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR">
+                        <label for="startDate" class="form-label">Fecha Pago Inicial <span style="color: #dc2626;">*</span></label>
+                        <input type="date" id="startDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate" class="form-label">Fecha Pago Final <span style="color: #dc2626;">*</span></label>
+                        <input type="date" id="endDate" class="form-input" required>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideReportModal()">Cancelar</button>
                 <button class="btn btn-primary" id="bGenerarReporte">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados de Consulta -->
+    <div class="modal-overlay" id="accountStatusResultsModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE CONSULTA - ESTADO DE CUENTA</h3>
+                <button class="modal-close" onclick="hideAccountStatusResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenedor de Reporte Formal -->
+                <div class="account-report-container">
+                    <!-- Información del Titular -->
+                    <div class="report-section">
+                        <div class="report-section-title">Información del Titular</div>
+                        <div class="report-info-grid">
+                            <div class="report-info-item">
+                                <label>Identificación:</label>
+                                <span id="resultsHolderId">-</span>
+                            </div>
+                            <div class="report-info-item">
+                                <label>Nombre:</label>
+                                <span id="resultsHolderName">-</span>
+                            </div>
+                            <div class="report-info-item">
+                                <label>Contrato:</label>
+                                <span id="resultsContract">-</span>
+                            </div>
+                            <div class="report-info-item">
+                                <label>Factura:</label>
+                                <span id="resultsInvoice">-</span>
+                            </div>
+                            <div class="report-info-item">
+                                <label>Fecha Primer Pago:</label>
+                                <span id="resultsFirstPaymentDate">-</span>
+                            </div>
+                            <div class="report-info-item">
+                                <label>Fecha Vencimiento:</label>
+                                <span id="resultsDueDate">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen Financiero -->
+                    <div class="report-section">
+                        <div class="report-section-title">Resumen Financiero</div>
+                        <div class="report-summary-grid" id="resultsSummaryCards">
+                            <div class="report-summary-item">
+                                <div class="report-summary-label">Valor Factura</div>
+                                <div class="report-summary-value" id="resultsValorFactura">$0.00</div>
+                            </div>
+                            <div class="report-summary-item">
+                                <div class="report-summary-label">Notas Débito</div>
+                                <div class="report-summary-value" id="resultsNotasDebito">$0.00</div>
+                            </div>
+                            <div class="report-summary-item">
+                                <div class="report-summary-label">Notas Crédito</div>
+                                <div class="report-summary-value" id="resultsNotasCredito">$0.00</div>
+                            </div>
+                            <div class="report-summary-item">
+                                <div class="report-summary-label">Valor Abonos</div>
+                                <div class="report-summary-value" id="resultsValorAbonos">$0.00</div>
+                            </div>
+                            <div class="report-summary-item report-summary-total">
+                                <div class="report-summary-label">Total Deuda</div>
+                                <div class="report-summary-value balance-amount" id="resultsTotalDeuda">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Ingresos -->
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tipo Ingreso</th>
+                                <th>Ingreso</th>
+                                <th>Cliente</th>
+                                <th>Fecha Tra.</th>
+                                <th>Cuota</th>
+                                <th>Recibo</th>
+                                <th>FP</th>
+                                <th>Valor Cobrado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountStatusResultsTableBody">
+                            <tr>
+                                <td colspan="8" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <p>No existen movimientos para este titular</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideAccountStatusResultsModal()">Cerrar</button>
+                <button class="btn btn-primary" id="bGenerarReporteDesdeConsulta">Generar Reporte</button>
             </div>
         </div>
     </div>

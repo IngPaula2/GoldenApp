@@ -16,12 +16,18 @@
 
 /* Contenedor principal del reporte */
 .report-container { 
-    max-width: 1400px; 
+    max-width: 100%; 
+    width: 100%;
     margin: 20px auto; 
     background: #fff; 
     padding: 16px; 
     border-radius: 8px; 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Header del reporte */
@@ -82,9 +88,25 @@
 
 /* Contenedor de la tabla */
 #tableWrap { 
-    overflow-x: auto; 
+    overflow-x: hidden; 
     border-top: 1px solid #eee; 
-    margin-top: 8px; 
+    margin-top: 8px;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+#tableWrap > div {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* Estilos de tabla */
@@ -154,7 +176,7 @@ body:has(#printContent[style*="display: block"]) > *:not(#printContent) {
 @media print {
     @page { 
         size: A4 landscape; 
-        margin: 12mm 8mm; 
+        margin: 8mm 5mm; 
     }
     
     .toolbar,
@@ -184,13 +206,18 @@ body:has(#printContent[style*="display: block"]) > *:not(#printContent) {
         width: 100% !important; 
         border-collapse: collapse !important; 
         table-layout: fixed !important; 
-        font-size: 11px !important; 
+        font-size: 8px !important; 
     }
     
     th, td { 
-        padding: 6px 4px !important; 
+        padding: 2px 1px !important; 
         word-wrap: break-word !important; 
         overflow-wrap: break-word !important; 
+        font-size: 8px !important;
+    }
+    
+    th {
+        font-size: 7px !important;
     }
     
     tr { 
@@ -221,6 +248,9 @@ body:has(#printContent[style*="display: block"]) > *:not(#printContent) {
         display: none !important; 
     }
 }
+
+
+
 
 
 

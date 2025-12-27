@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<!--
+    ====================================================================================
+    REPORTE - ESTADO DE CUENTA - GOLDEN APP
+    ====================================================================================
+    
+    Este archivo contiene la página del reporte de estado de cuenta.
+    Muestra el detalle completo de cartera del cliente.
+    
+    FUNCIONALIDADES:
+    - Visualización de estado de cuenta por titular
+    - Detalle de ingresos (caja y bancos)
+    - Resumen financiero (facturas, notas, abonos, deuda)
+    - Paginación de resultados
+    - Zoom para mejor visualización
+    - Exportación a Excel, Word y PDF
+    
+    INTEGRACIÓN CON BACKEND:
+    - Este archivo HTML carga el JavaScript en: assets/js/cartera/reportes/reporte-estado-cuenta.js
+    - Los datos se obtienen desde localStorage (debe ser reemplazado con API)
+    - Ver el archivo JavaScript para instrucciones detalladas de integración con backend
+    
+    ====================================================================================
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2025
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Estado de Cuenta</title>
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/nomina/reportes/comprobante-ejecutivo.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Ocultar controles de interfaz al imprimir */
+        @media print {
+            .toolbar,
+            .pagination-controls,
+            .zoom-controls,
+            .export-controls {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            .report-header {
+                margin-bottom: 10px;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            .report-container {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            #reportContent {
+                transform: scale(1) !important;
+            }
+            .footer {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container" id="reportRoot">
+        <div class="report-header">
+            <div>
+                <div class="report-title">Golden Bridge Corp S.A.S</div>
+                <div class="report-subtitle" id="reportSubtitle">REPORTE ESTADO DE CUENTA - Cliente: <span id="reportClientId"></span> - <span id="reportClientName"></span> - Ciudad: <span id="reportCity"></span> - Fecha: <span id="reportDate"></span> - Página: <span id="paginaActual">1</span></div>
+            </div>
+        </div>
+        <div class="toolbar" style="margin-bottom: 15px;">
+                <div class="pagination-controls">
+                    <button class="btn" onclick="goFirst()" title="Primera página"><i class="fas fa-angle-double-left"></i></button>
+                    <button class="btn" onclick="goPrevious()" title="Página anterior"><i class="fas fa-angle-left"></i></button>
+                    <input type="number" id="currentPage" value="1" min="1" onchange="goToPage(this.value)">
+                    <span>de <span id="totalPages">1</span></span>
+                    <button class="btn" onclick="goNext()" title="Página siguiente"><i class="fas fa-angle-right"></i></button>
+                    <button class="btn" onclick="goLast()" title="Última página"><i class="fas fa-angle-double-right"></i></button>
+                </div>
+                <div class="zoom-controls">
+                    <button class="btn" onclick="setZoom(-0.1)" title="Alejar"><i class="fas fa-search-minus"></i></button>
+                    <span id="zoomLevel">100%</span>
+                    <button class="btn" onclick="setZoom(0.1)" title="Acercar"><i class="fas fa-search-plus"></i></button>
+                </div>
+                <div class="export-controls">
+                    <button class="btn" onclick="exportExcel()" title="Exportar Excel" style="background: #28a745; color: white; border-color: #28a745;"><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn" onclick="exportDOC()" title="Exportar Word" style="background: #007bff; color: white; border-color: #007bff;"><i class="fas fa-file-word"></i> Word</button>
+                    <button class="btn" onclick="exportPDF()" title="Exportar PDF" style="background: #dc3545; color: white; border-color: #dc3545;"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+        </div>
+        <div id="reportContent">
+            <!-- El contenido del reporte se generará dinámicamente -->
+        </div>
+        <div class="footer">© 2025 - GOLDEN APP</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="../../../assets/js/cartera/reportes/reporte-estado-cuenta.js"></script>
+</body>
+</html>

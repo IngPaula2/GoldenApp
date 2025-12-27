@@ -186,6 +186,18 @@
     justify-content: center;
     z-index: 2000;
     backdrop-filter: blur(2px);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Modal de selección de ejecutivos debe estar por encima del modal principal */
+.modal-overlay#selectExecutiveModal {
+    z-index: 3000 !important;
+}
+
+/* Modal de selección de facturas debe estar por encima del modal principal y del modal de edición */
+.modal-overlay#selectInvoicesModal {
+    z-index: 4000 !important;
 }
 
 .modal {
@@ -198,6 +210,10 @@
     border: 1px solid #dbcd7a;
     position: relative;
     pointer-events: auto;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
 }
 
 .modal-header {
@@ -238,10 +254,38 @@
 
 .modal-body {
     margin-bottom: 25px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-right: 5px;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #DEB448;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #d4a942;
 }
 
 .modal-body .form-group {
-    margin-bottom: 0;
+    margin-bottom: 0.75rem;
+}
+
+@media (max-height: 800px) {
+    .modal-body .form-group {
+        margin-bottom: 0.5rem;
+    }
 }
 
 .modal-body .form-label {
@@ -250,6 +294,38 @@
     font-weight: 600;
     color: #1a1a1a;
     font-size: 14px;
+}
+
+.modal-body .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #1a1a1a;
+    font-family: 'Inter', sans-serif;
+}
+
+.modal-body .form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.modal-body .form-input::placeholder {
+    color: #9ca3af;
+}
+
+/* Asegurar que el campo de año no muestre flechas */
+.modal-body .form-input[type="text"][id="assignmentYear"] {
+    -moz-appearance: textfield;
+}
+
+.modal-body .form-input[type="text"][id="assignmentYear"]::-webkit-outer-spin-button,
+.modal-body .form-input[type="text"][id="assignmentYear"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .modal-body .select-container {
@@ -291,6 +367,9 @@
     display: flex;
     gap: 10px;
     justify-content: center;
+    margin-top: auto;
+    padding-top: 20px;
+    flex-shrink: 0;
 }
 
 .modal-footer .btn {
@@ -314,6 +393,630 @@
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
+.modal-footer .btn-secondary {
+    background: #6c757d;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.modal-footer .btn-secondary:hover {
+    background: #5a6268;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.modal-footer .btn-icon {
+    background: #6c757d;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.modal-footer .btn-icon:hover {
+    background: #5a6268;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.modal-footer .btn-primary i {
+    margin-right: 0;
+}
+
+/* ========================================
+   FORMULARIO DE ASIGNACIÓN POR EJECUTIVO
+   ======================================== */
+
+.modal-large {
+    max-width: 1200px;
+    width: 95%;
+    max-height: 95vh;
+}
+
+/* Ajustar modal cuando hay poco espacio vertical */
+@media (max-height: 800px) {
+    .modal-large {
+        max-width: 1400px;
+        width: 98%;
+    }
+    
+    .modal-body {
+        max-height: 60vh;
+    }
+}
+
+@media (max-height: 700px) {
+    .modal-large {
+        max-width: 1600px;
+        width: 98%;
+    }
+    
+    .form-row.two-col {
+        gap: 1.5rem;
+    }
+    
+    .modal-body {
+        max-height: 55vh;
+    }
+}
+
+.form-row.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.form-column-left,
+.form-column-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+@media (max-height: 800px) {
+    .form-column-left,
+    .form-column-right {
+        gap: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.modal-body .form-input[readonly] {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    color: #6b7280;
+}
+
+.btn-select-executive {
+    width: 100%;
+    padding: 12px 20px;
+    background: #DEB448;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-select-executive:hover {
+    background: #d4a942;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-select-executive i {
+    font-size: 14px;
+}
+
+/* Contenedor del botón de transferir */
+#transferButtonContainer {
+    padding: 0;
+    margin: 0;
+}
+
+/* Botón de transferir */
+.btn-transfer {
+    width: 100%;
+    padding: 12px 20px;
+    background: #DEB448;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-transfer:hover {
+    background: #d4a942;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-transfer i {
+    font-size: 14px;
+}
+
+.btn-assign-accounts {
+    width: 100%;
+    padding: 12px 20px;
+    background: #17a2b8;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-assign-accounts:hover {
+    background: #138496;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-assign-accounts i {
+    font-size: 14px;
+}
+
+.btn-add-account {
+    width: 100%;
+    padding: 12px 20px;
+    background: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-add-account:hover {
+    background: #218838;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-add-account i {
+    font-size: 14px;
+}
+
+/* ========================================
+   SECCIÓN DE CUENTAS ASIGNADAS
+   ======================================== */
+
+.assigned-accounts-section {
+    margin-top: 2rem;
+    border-top: 2px solid #e9ecef;
+    padding-top: 1.5rem;
+}
+
+.accounts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.accounts-header:hover {
+    background: #e9ecef;
+}
+
+.accounts-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.accounts-header i {
+    color: #6b7280;
+    transition: transform 0.3s ease;
+}
+
+.accounts-list {
+    margin-top: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.accounts-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.accounts-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.accounts-list::-webkit-scrollbar-thumb {
+    background: #28a745;
+    border-radius: 4px;
+}
+
+.accounts-list::-webkit-scrollbar-thumb:hover {
+    background: #218838;
+}
+
+.account-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    gap: 12px;
+}
+
+.account-item:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.account-number {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.account-value {
+    color: #28a745;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-remove-account {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-remove-account:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.btn-remove-account i {
+    font-size: 12px;
+}
+
+/* ========================================
+   MODAL DE SELECCIÓN DE EJECUTIVOS
+   ======================================== */
+
+.executives-search-container {
+    margin-bottom: 1.5rem;
+}
+
+.executives-list-container {
+    max-height: 50vh;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.executives-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.executives-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.executives-list-container::-webkit-scrollbar-thumb {
+    background: #DEB448;
+    border-radius: 4px;
+}
+
+.executives-list-container::-webkit-scrollbar-thumb:hover {
+    background: #d4a942;
+}
+
+.executives-list {
+    padding: 8px;
+}
+
+.executive-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.executive-item:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-color: #DEB448;
+}
+
+.executive-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.executive-id {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.executive-name {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.executive-cargo {
+    color: #DEB448;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.btn-select-executive-item {
+    background: #DEB448;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-select-executive-item:hover {
+    background: #d4a942;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-select-executive-item i {
+    font-size: 12px;
+}
+
+.no-executives-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ========================================
+   MODAL DE SELECCIÓN DE FACTURAS
+   ======================================== */
+
+.invoices-search-container {
+    margin-bottom: 1.5rem;
+}
+
+.invoices-list-container {
+    max-height: 50vh;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.invoices-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.invoices-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.invoices-list-container::-webkit-scrollbar-thumb {
+    background: #17a2b8;
+    border-radius: 4px;
+}
+
+.invoices-list-container::-webkit-scrollbar-thumb:hover {
+    background: #138496;
+}
+
+.invoices-list {
+    padding: 8px;
+}
+
+.invoice-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #fff;
+    transition: all 0.2s ease;
+    gap: 12px;
+}
+
+.invoice-item:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-color: #17a2b8;
+}
+
+.invoice-item.already-added {
+    opacity: 0.6;
+    background: #f3f4f6;
+}
+
+.invoice-checkbox {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.invoice-checkbox:disabled {
+    cursor: not-allowed;
+}
+
+.invoice-label {
+    flex: 1;
+    cursor: pointer;
+    margin: 0;
+}
+
+.invoice-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.invoice-number-display {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.invoice-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: #6b7280;
+    align-items: center;
+}
+
+.invoice-client {
+    flex: 1;
+    min-width: 150px;
+}
+
+.invoice-contract {
+    min-width: 120px;
+}
+
+.invoice-installment {
+    min-width: 80px;
+}
+
+.invoice-value {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.invoice-date {
+    color: #6b7280;
+}
+
+.already-added-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #ffc107;
+    color: #1a1a1a;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+    .form-row.two-col {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .modal-large {
+        max-width: 95%;
+        padding: 20px;
+    }
+    
+    .modal-body {
+        max-height: 70vh;
+    }
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 480px) {
+    .modal-overlay {
+        padding: 10px;
+    }
+    
+    .modal-large {
+        padding: 15px;
+    }
+    
+    .modal-header {
+        margin-bottom: 15px;
+    }
+    
+    .modal-title {
+        font-size: 18px;
+    }
+    
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+}
+
 /* ========================================
    MODALES
    ======================================== */
@@ -328,9 +1031,101 @@
     color: #1976D2;
 }
 
+.holder-name-display.success-text {
+    background: #d4edda;
+    border-left: 3px solid #28a745;
+    color: #155724;
+}
+
+.holder-name-display.error-text {
+    background: #f8d7da;
+    border-left: 3px solid #dc3545;
+    color: #721c24;
+}
+
 /* ========================================
    RESPONSIVE
    ======================================== */
+
+/* ========================================
+   NOTIFICACIONES
+   ======================================== */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 20000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification.show { 
+    transform: translateX(0); 
+}
+
+.notification-success { background: #28a745; }
+.notification-error { background: #dc3545; }
+.notification-warning { background: #ffc107; color: #1a1a1a; }
+.notification-info { background: #17a2b8; }
+
+/* ========================================
+   BOTONES DE ACCIÓN EN TABLA
+   ======================================== */
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-table-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    background-color: #DEB448;
+    color: #1a1a1a;
+    padding: 0;
+}
+
+.btn-table-action:hover {
+    background-color: #c9a43a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(222, 180, 72, 0.3);
+}
+
+.btn-table-action i {
+    font-size: 14px;
+}
+
+.btn-table-action[title="Editar"] {
+    background-color: #DEB448;
+    color: #1a1a1a;
+}
+
+.btn-table-action[title="Editar"]:hover {
+    background-color: #c9a43a;
+}
+
+.btn-table-action[title="Ver detalle"] {
+    background-color: #DEB448;
+    color: #1a1a1a;
+}
+
+.btn-table-action[title="Ver detalle"]:hover {
+    background-color: #c9a43a;
+}
 
 @media (max-width: 768px) {
     .assign-invoice-section .section-header {

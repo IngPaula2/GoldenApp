@@ -127,13 +127,16 @@
         <nav class="top-nav">
             <ul class="top-nav-list">
                 <li class="top-nav-item active">
-                    <a href="asignar-factura.html" class="top-nav-link">Asignar Factura</a>
+                    <a href="asignar-factura.html" class="top-nav-link">Asignar Cuentas</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="../notas/notas.html" class="top-nav-link">Notas</a>
                 </li>
                 <li class="top-nav-item">
                     <a href="../estado-cuenta/estado-cuenta.html" class="top-nav-link">Estado de Cuenta</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="../historial-cartera/historial-cartera.html" class="top-nav-link">Cartera</a>
                 </li>
             </ul>
         </nav>
@@ -144,7 +147,7 @@
             <section class="assign-invoice-section">
                 <div class="section-header">
                     <div class="section-title">
-                        <h2>Asignar Factura</h2>
+                        <h2>Asignar Cuentas</h2>
                         <div class="current-city-info" id="currentCityInfo">
                             <i class="fas fa-map-marker-alt"></i>
                             <span id="currentCityName">Seleccione una ciudad</span>
@@ -158,7 +161,7 @@
                             Buscar Asignación
                         </button>
                         <button class="btn btn-primary" onclick="showCreateAssignmentModal()">
-                            Asignar Factura
+                            Asignar por Factura
                         </button>
                         <button class="btn btn-primary" onclick="showReportModal()">
                             Reporte
@@ -170,19 +173,21 @@
                     <table class="table" id="assignInvoiceTable">
                         <thead>
                             <tr>
-                                <th>Número de Factura</th>
-                                <th>Identificación Titular</th>
-                                <th>Nombre Titular</th>
+                                <th>Identificación Ejecutivo</th>
+                                <th>Nombre Ejecutivo</th>
+                                <th>Año</th>
+                                <th>Mes</th>
                                 <th>Fecha Asignación</th>
-                                <th>Valor</th>
-                                <th>Estado</th>
-                                <th>Observaciones</th>
+                                <th>Fecha Inicial</th>
+                                <th>Fecha Fin</th>
+                                <th># Cuentas</th>
+                                <th>Valor Asignado</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
                         <tbody id="assignInvoiceTableBody">
                             <tr>
-                                <td colspan="8" class="no-data-message">
+                                <td colspan="10" class="no-data-message">
                                     <div class="no-data-content">
                                         <i class="fas fa-file-invoice"></i>
                                         <p>No existen registros de asignaciones de factura</p>
@@ -243,8 +248,8 @@
                         <div class="select-container">
                             <select id="assignmentSearchType" class="form-select">
                                 <option value="invoiceNumber">Número de Factura</option>
-                                <option value="holderName">Nombre Titular</option>
-                                <option value="holderId">Identificación Titular</option>
+                                <option value="executiveName">Nombre Ejecutivo</option>
+                                <option value="executiveId">Identificación Ejecutivo</option>
                             </select>
                             <i class="fas fa-chevron-down select-arrow"></i>
                         </div>
@@ -262,11 +267,57 @@
         </div>
     </div>
 
-    <!-- Modal de Crear Asignación -->
-    <div class="modal-overlay" id="createAssignmentModal" style="display: none;">
+    <!-- Modal de Resultados de Búsqueda -->
+    <div class="modal-overlay" id="searchResultsModal" style="display: none;">
         <div class="modal modal-large">
             <div class="modal-header">
-                <h3 class="modal-title">ASIGNAR FACTURA</h3>
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA</h3>
+                <button class="modal-close" onclick="hideSearchResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Identificación Ejecutivo</th>
+                                <th>Nombre Ejecutivo</th>
+                                <th>Año</th>
+                                <th>Mes</th>
+                                <th>Fecha Asignación</th>
+                                <th>Fecha Desde</th>
+                                <th>Fecha Hasta</th>
+                                <th>Total Cuentas</th>
+                                <th>Valor Asignado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsTableBody">
+                            <tr>
+                                <td colspan="10" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Intente con otro criterio de búsqueda</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideSearchResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Asignación -->
+    <div class="modal-overlay" id="createAssignmentModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">ASIGNAR POR FACTURA</h3>
                 <button class="modal-close" onclick="hideCreateAssignmentModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -275,57 +326,202 @@
                 <form id="createAssignmentForm">
                     <div class="form-row two-col">
                         <div class="form-group">
-                            <label for="invoiceNumber" class="form-label">Número de Factura *</label>
-                            <input type="text" id="invoiceNumber" class="form-input" placeholder="NÚMERO DE FACTURA" required>
+                            <label for="assignmentYear" class="form-label">Año de Asignación *</label>
+                            <input type="text" id="assignmentYear" class="form-input" placeholder="AÑO DE ASIGNACIÓN" maxlength="4" pattern="[0-9]{4}" required>
                         </div>
                         <div class="form-group">
-                            <label for="assignmentDate" class="form-label">Fecha de Asignación *</label>
-                            <input type="date" id="assignmentDate" class="form-input" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row two-col">
-                        <div class="form-group">
-                            <label for="holderId" class="form-label">Identificación del Titular *</label>
-                            <input type="text" id="holderId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required>
-                            <div id="holderNameDisplay" class="holder-name-display" style="display: none;"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="holderName" class="form-label">Nombre del Titular *</label>
-                            <input type="text" id="holderName" class="form-input" placeholder="NOMBRE DEL TITULAR" readonly required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row two-col">
-                        <div class="form-group">
-                            <label for="assignmentValue" class="form-label">Valor *</label>
-                            <input type="text" id="assignmentValue" class="form-input numeric-input" placeholder="VALOR" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="assignmentStatus" class="form-label">Estado *</label>
+                            <label for="assignmentMonth" class="form-label">Mes de Asignación *</label>
                             <div class="select-container">
-                                <select id="assignmentStatus" class="form-select" required>
-                                    <option value="">Seleccione el estado</option>
-                                    <option value="PENDIENTE">Pendiente</option>
-                                    <option value="ASIGNADA">Asignada</option>
-                                    <option value="CANCELADA">Cancelada</option>
+                                <select id="assignmentMonth" class="form-select" required>
+                                    <option value="">Seleccione el mes</option>
+                                    <option value="01">Enero</option>
+                                    <option value="02">Febrero</option>
+                                    <option value="03">Marzo</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Mayo</option>
+                                    <option value="06">Junio</option>
+                                    <option value="07">Julio</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Septiembre</option>
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
                                 </select>
                                 <i class="fas fa-chevron-down select-arrow"></i>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="assignmentObservations" class="form-label">Observaciones</label>
-                            <textarea id="assignmentObservations" class="form-input" rows="3" placeholder="OBSERVACIONES" maxlength="500"></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="hideCreateAssignmentModal()">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="bCrearAsignacion">Asignar</button>
+                <button type="button" class="btn btn-primary" id="bCrearAsignacion">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Facturas -->
+    <div class="modal-overlay" id="selectInvoicesModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR FACTURAS</h3>
+                <button class="modal-close" onclick="hideSelectInvoicesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="invoices-search-container">
+                    <div class="form-group">
+                        <label for="invoiceSearchInput" class="form-label">Buscar Factura</label>
+                        <input type="text" id="invoiceSearchInput" class="form-input" placeholder="Buscar por número de factura...">
+                    </div>
+                </div>
+                <div class="invoices-list-container">
+                    <div class="invoices-list" id="invoicesList">
+                        <!-- Las facturas se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSelectInvoicesModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bConfirmInvoicesSelection">
+                    <i class="fas fa-check"></i> Agregar Seleccionadas (<span id="selectedInvoicesCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Ejecutivo -->
+    <div class="modal-overlay" id="selectExecutiveModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONAR EJECUTIVO</h3>
+                <button class="modal-close" onclick="hideSelectExecutiveModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="executives-search-container">
+                    <div class="form-group">
+                        <label for="executiveSearchInput" class="form-label">Buscar Ejecutivo</label>
+                        <input type="text" id="executiveSearchInput" class="form-input" placeholder="Buscar por identificación o nombre...">
+                    </div>
+                </div>
+                <div class="executives-list-container">
+                    <div class="executives-list" id="executivesList">
+                        <!-- Los ejecutivos se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSelectExecutiveModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Asignación de Cuentas por Ejecutivo -->
+    <div class="modal-overlay" id="assignAccountsByExecutiveModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">ASIGNACIÓN DE CUENTAS POR EJECUTIVO</h3>
+                <button class="modal-close" onclick="hideAssignAccountsByExecutiveModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="assignAccountsByExecutiveForm">
+                    <div class="form-row two-col">
+                        <!-- Columna Izquierda -->
+                        <div class="form-column-left">
+                            <div class="form-group">
+                                <label class="form-label">Ejecutivo *</label>
+                                <button type="button" class="btn btn-select-executive" id="bSelectExecutive">
+                                    Seleccionar Ejecutivo
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label for="executiveId" class="form-label">Identificación del Ejecutivo</label>
+                                <input type="text" id="executiveId" class="form-input" placeholder="IDENTIFICACIÓN DEL EJECUTIVO" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="executiveName" class="form-label">Nombre del Ejecutivo</label>
+                                <input type="text" id="executiveName" class="form-input" placeholder="NOMBRE DEL EJECUTIVO" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="assignmentYearDisplay" class="form-label">Año Asignación</label>
+                                <input type="text" id="assignmentYearDisplay" class="form-input" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="assignmentMonthDisplay" class="form-label">Mes Asignación</label>
+                                <input type="text" id="assignmentMonthDisplay" class="form-input" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="currentDate" class="form-label">Fecha Hoy</label>
+                                <input type="date" id="currentDate" class="form-input" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="dateFrom" class="form-label">Fecha Desde *</label>
+                                <input type="date" id="dateFrom" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dateTo" class="form-label">Fecha Hasta *</label>
+                                <input type="date" id="dateTo" class="form-input" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Columna Derecha -->
+                        <div class="form-column-right">
+                            <div class="form-group">
+                                <label for="totalAccounts" class="form-label">Total Cuentas</label>
+                                <input type="text" id="totalAccounts" class="form-input" value="0" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="assignedValue" class="form-label">Valor Asignado</label>
+                                <input type="text" id="assignedValue" class="form-input" value="0.00" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Transferir a (Opcional)</label>
+                                <button type="button" class="btn btn-select-executive" id="bSelectTransferExecutive">
+                                    Seleccionar Ejecutivo para Transferir
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label for="transferExecutiveId" class="form-label">Identificación Ejecutivo Transferencia</label>
+                                <input type="text" id="transferExecutiveId" class="form-input" placeholder="IDENTIFICACIÓN DEL EJECUTIVO" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="transferExecutiveName" class="form-label">Nombre Ejecutivo Transferencia</label>
+                                <input type="text" id="transferExecutiveName" class="form-input" placeholder="NOMBRE DEL EJECUTIVO" readonly>
+                            </div>
+                            <div class="form-group" id="transferButtonContainer" style="display: none;">
+                                <button type="button" class="btn btn-transfer" id="bTransferFromInfo">
+                                    <i class="fas fa-exchange-alt"></i> Transferir
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Facturas</label>
+                                <button type="button" class="btn btn-select-executive" id="bAssignAccounts">
+                                    Asignar Cuentas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de Cuentas Asignadas -->
+                    <div class="assigned-accounts-section" id="assignedAccountsSection" style="display: none;">
+                        <div class="accounts-header" onclick="toggleAccountsList()">
+                            <h4>Cuentas Asignadas (<span id="accountsCount">0</span>)</h4>
+                            <i class="fas fa-chevron-down" id="accountsToggleIcon"></i>
+                        </div>
+                        <div class="accounts-list" id="accountsList">
+                            <!-- Las cuentas se agregarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideAssignAccountsByExecutiveModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="bSaveAccounts">Guardar</button>
             </div>
         </div>
     </div>
@@ -334,26 +530,117 @@
     <div class="modal-overlay" id="reportModal" style="display: none;">
         <div class="modal modal-large">
             <div class="modal-header">
-                <h3 class="modal-title">GENERAR REPORTE</h3>
+                <h3 class="modal-title">GENERAR REPORTE DE ASIGNACIÓN DETALLADA</h3>
                 <button class="modal-close" onclick="hideReportModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="startDate" class="form-label">Fecha Inicio *</label>
-                        <input type="date" id="startDate" class="form-input" required>
+                <form id="reportForm">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="reportYear" class="form-label">Año de Asignación <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="reportYear" class="form-input" placeholder="AÑO" maxlength="4" pattern="[0-9]{4}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportMonth" class="form-label">Mes de Asignación <span style="color: #dc2626;">*</span></label>
+                            <div class="select-container">
+                                <select id="reportMonth" class="form-select" required>
+                                    <option value="">Seleccione el mes</option>
+                                    <option value="01">Enero</option>
+                                    <option value="02">Febrero</option>
+                                    <option value="03">Marzo</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Mayo</option>
+                                    <option value="06">Junio</option>
+                                    <option value="07">Julio</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Septiembre</option>
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="endDate" class="form-label">Fecha Fin *</label>
-                        <input type="date" id="endDate" class="form-input" required>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="reportTipoBusqueda" class="form-label">Tipo de Búsqueda <span style="color: #dc2626;">*</span></label>
+                            <div class="select-container">
+                                <select id="reportTipoBusqueda" class="form-select" required>
+                                    <option value="">Seleccione el tipo</option>
+                                    <option value="ejecutivo">Por Ejecutivo</option>
+                                    <option value="ciudad">Por Ciudad</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <div class="form-row" id="reportPorEjecutivoRow" style="display: none;">
+                        <div class="form-group">
+                            <label for="reportExecutiveId" class="form-label">Identificación del Ejecutivo <span style="color: #dc2626;">*</span></label>
+                            <input type="text" id="reportExecutiveId" class="form-input" placeholder="Ingrese la identificación del ejecutivo" maxlength="10">
+                            <div id="reportExecutiveNameDisplay" style="margin-top: 5px; padding: 5px; border-radius: 4px; display: none; font-size: 12px; background-color: #f0f0f0;"></div>
+                        </div>
+                    </div>
+                    <div class="form-row" id="reportPorCiudadRow" style="display: none;">
+                        <div class="form-group">
+                            <label for="reportCiudad" class="form-label">Ciudad <span style="color: #dc2626;">*</span></label>
+                            <div class="select-container">
+                                <select id="reportCiudad" class="form-select">
+                                    <option value="">Seleccione la ciudad</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideReportModal()">Cancelar</button>
                 <button class="btn btn-primary" id="bGenerarReporte">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalle de Asignación -->
+    <div class="modal-overlay" id="assignmentDetailsModal" style="display: none;">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 class="modal-title">DETALLE DE ASIGNACIÓN DE CUENTAS</h3>
+                <button class="modal-close" onclick="closeAssignmentDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="assignment-summary">
+                    <p><strong>Ejecutivo:</strong> <span id="detailExecutiveName"></span></p>
+                    <p><strong>Periodo:</strong> <span id="detailAssignmentPeriod"></span></p>
+                    <p><strong>Total Cuentas:</strong> <span id="detailTotalAccounts">0</span></p>
+                    <p><strong>Valor Asignado:</strong> <span id="detailTotalValue">$0,00</span></p>
+                </div>
+                <div class="data-table" style="margin-top: 1rem;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Número de Factura</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignmentDetailsTableBody">
+                            <tr>
+                                <td colspan="2" class="no-data-message">
+                                    No hay cuentas para mostrar.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAssignmentDetailsModal()">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="bEditFromDetails" onclick="editFromDetailsModal()">Editar</button>
             </div>
         </div>
     </div>
@@ -368,7 +655,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p class="modal-message">¿Está segur@ que desea asignar esta factura?</p>
+                <p class="modal-message" id="confirmAssignmentMessage">¿Está segur@ que desea asignar esta factura?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="cancelCreateAssignment()">Cancelar</button>
@@ -387,7 +674,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p class="modal-message">¡La factura fue asignada correctamente!</p>
+                <p class="modal-message" id="successAssignmentMessage">¡La factura fue asignada correctamente!</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="closeSuccessCreateAssignmentModal()">Aceptar</button>
@@ -417,6 +704,7 @@
     
     <!-- JavaScript -->
     <script src="../../../assets/js/accessibility.js"></script>
+    <script src="../../../assets/js/cartera/cartera-manager.js"></script>
     <script src="../../../assets/js/cartera/asignar-factura/asignar-factura.js"></script>
 </body>
 </html>

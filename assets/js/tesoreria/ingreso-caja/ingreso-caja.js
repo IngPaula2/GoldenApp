@@ -3444,19 +3444,89 @@ function loadPendingInstallments() {
     // Obtener cuotas ya pagadas con sus valores para calcular saldos
     const city = getSelectedCityCode();
     const inflowsRaw = localStorage.getItem(`ingresosCaja_${city}`);
+    const ingresosBancosRaw = localStorage.getItem(`ingresosBancos_${city}`);
     const inflows = inflowsRaw ? JSON.parse(inflowsRaw) : [];
+    const ingresosBancos = ingresosBancosRaw ? JSON.parse(ingresosBancosRaw) : [];
     const pagosPorCuota = {};
     
+    // Procesar ingresos de caja
     if (Array.isArray(inflows)) {
         inflows.forEach(i => {
             const sameInvoice = String(i.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
             const isActive = (i.estado || 'activo') === 'activo';
             if (sameInvoice && isActive) {
-                const cuotaNum = parseInt(i.cuota) || 0;
-                if (!pagosPorCuota[cuotaNum]) {
-                    pagosPorCuota[cuotaNum] = 0;
+                // Si existe detalleCuotas, usar esa información (más precisa)
+                if (i.detalleCuotas && Array.isArray(i.detalleCuotas)) {
+                    i.detalleCuotas.forEach(detalle => {
+                        const cuotaNum = parseInt(detalle.cuota) || 0;
+                        if (cuotaNum > 0) {
+                            if (!pagosPorCuota[cuotaNum]) {
+                                pagosPorCuota[cuotaNum] = 0;
+                            }
+                            pagosPorCuota[cuotaNum] += parseFloat(detalle.valorPagar || 0);
+                        }
+                    });
+                } else {
+                    // Procesar el campo cuota que puede ser un string con múltiples cuotas separadas por comas
+                    const cuotaField = String(i.cuota || '').trim();
+                    if (cuotaField) {
+                        const cuotasArray = cuotaField.split(',').map(c => parseInt(c.trim())).filter(c => c > 0);
+                        const valorIngreso = parseFloat(i.valor || 0);
+                        const valorPorCuota = cuotasArray.length > 0 ? valorIngreso / cuotasArray.length : valorIngreso;
+                        
+                        cuotasArray.forEach(cuotaNum => {
+                            if (cuotaNum > 0) {
+                                if (!pagosPorCuota[cuotaNum]) {
+                                    pagosPorCuota[cuotaNum] = 0;
+                                }
+                                pagosPorCuota[cuotaNum] += valorPorCuota;
+                            }
+                        });
+                    }
                 }
-                pagosPorCuota[cuotaNum] += parseFloat(i.valor || 0);
+            }
+        });
+    }
+    
+    // Procesar ingresos de bancos
+    if (Array.isArray(ingresosBancos)) {
+        ingresosBancos.forEach(ing => {
+            try {
+                if (ing.cashInflowData) {
+                    const cashInflow = JSON.parse(ing.cashInflowData);
+                    const sameInvoice = String(ing.invoiceNumber || cashInflow.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
+                    const isActive = (ing.estado || cashInflow.estado || 'activo') === 'activo';
+                    
+                    if (sameInvoice && isActive && cashInflow.detalleCuotas && Array.isArray(cashInflow.detalleCuotas)) {
+                        cashInflow.detalleCuotas.forEach(detalle => {
+                            const cuotaNum = parseInt(detalle.cuota) || 0;
+                            if (cuotaNum > 0) {
+                                if (!pagosPorCuota[cuotaNum]) {
+                                    pagosPorCuota[cuotaNum] = 0;
+                                }
+                                pagosPorCuota[cuotaNum] += parseFloat(detalle.valorPagar || 0);
+                            }
+                        });
+                    } else if (sameInvoice && isActive && cashInflow.cuota) {
+                        const cuotaField = String(cashInflow.cuota || '').trim();
+                        if (cuotaField) {
+                            const cuotasArray = cuotaField.split(',').map(c => parseInt(c.trim())).filter(c => c > 0);
+                            const valorIngreso = parseFloat(ing.valor || cashInflow.valor || 0);
+                            const valorPorCuota = cuotasArray.length > 0 ? valorIngreso / cuotasArray.length : valorIngreso;
+                            
+                            cuotasArray.forEach(cuotaNum => {
+                                if (cuotaNum > 0) {
+                                    if (!pagosPorCuota[cuotaNum]) {
+                                        pagosPorCuota[cuotaNum] = 0;
+                                    }
+                                    pagosPorCuota[cuotaNum] += valorPorCuota;
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error procesando ingreso banco:', e);
             }
         });
     }
@@ -4524,19 +4594,89 @@ function loadPendingInstallments() {
     // Obtener cuotas ya pagadas con sus valores para calcular saldos
     const city = getSelectedCityCode();
     const inflowsRaw = localStorage.getItem(`ingresosCaja_${city}`);
+    const ingresosBancosRaw = localStorage.getItem(`ingresosBancos_${city}`);
     const inflows = inflowsRaw ? JSON.parse(inflowsRaw) : [];
+    const ingresosBancos = ingresosBancosRaw ? JSON.parse(ingresosBancosRaw) : [];
     const pagosPorCuota = {};
     
+    // Procesar ingresos de caja
     if (Array.isArray(inflows)) {
         inflows.forEach(i => {
             const sameInvoice = String(i.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
             const isActive = (i.estado || 'activo') === 'activo';
             if (sameInvoice && isActive) {
-                const cuotaNum = parseInt(i.cuota) || 0;
-                if (!pagosPorCuota[cuotaNum]) {
-                    pagosPorCuota[cuotaNum] = 0;
+                // Si existe detalleCuotas, usar esa información (más precisa)
+                if (i.detalleCuotas && Array.isArray(i.detalleCuotas)) {
+                    i.detalleCuotas.forEach(detalle => {
+                        const cuotaNum = parseInt(detalle.cuota) || 0;
+                        if (cuotaNum > 0) {
+                            if (!pagosPorCuota[cuotaNum]) {
+                                pagosPorCuota[cuotaNum] = 0;
+                            }
+                            pagosPorCuota[cuotaNum] += parseFloat(detalle.valorPagar || 0);
+                        }
+                    });
+                } else {
+                    // Procesar el campo cuota que puede ser un string con múltiples cuotas separadas por comas
+                    const cuotaField = String(i.cuota || '').trim();
+                    if (cuotaField) {
+                        const cuotasArray = cuotaField.split(',').map(c => parseInt(c.trim())).filter(c => c > 0);
+                        const valorIngreso = parseFloat(i.valor || 0);
+                        const valorPorCuota = cuotasArray.length > 0 ? valorIngreso / cuotasArray.length : valorIngreso;
+                        
+                        cuotasArray.forEach(cuotaNum => {
+                            if (cuotaNum > 0) {
+                                if (!pagosPorCuota[cuotaNum]) {
+                                    pagosPorCuota[cuotaNum] = 0;
+                                }
+                                pagosPorCuota[cuotaNum] += valorPorCuota;
+                            }
+                        });
+                    }
                 }
-                pagosPorCuota[cuotaNum] += parseFloat(i.valor || 0);
+            }
+        });
+    }
+    
+    // Procesar ingresos de bancos
+    if (Array.isArray(ingresosBancos)) {
+        ingresosBancos.forEach(ing => {
+            try {
+                if (ing.cashInflowData) {
+                    const cashInflow = JSON.parse(ing.cashInflowData);
+                    const sameInvoice = String(ing.invoiceNumber || cashInflow.invoiceNumber || '').replace(/^0+/, '') === String(invoiceNumber).replace(/^0+/, '');
+                    const isActive = (ing.estado || cashInflow.estado || 'activo') === 'activo';
+                    
+                    if (sameInvoice && isActive && cashInflow.detalleCuotas && Array.isArray(cashInflow.detalleCuotas)) {
+                        cashInflow.detalleCuotas.forEach(detalle => {
+                            const cuotaNum = parseInt(detalle.cuota) || 0;
+                            if (cuotaNum > 0) {
+                                if (!pagosPorCuota[cuotaNum]) {
+                                    pagosPorCuota[cuotaNum] = 0;
+                                }
+                                pagosPorCuota[cuotaNum] += parseFloat(detalle.valorPagar || 0);
+                            }
+                        });
+                    } else if (sameInvoice && isActive && cashInflow.cuota) {
+                        const cuotaField = String(cashInflow.cuota || '').trim();
+                        if (cuotaField) {
+                            const cuotasArray = cuotaField.split(',').map(c => parseInt(c.trim())).filter(c => c > 0);
+                            const valorIngreso = parseFloat(ing.valor || cashInflow.valor || 0);
+                            const valorPorCuota = cuotasArray.length > 0 ? valorIngreso / cuotasArray.length : valorIngreso;
+                            
+                            cuotasArray.forEach(cuotaNum => {
+                                if (cuotaNum > 0) {
+                                    if (!pagosPorCuota[cuotaNum]) {
+                                        pagosPorCuota[cuotaNum] = 0;
+                                    }
+                                    pagosPorCuota[cuotaNum] += valorPorCuota;
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error procesando ingreso banco:', e);
             }
         });
     }
@@ -5670,6 +5810,15 @@ function confirmCreateInflow() {
         // Guardar el registro en localStorage
         // BACKEND: Reemplazar por POST /api/cash-inflows
         localStorage.setItem(`ingresosCaja_${inflowData.city}`, JSON.stringify(list));
+        
+        // Actualizar tabla de CARTERA automáticamente
+        try {
+            if (window.CarteraManager && window.CarteraManager.updateCarteraFromInflow) {
+                window.CarteraManager.updateCarteraFromInflow(inflow, inflowData.city, 'caja');
+            }
+        } catch (e) {
+            console.error('Error actualizando cartera desde ingreso a caja:', e);
+        }
         
         // Log de depuración: Verificar que se guardó correctamente
         console.log('✅ Ingreso guardado:', {
