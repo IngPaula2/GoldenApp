@@ -4066,12 +4066,19 @@ function handleSelectCity() {
     // Obtener código de la ciudad seleccionada
     const cityCode = citySelect.value;
     
+    // Guardar ciudad seleccionada en sessionStorage
+    sessionStorage.setItem('selectedCity', cityCode);
+    ciudadActual = cityCode;
+    
     // Obtener nombre completo para el indicador y la notificación
     const selectedOption = citySelect.options[citySelect.selectedIndex];
     const cityName = selectedOption ? selectedOption.textContent : '';
     
     // Actualizar indicador de ciudad actual
     updateCurrentCityDisplay(cityName);
+    
+    // Cargar empleados de la ciudad seleccionada
+    loadEmpleadosFromStorage();
     
     // Ocultar modal
     hideSelectCityModal();

@@ -744,6 +744,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Event listener para observaciones - convertir a mayúsculas en tiempo real
+    const observacionesField = document.getElementById('pObservaciones');
+    if (observacionesField) {
+        observacionesField.addEventListener('input', function() {
+            // Convertir a mayúsculas en tiempo real
+            this.value = this.value.toUpperCase();
+        });
+        observacionesField.addEventListener('paste', function(e) {
+            // Manejar pegado de texto y convertir a mayúsculas
+            e.preventDefault();
+            const textoPegado = (e.clipboardData || window.clipboardData).getData('text');
+            const textoMayusculas = textoPegado.toUpperCase();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + textoMayusculas + this.value.substring(end);
+            this.setSelectionRange(start + textoMayusculas.length, start + textoMayusculas.length);
+        });
+    }
+    
     // Event listener para meses de asesoría
     const mesesField = document.getElementById('tMeses_Asesoria');
     if (mesesField) {
@@ -1987,7 +2006,7 @@ function editPlan(codigo) {
         if (mesesAsesoriaField) mesesAsesoriaField.value = plan.mesesAsesoria;
         if (usuariosAplicanField) usuariosAplicanField.value = plan.usuariosAplican;
         if (numLibrosField) numLibrosField.value = plan.numLibros;
-        if (observacionesField) observacionesField.value = plan.observaciones || '';
+        if (observacionesField) observacionesField.value = (plan.observaciones || '').toUpperCase();
         
         // Cargar cuentas contables antes de establecer valores
         loadAccountingAccounts();

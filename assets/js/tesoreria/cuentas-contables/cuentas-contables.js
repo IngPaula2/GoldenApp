@@ -186,11 +186,17 @@ function handleCreateAccountingAccount() {
     if (!form) return;
     
     // Validar campos requeridos
-    const codigoCuenta = document.getElementById('accountCode')?.value.replace(/[^\d]/g, '').trim();
+    const codigoCuenta = document.getElementById('accountCode')?.value.replace(/[^\d]/g, '').substring(0, 10).trim();
     const nombreCuenta = document.getElementById('accountName')?.value.trim();
     
     if (!codigoCuenta || !nombreCuenta) {
         showNotification('Por favor, complete todos los campos requeridos', 'warning');
+        return;
+    }
+    
+    // Validar que el código no exceda 10 dígitos
+    if (codigoCuenta.length > 10) {
+        showNotification('El código de cuenta no puede exceder 10 dígitos', 'warning');
         return;
     }
     
@@ -406,10 +412,29 @@ function initializeUppercaseInputs() {
 function initializeNumericFormatting() {
     const numericInputs = document.querySelectorAll('.numeric-input');
     numericInputs.forEach(input => {
-        input.addEventListener('input', function(e) {
-            // Permitir solo números
-            this.value = this.value.replace(/[^\d]/g, '');
-        });
+        // Si es el campo de código de cuenta, limitar a 10 dígitos
+        if (input.id === 'accountCode') {
+            input.addEventListener('input', function(e) {
+                // Permitir solo números y limitar a 10 dígitos
+                this.value = this.value.replace(/[^\d]/g, '').substring(0, 10);
+            });
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const numericOnly = pastedText.replace(/[^\d]/g, '').substring(0, 10);
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const currentValue = this.value;
+                const newValue = currentValue.substring(0, start) + numericOnly + currentValue.substring(end);
+                this.value = newValue.substring(0, 10);
+                this.setSelectionRange(Math.min(start + numericOnly.length, 10), Math.min(start + numericOnly.length, 10));
+            });
+        } else {
+            input.addEventListener('input', function(e) {
+                // Permitir solo números
+                this.value = this.value.replace(/[^\d]/g, '');
+            });
+        }
     });
 }
 
