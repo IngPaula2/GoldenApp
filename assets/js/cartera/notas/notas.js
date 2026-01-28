@@ -2794,4 +2794,3 @@ function closeSuccessToggleNoteModal() {
         modal.style.display = 'none';
     }
 }
-

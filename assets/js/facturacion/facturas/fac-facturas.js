@@ -567,6 +567,15 @@ function loadNextInvoiceNumber() {
 
 // Event listener para buscar titular por ID
 document.getElementById('clientId')?.addEventListener('input', function() {
+    // Validar que solo sean números y limitar a 10 dígitos
+    const cursorPosition = this.selectionStart;
+    this.value = this.value.replace(/[^\d]/g, '');
+    if (this.value.length > 10) {
+        this.value = this.value.substring(0, 10);
+    }
+    // Restaurar posición del cursor
+    this.setSelectionRange(cursorPosition, cursorPosition);
+    
     const clientId = this.value.trim();
     if (clientId.length >= 6) {
         // Limpiar estado de error previo mientras se consulta
@@ -585,6 +594,25 @@ document.getElementById('clientId')?.addEventListener('input', function() {
         const disp = document.getElementById('clientNameDisplay');
         if (disp) { disp.classList.remove('error-text'); disp.style.display = 'none'; disp.textContent=''; }
     }
+});
+
+// También validar al pegar en el campo de identificación
+document.getElementById('clientId')?.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    const numbersOnly = pastedText.replace(/[^\d]/g, '').substring(0, 10);
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const currentValue = this.value;
+    const newValue = currentValue.substring(0, start) + numbersOnly + currentValue.substring(end);
+    // Asegurar que no exceda 10 dígitos en total
+    this.value = newValue.substring(0, 10);
+    // Restaurar posición del cursor
+    const newPosition = Math.min(start + numbersOnly.length, 10);
+    this.setSelectionRange(newPosition, newPosition);
+    
+    // Disparar evento input para que se ejecute la búsqueda si aplica
+    this.dispatchEvent(new Event('input'));
 });
 
 // El campo es numérico y readonly; no aplicar formateo visual dentro del input

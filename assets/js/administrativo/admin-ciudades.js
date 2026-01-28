@@ -12,84 +12,6 @@
 // Dashboard JavaScript
 
 // ========================================
-// PERFIL DE USUARIO Y DROPDOWN
-// ========================================
-
-// Inicializar dropdown del usuario cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    const userInfo = document.querySelector('.user-info');
-    const dropdown = document.getElementById('userDropdown');
-    const dropdownArrow = document.querySelector('.dropdown-arrow');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (userInfo && dropdown) {
-        // Toggle del dropdown al hacer clic en el perfil
-        userInfo.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-            dropdownArrow.classList.toggle('open');
-            sidebar.classList.toggle('dropdown-open');
-        });
-        
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            if (!userInfo.contains(e.target)) {
-                dropdown.classList.remove('show');
-                dropdownArrow.classList.remove('open');
-                sidebar.classList.remove('dropdown-open');
-            }
-        });
-        
-        // Manejar clics en elementos del dropdown
-        const dropdownItems = document.querySelectorAll('.dropdown-item');
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (this.classList.contains('logout-item')) {
-                    // Redirigir inmediatamente al login
-                    window.location.href = '../../index.html';
-                } else if (this.classList.contains('admin-users-item')) {
-                    // Lógica de administrar usuarios
-                    alert('Funcionalidad de administrar usuarios en desarrollo');
-                }
-                // Cerrar dropdown después del clic
-                dropdown.classList.remove('show');
-                dropdownArrow.classList.remove('open');
-                sidebar.classList.remove('dropdown-open');
-            });
-        });
-    }
-});
-
-// ========================================
-// FUNCIONES DE MODAL DE CERRAR SESIÓN
-// ========================================
-
-window.showConfirmLogoutModal = function() {
-    const modal = document.getElementById('confirmLogoutModal');
-    if (modal) {
-        modal.classList.add('show');
-    }
-}
-
-window.cancelLogout = function() {
-    const modal = document.getElementById('confirmLogoutModal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
-}
-
-window.confirmLogout = function() {
-    // Limpiar datos de sesión
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    sessionStorage.clear();
-    
-    // Redirigir al index
-    window.location.href = '../../index.html';
-}
-
-// ========================================
 // VARIABLES GLOBALES
 // ========================================
 const ciudadesData = {};
@@ -143,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Referencias a los elementos de modales
     const selectCityModal = document.getElementById('selectCityModal');
-    const selectCityModalOverlay = document.getElementById('selectCityModal');
+    const selectCityModalOverlay = document.querySelector('#selectCityModal.modal-overlay');
     const modal = document.getElementById('cityModal');
     const citySearchModalOverlay = document.querySelector('#cityModal.modal-overlay');
     const createCityModal = document.getElementById('createCityModal');
@@ -161,20 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verificar si el usuario ya seleccionó una ciudad en esta sesión
         const selectedCity = sessionStorage.getItem('selectedCity');
         if (!selectedCity) {
-            // Poblar el select antes de mostrar el modal
-            if (typeof refreshCitySelects === 'function') {
-                refreshCitySelects();
-            }
-            
-            // Usar getElementById como fallback si el selector falla
-            const modal = selectCityModalOverlay || document.getElementById('selectCityModal');
-            if (modal) {
-                modal.style.display = 'flex';
-                modal.style.zIndex = '9999';
-                document.body.style.overflow = 'hidden';
-            } else {
-                console.error('No se encontró el modal selectCityModal');
-            }
+            selectCityModalOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
     }
     
@@ -183,20 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * Se usa para permitir cambiar la ciudad seleccionada
      */
     function forceShowSelectCityModal() {
-        // Poblar el select antes de mostrar el modal
-        if (typeof refreshCitySelects === 'function') {
-            refreshCitySelects();
-        }
-        
-        // Usar getElementById como fallback si el selector falla
-        const modal = selectCityModalOverlay || document.getElementById('selectCityModal');
-        if (modal) {
-            modal.style.display = 'flex';
-            modal.style.zIndex = '9999';
-            document.body.style.overflow = 'hidden';
-        } else {
-            console.error('No se encontró el modal selectCityModal');
-        }
+        selectCityModalOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
     
     /**
@@ -204,12 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * Restaura el scroll del body
      */
     function hideSelectCityModal() {
-        // Usar getElementById como fallback si el selector falla
-        const modal = selectCityModalOverlay || document.getElementById('selectCityModal');
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
+        selectCityModalOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
     
     /**
@@ -609,6 +503,57 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // ========================================
+    // PERFIL DE USUARIO Y DROPDOWN
+    // ========================================
+    
+    // Elementos del perfil de usuario
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    const dropdownArrow = document.querySelector('.dropdown-arrow');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (userInfo && dropdown) {
+        // Toggle del dropdown al hacer clic en el perfil
+        userInfo.addEventListener('click', function() {
+            dropdown.classList.toggle('show');
+            dropdownArrow.classList.toggle('open');
+            sidebar.classList.toggle('dropdown-open');
+        });
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userInfo.contains(e.target)) {
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            }
+        });
+        
+        // Manejar clics en elementos del dropdown
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (this.classList.contains('logout-item')) {
+                    // Funcionalidad de cerrar sesión
+                    sessionStorage.removeItem('isAuthenticated');
+                    sessionStorage.removeItem('username');
+                    window.location.href = '../index.html';
+                } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
+                    // Navegar a administración de usuarios
+                    console.log('Navegando a administrar usuarios');
+                    // Agregar navegación a página de administración de usuarios aquí
+                }
+                
+                // Cerrar dropdown después del clic
+                dropdown.classList.remove('show');
+                dropdownArrow.classList.remove('open');
+                sidebar.classList.remove('dropdown-open');
+            });
+        });
+    }
     
 
 
@@ -722,6 +667,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ========================================
+    // VALIDACIÓN DE CAMPOS DE TELÉFONO
+    // ========================================
+    
+    /**
+     * Limita el campo de teléfono a solo números y máximo 10 dígitos
+     */
+    function setupTelefonoValidation(inputId) {
+        const telefonoInput = document.getElementById(inputId);
+        if (!telefonoInput) return;
+        
+        // Limitar entrada a solo números mientras el usuario escribe
+        telefonoInput.addEventListener('input', function(e) {
+            // Remover cualquier carácter que no sea número
+            let value = this.value.replace(/\D/g, '');
+            
+            // Limitar a 10 dígitos
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            this.value = value;
+        });
+        
+        // Prevenir pegar texto no numérico
+        telefonoInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = paste.replace(/\D/g, '').substring(0, 10);
+            this.value = numbersOnly;
+        });
+        
+        // Prevenir teclas que no sean números
+        telefonoInput.addEventListener('keydown', function(e) {
+            // Permitir teclas de control (backspace, delete, tab, etc.)
+            if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || 
+                e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown' ||
+                (e.ctrlKey && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x'))) {
+                return;
+            }
+            
+            // Permitir solo números
+            if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    // Configurar validación para ambos campos de teléfono
+    setupTelefonoValidation('tTelefono'); // Campo de teléfono de ciudad
+    setupTelefonoValidation('fTelefono'); // Campo de teléfono de filial
+    
+    // ========================================
     // FUNCIONALIDAD DEL BOTÓN CREAR CIUDAD
     // ========================================
     
@@ -746,6 +743,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(correo)) {
                 alert('Por favor, ingrese un correo electrónico válido.');
+                return;
+            }
+            
+            // Validar teléfono: debe tener exactamente 10 dígitos
+            if (telefono.length !== 10) {
+                alert('El teléfono debe tener exactamente 10 dígitos.');
+                return;
+            }
+            
+            // Validar que el teléfono contenga solo números
+            if (!/^\d+$/.test(telefono)) {
+                alert('El teléfono solo puede contener números.');
                 return;
             }
             
@@ -845,6 +854,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!codigo || !nombre || !ciudad) {
                 alert('Por favor, complete todos los campos obligatorios de la filial.');
                 return;
+            }
+            
+            // Validar teléfono si se proporciona (es opcional pero si se ingresa debe tener 10 dígitos)
+            if (telefono && telefono.trim() !== '') {
+                if (telefono.length !== 10) {
+                    alert('El teléfono debe tener exactamente 10 dígitos.');
+                    return;
+                }
+                
+                // Validar que el teléfono contenga solo números
+                if (!/^\d+$/.test(telefono)) {
+                    alert('El teléfono solo puede contener números.');
+                    return;
+                }
             }
             
             const filial = { codigo, nombre, ciudad, direccion, telefono, activo: true };

@@ -189,6 +189,16 @@ function showCreateCargoModal() {
     const modal = document.getElementById('createCargoModal');
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
+    
+    // Asegurar que el campo código esté habilitado al crear
+    const cargoCodigo = document.getElementById('cargoCodigo');
+    if (cargoCodigo) {
+        cargoCodigo.disabled = false;
+        cargoCodigo.removeAttribute('data-original-code');
+    }
+    
+    // Restaurar el modal a su estado original de creación
+    resetModalToCreate();
 }
 
 /**
@@ -308,8 +318,10 @@ function editCargo(cargoId) {
             submitButton.onclick = () => handleUpdateCargo(cargoId);
         }
         
-        // Mostrar el modal
-        showCreateCargoModal();
+        // Mostrar el modal sin resetear (abrir directamente)
+        const modal = document.getElementById('createCargoModal');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
     } else {
         showNotification('No se encontró el cargo a editar', 'error');
     }
@@ -500,6 +512,13 @@ function resetModalToCreate() {
     const submitButton = document.getElementById('bCrearSubmit');
     submitButton.textContent = 'Crear';
     submitButton.onclick = handleCreateCargo;
+    
+    // Asegurar que el campo código esté habilitado
+    const cargoCodigo = document.getElementById('cargoCodigo');
+    if (cargoCodigo) {
+        cargoCodigo.disabled = false;
+        cargoCodigo.removeAttribute('data-original-code');
+    }
 }
 
 // ========================================
@@ -519,6 +538,12 @@ function handleUpdateCargo(cargoId) {
     // Validar campos requeridos
     if (isEmpty(seccion) || isEmpty(codigo) || isEmpty(nombre)) {
         showNotification('Por favor, complete todos los campos requeridos', 'error');
+        return;
+    }
+    
+    // Validar que el código no exceda 10 caracteres
+    if (codigo.length > 10) {
+        showNotification('El código no puede exceder 10 caracteres', 'error');
         return;
     }
     
@@ -549,6 +574,12 @@ function handleCreateCargo() {
     // Validar campos requeridos
     if (isEmpty(seccion) || isEmpty(codigo) || isEmpty(nombre)) {
         showNotification('Por favor, complete todos los campos requeridos', 'error');
+        return;
+    }
+    
+    // Validar que el código no exceda 10 caracteres
+    if (codigo.length > 10) {
+        showNotification('El código no puede exceder 10 caracteres', 'error');
         return;
     }
     

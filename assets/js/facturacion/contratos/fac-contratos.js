@@ -173,18 +173,98 @@ function updateSearchPlaceholder() {
     const searchLabel = document.getElementById('searchLabel');
     const searchInput = document.getElementById('searchValue');
     
+    // Limpiar el valor del campo al cambiar el tipo de búsqueda
+    searchInput.value = '';
+    
+    // Remover event listeners anteriores
+    const newInput = searchInput.cloneNode(true);
+    searchInput.parentNode.replaceChild(newInput, searchInput);
+    
+    // Limpiar restricciones anteriores
+    newInput.removeAttribute('maxlength');
+    newInput.removeAttribute('pattern');
+    
     switch(searchType) {
         case 'contractNumber':
             searchLabel.textContent = 'Número de Contrato *';
-            searchInput.placeholder = 'Ingrese el número de contrato';
+            newInput.placeholder = 'Ingrese el número de contrato';
+            // Limitar a 10 dígitos y solo números
+            newInput.setAttribute('maxlength', '10');
+            newInput.addEventListener('input', function() {
+                // Permitir solo números
+                this.value = this.value.replace(/[^\d]/g, '');
+                // Limitar a 10 dígitos
+                if (this.value.length > 10) {
+                    this.value = this.value.substring(0, 10);
+                }
+            });
+            // También validar al pegar
+            newInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const numbersOnly = pastedText.replace(/[^\d]/g, '').substring(0, 10);
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const currentValue = this.value;
+                const newValue = currentValue.substring(0, start) + numbersOnly + currentValue.substring(end);
+                // Asegurar que no exceda 10 dígitos en total
+                this.value = newValue.substring(0, 10);
+                // Restaurar posición del cursor
+                const newPosition = Math.min(start + numbersOnly.length, 10);
+                this.setSelectionRange(newPosition, newPosition);
+            });
             break;
         case 'clientName':
             searchLabel.textContent = 'Nombre del Titular *';
-            searchInput.placeholder = 'Ingrese el nombre del titular';
+            newInput.placeholder = 'Ingrese el nombre del titular';
+            // Agregar conversión automática a mayúsculas para nombre del titular
+            newInput.addEventListener('input', function() {
+                const cursorPosition = this.selectionStart;
+                this.value = this.value.toUpperCase();
+                // Restaurar posición del cursor
+                this.setSelectionRange(cursorPosition, cursorPosition);
+            });
+            // También convertir al pegar
+            newInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const currentValue = this.value;
+                this.value = currentValue.substring(0, start) + pastedText.toUpperCase() + currentValue.substring(end);
+                // Restaurar posición del cursor después del texto pegado
+                const newPosition = start + pastedText.length;
+                this.setSelectionRange(newPosition, newPosition);
+            });
             break;
         case 'clientId':
             searchLabel.textContent = 'Identificación del Titular *';
-            searchInput.placeholder = 'Ingrese la identificación del titular';
+            newInput.placeholder = 'Ingrese la identificación del titular';
+            // Limitar a 10 dígitos y solo números
+            newInput.setAttribute('maxlength', '10');
+            newInput.addEventListener('input', function() {
+                // Permitir solo números
+                this.value = this.value.replace(/[^\d]/g, '');
+                // Limitar a 10 dígitos
+                if (this.value.length > 10) {
+                    this.value = this.value.substring(0, 10);
+                }
+            });
+            // También validar al pegar
+            newInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const numbersOnly = pastedText.replace(/[^\d]/g, '').substring(0, 10);
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const currentValue = this.value;
+                const newValue = currentValue.substring(0, start) + numbersOnly + currentValue.substring(end);
+                // Asegurar que no exceda 10 dígitos en total
+                this.value = newValue.substring(0, 10);
+                // Restaurar posición del cursor
+                const newPosition = Math.min(start + numbersOnly.length, 10);
+                this.setSelectionRange(newPosition, newPosition);
+            });
             break;
     }
 }

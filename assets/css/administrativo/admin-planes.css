@@ -144,6 +144,43 @@
     box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
 }
 
+/* Estilos para selects */
+.select-container {
+    position: relative;
+}
+
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+    background: #fff;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+    font-size: 0.8rem;
+}
+
 /* Estilos específicos para inputs - como empleados */
 .form-input[type="number"] {
     text-align: right;

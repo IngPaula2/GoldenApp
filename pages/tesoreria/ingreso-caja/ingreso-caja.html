@@ -343,7 +343,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="inflowObservations" class="form-label">Observaciones</label>
-                            <textarea id="inflowObservations" class="form-input" rows="3" placeholder="OBSERVACIONES" maxlength="500"></textarea>
+                            <textarea id="inflowObservations" class="form-input uppercase-input" rows="3" placeholder="OBSERVACIONES" maxlength="500"></textarea>
                         </div>
                     </div>
                 </form>
@@ -359,6 +359,9 @@
     <div class="modal-overlay" id="createInflowDetailsModal" style="display: none;">
         <div class="modal modal-large">
             <div class="modal-header">
+                <button class="btn-back" onclick="goBackToInflowForm()" title="Volver al formulario anterior">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <h3 class="modal-title">DATOS DEL TITULAR Y FACTURA</h3>
                 <button class="modal-close" onclick="hideCreateInflowDetailsModal()">
                     <i class="fas fa-times"></i>
@@ -370,7 +373,7 @@
                     <div class="form-row two-col">
                         <div class="form-group">
                             <label for="holderId" class="form-label">Identificación del Titular *</label>
-                            <input type="text" id="holderId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required>
+                            <input type="text" id="holderId" class="form-input" placeholder="IDENTIFICACIÓN DEL TITULAR" required maxlength="10">
                             <div id="holderNameDisplay" class="holder-name-display" style="display: none;"></div>
                         </div>
                         <div class="form-group">

@@ -365,14 +365,99 @@ function showCreatePlanModal() {
         document.getElementById('tLibros').value = '';
         setPlanActivo('SI'); // Reset to SI
         document.getElementById('pObservaciones').value = '';
+        document.getElementById('cCuentaDebito').value = '';
+        document.getElementById('cCuentaCredito').value = '';
         document.getElementById('createPlanTitle').textContent = 'CREAR PLAN';
         document.getElementById('bCrear').textContent = 'Siguiente';
         document.getElementById('bCrear').style.display = 'inline-block';
         document.getElementById('bActualizar').style.display = 'none';
+        
+        // Cargar cuentas contables en los selects
+        loadAccountingAccounts();
     }
 }
 function hideCreatePlanModal() { const m = document.getElementById('createPlanModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
 function hidePlanResultsModal() { const m = document.getElementById('planResultsModal'); if (m) { m.classList.remove('show'); document.body.style.overflow='auto'; } }
+
+/**
+ * Carga las cuentas contables desde localStorage y las agrega a los selects
+ * Filtra por tipo: débito para el select de débito y crédito para el select de crédito
+ */
+function loadAccountingAccounts() {
+    try {
+        // Obtener cuentas contables desde localStorage
+        const raw = localStorage.getItem('accountingAccountsData');
+        const accounts = raw ? JSON.parse(raw) : [];
+        
+        if (!Array.isArray(accounts)) {
+            console.warn('accountingAccountsData no es un array válido');
+            return;
+        }
+        
+        // Filtrar solo cuentas activas
+        const activeAccounts = accounts.filter(acc => acc.estado === 'activo');
+        
+        // Separar por tipo
+        const cuentasDebito = activeAccounts.filter(acc => acc.tipo === 'debito');
+        const cuentasCredito = activeAccounts.filter(acc => acc.tipo === 'credito');
+        
+        // Ordenar por código
+        cuentasDebito.sort((a, b) => {
+            const codeA = String(a.codigo || '').toUpperCase();
+            const codeB = String(b.codigo || '').toUpperCase();
+            return codeA.localeCompare(codeB);
+        });
+        
+        cuentasCredito.sort((a, b) => {
+            const codeA = String(a.codigo || '').toUpperCase();
+            const codeB = String(b.codigo || '').toUpperCase();
+            return codeA.localeCompare(codeB);
+        });
+        
+        // Obtener los selects
+        const cuentaDebitoSelect = document.getElementById('cCuentaDebito');
+        const cuentaCreditoSelect = document.getElementById('cCuentaCredito');
+        
+        // Limpiar opciones existentes (excepto la primera)
+        if (cuentaDebitoSelect) {
+            cuentaDebitoSelect.innerHTML = '<option value="">Seleccione la cuenta débito</option>';
+        }
+        if (cuentaCreditoSelect) {
+            cuentaCreditoSelect.innerHTML = '<option value="">Seleccione la cuenta crédito</option>';
+        }
+        
+        // Agregar solo cuentas débito al select de débito
+        cuentasDebito.forEach(account => {
+            const optionText = `${account.codigo} - ${account.nombre}`;
+            const optionValue = account.codigo;
+            
+            if (cuentaDebitoSelect) {
+                const option = document.createElement('option');
+                option.value = optionValue;
+                option.textContent = optionText;
+                cuentaDebitoSelect.appendChild(option);
+            }
+        });
+        
+        // Agregar solo cuentas crédito al select de crédito
+        cuentasCredito.forEach(account => {
+            const optionText = `${account.codigo} - ${account.nombre}`;
+            const optionValue = account.codigo;
+            
+            if (cuentaCreditoSelect) {
+                const option = document.createElement('option');
+                option.value = optionValue;
+                option.textContent = optionText;
+                cuentaCreditoSelect.appendChild(option);
+            }
+        });
+        
+        console.log('Cuentas débito cargadas:', cuentasDebito.length);
+        console.log('Cuentas crédito cargadas:', cuentasCredito.length);
+    } catch (e) {
+        console.error('Error al cargar cuentas contables:', e);
+    }
+}
 
 // ========================================
 // 🔗 CONEXIÓN BACKEND - CREAR/ACTUALIZAR PLAN
@@ -405,8 +490,10 @@ function createOrUpdateFromForm() {
     const numLibros = parseInt(document.getElementById('tLibros').value || '0', 10);
     const activo = document.getElementById('cActivo').value === 'SI';
     const observaciones = document.getElementById('pObservaciones').value.trim();
+    const cuentaDebito = document.getElementById('cCuentaDebito').value.trim();
+    const cuentaCredito = document.getElementById('cCuentaCredito').value.trim();
     
-    if (!nombre || valorPlan <= 0 || cuotaInicial <= 0 || numCuotas < 0 || mensualidad <= 0 || !fechaInicial || usuariosAplican <= 0) { 
+    if (!nombre || valorPlan <= 0 || cuotaInicial <= 0 || numCuotas < 0 || mensualidad <= 0 || !fechaInicial || usuariosAplican <= 0 || !cuentaDebito || !cuentaCredito) { 
         alert('Complete todos los campos obligatorios'); 
         return;
     }
@@ -423,7 +510,9 @@ function createOrUpdateFromForm() {
         usuariosAplican,
         numLibros,
         activo,
-        observaciones
+        observaciones,
+        cuentaDebito,
+        cuentaCredito
     };
     
     if (isUpdate) {
@@ -1899,6 +1988,19 @@ function editPlan(codigo) {
         if (usuariosAplicanField) usuariosAplicanField.value = plan.usuariosAplican;
         if (numLibrosField) numLibrosField.value = plan.numLibros;
         if (observacionesField) observacionesField.value = plan.observaciones || '';
+        
+        // Cargar cuentas contables antes de establecer valores
+        loadAccountingAccounts();
+        
+        // Establecer valores de cuentas contables si existen
+        const cuentaDebitoField = document.getElementById('cCuentaDebito');
+        const cuentaCreditoField = document.getElementById('cCuentaCredito');
+        if (cuentaDebitoField && plan.cuentaDebito) {
+            cuentaDebitoField.value = plan.cuentaDebito;
+        }
+        if (cuentaCreditoField && plan.cuentaCredito) {
+            cuentaCreditoField.value = plan.cuentaCredito;
+        }
         
         // Establecer el estado activo
         if (activoField) {

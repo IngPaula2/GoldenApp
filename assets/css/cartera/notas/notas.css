@@ -741,9 +741,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 14px;
-}
-
-.btn-edit {
+}.btn-edit {
     background-color: #DEB448;
     color: #1a1a1a;
 }
@@ -897,4 +895,3 @@
 .status-badge.status-inactive {
     color: #495057;
 }
-

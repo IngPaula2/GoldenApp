@@ -65,25 +65,8 @@ function loadOrgsForSelectedCity() {
     } catch (e) {}
     // Rellenar en memoria
     Object.keys(bucket).forEach(code => { organizacionesData[code] = bucket[code]; });
-    // Reconstruir tabla
-    try {
-        const tableBody = document.getElementById('organizacionesTableBody');
-        if (tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="no-data-message">
-                        <div class="no-data-content">
-                            <i class="fas fa-building"></i>
-                            <p>No existen registros de organizaciones</p>
-                            <small>Haz clic en "Crear Organización" para crear el primer registro</small>
-                        </div>
-                    </td>
-                </tr>`;
-            Object.values(organizacionesData)
-                .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo)))
-                .forEach(o => addOrgToTable(o, true));
-        }
-    } catch (e) {}
+    // Reconstruir tabla usando la función de reconstrucción
+    rebuildOrganizationsTable();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -212,8 +195,10 @@ document.addEventListener('DOMContentLoaded', function() {
      * Oculta el modal de crear organización y limpia el formulario
      */
     function hideCreateOrgModal() {
-        createOrgModalOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        if (createOrgModalOverlay) {
+            createOrgModalOverlay.style.display = 'none';
+            createOrgModalOverlay.classList.remove('show');
+        }
         // Limpiar campos del formulario
         clearCreateOrgForm();
     }
@@ -266,6 +251,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('confirmCreateOrgModal');
         if (modal) {
             modal.classList.add('show');
+            modal.style.display = 'flex';
+            modal.style.zIndex = '7000';
             document.body.style.overflow = 'hidden';
         }
     }
@@ -277,6 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('confirmCreateOrgModal');
         if (modal) {
             modal.classList.remove('show');
+            modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
         
@@ -289,10 +277,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * CONEXIÓN BACKEND: POST /api/organizaciones
      */
     function confirmCreateOrg() {
-        // Cerrar modal de confirmación
+        // Cerrar modal de confirmación primero
         const confirmModal = document.getElementById('confirmCreateOrgModal');
         if (confirmModal) {
             confirmModal.classList.remove('show');
+            confirmModal.style.display = 'none';
         }
         
         // Obtener datos temporales
@@ -316,7 +305,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Guardar por ciudad y persistir
         const city = getSelectedCityCode();
-        if (!city) { try { showNotification('Seleccione una ciudad primero', 'warning'); } catch(e) {} return; }
+        if (!city) { 
+            try { showNotification('Seleccione una ciudad primero', 'warning'); } catch(e) {} 
+            return; 
+        }
         if (!organizacionesByCity[city]) organizacionesByCity[city] = {};
         const toSave = { ...orgData, ciudad: city };
         organizacionesByCity[city][orgData.codigo] = toSave;
@@ -324,30 +316,67 @@ document.addEventListener('DOMContentLoaded', function() {
         // También reflejar en memoria y UI actual
         organizacionesData[orgData.codigo] = toSave;
         
-        // Cerrar modal de creación y limpiar formulario
-        hideCreateOrgModal();
+        // Cerrar modal de creación y limpiar formulario ANTES de mostrar el de éxito
+        if (createOrgModalOverlay) {
+            createOrgModalOverlay.style.display = 'none';
+            createOrgModalOverlay.classList.remove('show');
+        }
+        clearCreateOrgForm();
         
-        // Agregar la organización a la tabla
-        console.log('Llamando a addOrgToTable con:', orgData);
-        addOrgToTable(orgData);
-        console.log('addOrgToTable ejecutado');
+        // Reconstruir la tabla completa para mostrar todas las organizaciones
+        console.log('Reconstruyendo tabla de organizaciones');
+        try {
+            rebuildOrganizationsTable();
+            console.log('Tabla reconstruida exitosamente');
+        } catch (error) {
+            console.error('Error al reconstruir tabla:', error);
+        }
         
-        // Mostrar modal de éxito
-        showSuccessCreateOrgModal();
-        try { showNotification('Organización creada exitosamente', 'success'); } catch (e) {}
-        
-        // Limpiar datos temporales
+        // Limpiar datos temporales antes de mostrar el modal de éxito
         window.tempOrgData = null;
+        
+        // Mostrar modal de éxito DESPUÉS de cerrar el de creación
+        setTimeout(function() {
+            try {
+                showSuccessCreateOrgModal();
+                console.log('Modal de éxito llamado');
+            } catch (error) {
+                console.error('Error al mostrar modal de éxito:', error);
+                // Intentar usar la función global si existe
+                if (typeof window.showSuccessCreateOrgModal === 'function') {
+                    window.showSuccessCreateOrgModal();
+                }
+            }
+        }, 100);
     }
     
     /**
      * Muestra el modal de éxito para crear organización
      */
     function showSuccessCreateOrgModal() {
+        console.log('showSuccessCreateOrgModal llamada');
         const modal = document.getElementById('successCreateOrgModal');
+        console.log('Modal encontrado:', modal);
         if (modal) {
+            // Asegurarse de que el modal de creación esté cerrado
+            if (createOrgModalOverlay) {
+                createOrgModalOverlay.style.display = 'none';
+                createOrgModalOverlay.classList.remove('show');
+            }
+            // Asegurarse de que el modal de confirmación esté cerrado
+            const confirmModal = document.getElementById('confirmCreateOrgModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+            // Mostrar el modal de éxito
             modal.classList.add('show');
+            modal.style.display = 'flex';
+            modal.style.zIndex = '8000';
             document.body.style.overflow = 'hidden';
+            console.log('Modal de éxito mostrado');
+        } else {
+            console.error('No se encontró el modal successCreateOrgModal');
         }
     }
     
@@ -358,11 +387,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('successCreateOrgModal');
         if (modal) {
             modal.classList.remove('show');
+            modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
     }
     
     // Exponer funciones globalmente
+    window.showConfirmCreateOrgModal = showConfirmCreateOrgModal;
+    window.showSuccessCreateOrgModal = showSuccessCreateOrgModal;
     window.cancelCreateOrg = cancelCreateOrg;
     window.confirmCreateOrg = confirmCreateOrg;
     window.closeSuccessOrgModal = closeSuccessOrgModal;
@@ -711,13 +743,56 @@ document.addEventListener('DOMContentLoaded', function() {
     // FUNCIONALIDAD DEL BOTÓN CREAR ORGANIZACIÓN
     // ========================================
     
+    /**
+     * Configura la validación de campos de código (solo letras, máximo 10 caracteres)
+     * @param {string} inputId - ID del campo input a validar
+     */
+    function setupCodigoValidation(inputId) {
+        const codigoInput = document.getElementById(inputId);
+        if (codigoInput) {
+            codigoInput.addEventListener('input', function(e) {
+                // Remover cualquier carácter que no sea letra
+                let value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+                
+                // Limitar a 10 caracteres
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+                
+                // Convertir a mayúsculas
+                this.value = value.toUpperCase();
+            });
+            
+            // Prevenir pegar texto no válido
+            codigoInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const lettersOnly = paste.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '').substring(0, 10).toUpperCase();
+                this.value = lettersOnly;
+            });
+        }
+    }
+    
+    // Configurar validación del campo código en formulario de crear/actualizar
+    setupCodigoValidation('tId');
+    
+    // Configurar validación del campo código en formulario de búsqueda
+    setupCodigoValidation('searchOrgCodigo');
+    
     // Funcionalidad del botón crear organización
     const bCrear = document.getElementById('bCrear');
     if (bCrear) {
-        bCrear.addEventListener('click', function() {
+        bCrear.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Botón crear clickeado');
+            
             // Obtener valores del formulario
             const codigo = document.getElementById('tId').value.trim();
             const nombre = document.getElementById('tNombre').value.trim();
+            
+            console.log('Código:', codigo, 'Nombre:', nombre);
             
             // Validar campos obligatorios
             if (!codigo || !nombre) {
@@ -725,18 +800,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Validar que el código solo contenga letras y tenga máximo 10 caracteres
+            // El código ya está en mayúsculas por la validación del input
+            const codigoUpper = codigo.toUpperCase();
+            if (!/^[A-ZÁÉÍÓÚÑ]{1,10}$/.test(codigoUpper)) {
+                alert('El código debe contener solo letras y tener máximo 10 caracteres.');
+                return;
+            }
+            
             // Crear objeto de organización
             const nuevaOrganizacion = {
-                codigo: codigo,
+                codigo: codigoUpper,
                 nombre: nombre,
                 // Estado por defecto: activa
                 activo: true
             };
             
+            console.log('Organización a crear:', nuevaOrganizacion);
+            
             // Es una creación - mostrar modal de confirmación
             window.tempOrgData = nuevaOrganizacion;
-            showConfirmCreateOrgModal();
+            
+            try {
+                // Intentar llamar la función local primero, si no existe usar la global
+                if (typeof showConfirmCreateOrgModal === 'function') {
+                    showConfirmCreateOrgModal();
+                } else if (typeof window.showConfirmCreateOrgModal === 'function') {
+                    window.showConfirmCreateOrgModal();
+                } else {
+                    throw new Error('Función showConfirmCreateOrgModal no encontrada');
+                }
+                console.log('Modal de confirmación mostrado');
+            } catch (error) {
+                console.error('Error al mostrar modal de confirmación:', error);
+                alert('Error al mostrar el modal de confirmación. Por favor, intente nuevamente.');
+            }
         });
+    } else {
+        console.error('No se encontró el botón bCrear');
     }
 
     // Funcionalidad del botón actualizar organización
@@ -749,8 +850,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Por favor, complete todos los campos obligatorios.');
                 return;
             }
+            
+            // Validar que el código solo contenga letras y tenga máximo 10 caracteres
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]{1,10}$/.test(codigo)) {
+                alert('El código debe contener solo letras y tener máximo 10 caracteres.');
+                return;
+            }
+            
             const nuevaOrganizacion = {
-                codigo: codigo,
+                codigo: codigo.toUpperCase(),
                 nombre: nombre,
                 activo: true
             };
@@ -1089,6 +1197,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('confirmUpdateOrgModal');
         if (modal) {
             modal.classList.add('show');
+            modal.style.display = 'flex';
+            modal.style.zIndex = '7000';
             document.body.style.overflow = 'hidden';
         }
     }
@@ -1100,6 +1210,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const confirmModal = document.getElementById('confirmUpdateOrgModal');
         if (confirmModal) {
             confirmModal.classList.remove('show');
+            confirmModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
         
         // Limpiar datos temporales
@@ -1111,10 +1223,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * CONEXIÓN BACKEND: PUT /api/organizaciones/{codigo}
      */
     function confirmUpdateOrg() {
-        // Cerrar modal de confirmación
+        // Cerrar modal de confirmación primero
         const confirmModal = document.getElementById('confirmUpdateOrgModal');
         if (confirmModal) {
             confirmModal.classList.remove('show');
+            confirmModal.style.display = 'none';
         }
         
         // Obtener datos temporales
@@ -1139,15 +1252,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Procesar la actualización
         processOrgUpdate(organizacionData);
         
-        // Cerrar modal de creación
-        hideCreateOrgModal();
+        // Cerrar modal de creación ANTES de mostrar el de éxito
+        if (createOrgModalOverlay) {
+            createOrgModalOverlay.style.display = 'none';
+            createOrgModalOverlay.classList.remove('show');
+        }
+        clearCreateOrgForm();
         
-        // Mostrar modal de éxito
-        showSuccessUpdateOrgModal();
-        try { showNotification('Organización actualizada exitosamente', 'success'); } catch (e) {}
+        // Reconstruir la tabla completa
+        try {
+            rebuildOrganizationsTable();
+        } catch (error) {
+            console.error('Error al reconstruir tabla:', error);
+        }
         
-        // Limpiar datos temporales
+        // Limpiar datos temporales antes de mostrar el modal de éxito
         window.tempOrgData = null;
+        
+        // Mostrar modal de éxito DESPUÉS de cerrar el de creación
+        setTimeout(function() {
+            try {
+                showSuccessUpdateOrgModal();
+            } catch (error) {
+                console.error('Error al mostrar modal de éxito:', error);
+            }
+        }, 100);
     }
     
     /**
@@ -1156,7 +1285,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSuccessUpdateOrgModal() {
         const modal = document.getElementById('successUpdateOrgModal');
         if (modal) {
+            // Asegurarse de que el modal de creación esté cerrado
+            if (createOrgModalOverlay) {
+                createOrgModalOverlay.style.display = 'none';
+                createOrgModalOverlay.classList.remove('show');
+            }
+            // Asegurarse de que el modal de confirmación esté cerrado
+            const confirmModal = document.getElementById('confirmUpdateOrgModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+            // Mostrar el modal de éxito
             modal.classList.add('show');
+            modal.style.display = 'flex';
+            modal.style.zIndex = '8000';
             document.body.style.overflow = 'hidden';
         }
     }
@@ -1168,6 +1311,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('successUpdateOrgModal');
         if (modal) {
             modal.classList.remove('show');
+            modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
     }
@@ -1197,12 +1341,6 @@ function addOrgToTable(organizacion, replaceIfExists = false) {
     if (!tableBody) {
         console.error('No se encontró el elemento organizacionesTableBody');
         return;
-    }
-    
-    const noDataRow = tableBody.querySelector('.no-data-message');
-    
-    if (noDataRow) {
-        noDataRow.remove();
     }
     
     // Si existe, y se solicita reemplazar, actualizar la fila
@@ -1242,8 +1380,6 @@ function addOrgToTable(organizacion, replaceIfExists = false) {
         console.log('Creando nueva fila');
         const newRow = document.createElement('tr');
         newRow.innerHTML = rowHtml;
-        tableBody.appendChild(newRow);
-        console.log('Nueva fila agregada a la tabla');
         
         // Agregar efectos hover a la nueva fila
         newRow.addEventListener('mouseenter', function() {
@@ -1253,8 +1389,102 @@ function addOrgToTable(organizacion, replaceIfExists = false) {
         newRow.addEventListener('mouseleave', function() {
             this.style.backgroundColor = '';
         });
+        
+        // Remover mensaje de "no data" si existe
+        const noDataRow = tableBody.querySelector('.no-data-message');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        // Insertar la nueva fila en la posición correcta (ordenada por código)
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        let insertIndex = -1;
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const firstCell = row.querySelector('td');
+            if (firstCell && !firstCell.hasAttribute('colspan')) {
+                const rowCode = firstCell.textContent.trim();
+                if (rowCode.localeCompare(organizacion.codigo.trim()) > 0) {
+                    insertIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (insertIndex >= 0) {
+            tableBody.insertBefore(newRow, tableBody.children[insertIndex]);
+        } else {
+            tableBody.appendChild(newRow);
+        }
+        
+        console.log('Nueva fila agregada a la tabla');
     }
     // Si existe pero no se debe reemplazar, no hacer nada
+}
+
+/**
+ * Reconstruye la tabla completa de organizaciones desde organizacionesData
+ * Asegura que todas las organizaciones se muestren correctamente
+ */
+function rebuildOrganizationsTable() {
+    const tableBody = document.getElementById('organizacionesTableBody');
+    if (!tableBody) return;
+    
+    // Obtener todas las organizaciones ordenadas
+    const organizaciones = Object.values(organizacionesData)
+        .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)));
+    
+    // Limpiar la tabla
+    tableBody.innerHTML = '';
+    
+    // Si no hay organizaciones, mostrar mensaje
+    if (organizaciones.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message">
+                    <div class="no-data-content">
+                        <i class="fas fa-building"></i>
+                        <p>No existen registros de organizaciones</p>
+                        <small>Haz clic en "Crear Organización" para crear el primer registro</small>
+                    </div>
+                </td>
+            </tr>`;
+        return;
+    }
+    
+    // Agregar todas las organizaciones
+    organizaciones.forEach(org => {
+        const isActive = org.activo !== false;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${org.codigo}</td>
+            <td>${org.nombre}</td>
+            <td>
+                <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'ACTIVA' : 'INACTIVA'}</span>
+            </td>
+            <td>
+                <button class="btn btn-small" onclick="editOrg('${org.codigo}')" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <label class="animated-toggle" data-codigo="${org.codigo}" title="${isActive ? 'Desactivar' : 'Activar'}">
+                    <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleOrgState('${org.codigo}')">
+                    <span class="toggle-slider"></span>
+                </label>
+            </td>
+        `;
+        
+        // Agregar efectos hover
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+        
+        tableBody.appendChild(row);
+    });
 }
 
 /**
@@ -1667,7 +1897,8 @@ function updateCurrentCityDisplay(cityName) {
 }
 
 // Exponer funciones de eliminación globalmente
-window.deleteOrg = deleteOrg;
+// Nota: deleteOrg no se usa actualmente (ver línea 1341), pero se mantienen las funciones de modal
+// window.deleteOrg = deleteOrg; // Comentado porque la función no existe
 window.showConfirmDeleteOrgModal = showConfirmDeleteOrgModal;
 window.cancelDeleteOrg = cancelDeleteOrg;
 window.confirmDeleteOrg = confirmDeleteOrg;

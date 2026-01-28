@@ -198,6 +198,9 @@
                 <li class="top-nav-item">
                     <a href="admin-control-consecutivos.html" class="top-nav-link">Control de Consecutivos</a>
                 </li>
+                <li class="top-nav-item">
+                    <a href="cuentas-contables.html" class="top-nav-link">Cuentas Contables</a>
+                </li>
             </ul>
         </nav>
         <!-- Área de Contenido -->
@@ -337,7 +340,29 @@
                         </div>
                     </div>
                     
-                    <!-- Cuarta fila: Observaciones y Estado Activo -->
+                    <!-- Cuarta fila: Cuenta Débito y Cuenta Crédito -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cCuentaDebito" class="form-label">Cuenta Débito *</label>
+                            <div class="select-container">
+                                <select id="cCuentaDebito" class="form-select" required>
+                                    <option value="">Seleccione la cuenta débito</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cCuentaCredito" class="form-label">Cuenta Crédito *</label>
+                            <div class="select-container">
+                                <select id="cCuentaCredito" class="form-select" required>
+                                    <option value="">Seleccione la cuenta crédito</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quinta fila: Observaciones y Estado Activo -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="pObservaciones" class="form-label">Observaciones</label>

@@ -445,8 +445,11 @@ function showCreateInflowModal() {
         modal.style.display = 'flex';
         const isEditing = !!window.__editingInflowId;
         
-        if (!isEditing) {
-            // Limpiar formulario (esto también cargará el número si no existe)
+        // Si hay datos temporales guardados (vuelta atrás), no limpiar el formulario
+        const hasTempData = window.tempInflowBasicData;
+        
+        if (!isEditing && !hasTempData) {
+            // Limpiar formulario solo si no hay datos temporales (esto también cargará el número si no existe)
             clearCreateInflowForm();
             // Fecha manual (sin valor por defecto)
             const dateEl = document.getElementById('inflowDate');
@@ -460,12 +463,12 @@ function showCreateInflowModal() {
                     loadNextInflowNumber();
                 }
             }, 100);
-            
-            // Restaurar título y botón
-            const modalTitle = document.querySelector('#createInflowModal .modal-title');
-            if (modalTitle) {
-                modalTitle.textContent = 'CREAR INGRESO';
-            }
+        }
+        
+        // Restaurar título y botón
+        const modalTitle = document.querySelector('#createInflowModal .modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = 'CREAR INGRESO';
         }
     }
 }
@@ -511,18 +514,56 @@ function hideCreateInflowDetailsModal() {
         window.__editingInflowId = null;
         window.tempInflowEditData = null;
     }
-    
-    // Restaurar título y botón
-    const detailsTitle = document.querySelector('#createInflowDetailsModal .modal-title');
-    if (detailsTitle) {
-        detailsTitle.textContent = 'DATOS DEL TITULAR Y FACTURA';
-    }
-    
-    const crearBtn = document.getElementById('bCrearIngreso');
-    if (crearBtn) {
-        crearBtn.textContent = 'Crear Ingreso';
-    }
 }
+
+/**
+ * Función para volver al formulario anterior (primer paso) conservando los datos
+ */
+function goBackToInflowForm() {
+    // Cerrar el modal de detalles
+    hideCreateInflowDetailsModal();
+    
+    // Restaurar datos del primer paso si existen
+    if (window.tempInflowBasicData) {
+        const data = window.tempInflowBasicData;
+        
+        // Restaurar valores en los campos del primer formulario
+        const tipoIngresoField = document.getElementById('inflowIncomeTypeCode');
+        const numeroField = document.getElementById('inflowNumber');
+        const fechaField = document.getElementById('inflowDate');
+        const observacionesField = document.getElementById('inflowObservations');
+        
+        if (tipoIngresoField) {
+            tipoIngresoField.value = data.tipoIngresoCodigo || '';
+            // Si hay nombre del tipo de ingreso, mostrarlo
+            if (data.tipoIngresoNombre) {
+                const display = document.getElementById('incomeTypeNameDisplay');
+                if (display) {
+                    display.textContent = data.tipoIngresoNombre;
+                    display.style.display = 'block';
+                }
+            }
+        }
+        
+        if (numeroField) {
+            numeroField.value = data.numero || '';
+        }
+        
+        if (fechaField) {
+            fechaField.value = data.fecha || '';
+        }
+        
+        if (observacionesField) {
+            observacionesField.value = data.observaciones || '';
+        }
+    }
+    
+    // Mostrar el primer modal
+    showCreateInflowModal();
+}
+
+// Exponer función globalmente
+window.goBackToInflowForm = goBackToInflowForm;
 
 // ========================================
 // MODAL DE SELECCIÓN DE CUOTAS
@@ -1494,12 +1535,37 @@ function initializeTitularAndExecutiveSearch() {
     const holderIdInput = document.getElementById('holderId');
     if (holderIdInput) {
         holderIdInput.addEventListener('input', function() {
+            // Limitar a solo números y máximo 10 dígitos
+            const cursorPosition = this.selectionStart;
+            this.value = this.value.replace(/[^\d]/g, '');
+            if (this.value.length > 10) {
+                this.value = this.value.substring(0, 10);
+            }
+            // Restaurar posición del cursor
+            const newPosition = Math.min(cursorPosition, this.value.length);
+            this.setSelectionRange(newPosition, newPosition);
+            
             const holderId = this.value.trim();
             if (holderId.length >= 6) {
                 searchTitularByIdentification(holderId);
             } else {
                 clearTitularData();
             }
+        });
+        
+        // Manejar eventos de pegado
+        holderIdInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = pastedText.replace(/[^\d]/g, '').substring(0, 10);
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const currentValue = this.value;
+            const newValue = currentValue.substring(0, start) + numbersOnly + currentValue.substring(end);
+            this.value = newValue.substring(0, 10);
+            const newPosition = Math.min(start + numbersOnly.length, 10);
+            this.setSelectionRange(newPosition, newPosition);
+            this.dispatchEvent(new Event('input'));
         });
     }
     
@@ -2764,17 +2830,17 @@ function parseFormattedNumber(formattedValue) {
 // ========================================
 
 function initializeUppercaseInputs() {
-    // Agregar evento a todos los inputs con clase uppercase-input
-    document.querySelectorAll('.uppercase-input').forEach(input => {
-        input.addEventListener('input', function() {
+    // Agregar evento a todos los inputs y textareas con clase uppercase-input
+    document.querySelectorAll('.uppercase-input').forEach(element => {
+        element.addEventListener('input', function() {
             const cursorPosition = this.selectionStart;
             this.value = this.value.toUpperCase();
-            // Restaurar posición del cursor
+            // Restaurar posición del cursor (funciona tanto para input como textarea)
             this.setSelectionRange(cursorPosition, cursorPosition);
         });
         
         // También convertir al pegar (evento paste)
-        input.addEventListener('paste', function(e) {
+        element.addEventListener('paste', function(e) {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
             const start = this.selectionStart;

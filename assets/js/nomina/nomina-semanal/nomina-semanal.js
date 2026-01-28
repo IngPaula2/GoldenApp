@@ -3686,10 +3686,14 @@ function renderEditScalesTable() {
         let employeeName = scale.empleadoNombre || '';
         if (!employeeName && scale.empleadoId) {
             employeeName = getEmployeeNameByIdentification(scale.empleadoId, cityCode);
-            // Actualizar el objeto scale con el nombre encontrado
+            // Actualizar el objeto scale con el nombre encontrado (ya viene en mayúsculas)
             if (employeeName) {
-                scale.empleadoNombre = employeeName;
+                scale.empleadoNombre = employeeName.toUpperCase();
             }
+        } else if (employeeName) {
+            // Asegurar que el nombre existente esté en mayúsculas
+            employeeName = employeeName.toUpperCase();
+            scale.empleadoNombre = employeeName;
         }
 
         // Al editar, se cargan los datos actuales para que el usuario solo ajuste lo necesario
@@ -3703,6 +3707,8 @@ function renderEditScalesTable() {
                     data-scale-index="${index}"
                     data-field="nombre"
                     placeholder="Nombre de la escala"
+                    readonly
+                    style="background-color: #f5f5f5; cursor: not-allowed;"
                 >
             </td>
             <td>
@@ -3719,10 +3725,12 @@ function renderEditScalesTable() {
                 <input 
                     type="text" 
                     class="form-input" 
-                    value="${employeeName}"
+                    value="${employeeName.toUpperCase()}"
                     data-scale-index="${index}"
                     data-field="empleadoNombre"
                     placeholder="Nombre del ejecutivo"
+                    readonly
+                    style="background-color: #f5f5f5; cursor: not-allowed; text-transform: uppercase;"
                 >
             </td>
             <td>
@@ -3775,33 +3783,26 @@ function renderEditScalesTable() {
         });
     });
     
-    // Actualizar nombre de escala al perder el foco
-    tbody.querySelectorAll('[data-field="nombre"]').forEach(input => {
-        input.addEventListener('blur', function() {
-            const index = parseInt(this.dataset.scaleIndex);
-            const value = this.value.trim();
-            if (currentScales[index]) {
-                currentScales[index].nombre = value;
-                currentScales[index].nombreEscala = value;
-            }
-        });
-    });
-    
-    // Sincronizar identificaciones al perder el foco
+    // Sincronizar identificaciones - actualizar automáticamente cuando cambie
     tbody.querySelectorAll('[data-field="empleadoId"]').forEach(input => {
+        // Actualizar en tiempo real mientras se escribe (con debounce)
+        let timeoutId;
+        input.addEventListener('input', function() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                const index = parseInt(this.dataset.scaleIndex);
+                const nameInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="empleadoNombre"]`);
+                const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+                applyEmployeeIdToScale(index, this.value.trim(), nameInput, nombreInput);
+            }, 300); // Esperar 300ms después de que el usuario deje de escribir
+        });
+        
+        // También actualizar al perder el foco
         input.addEventListener('blur', function() {
             const index = parseInt(this.dataset.scaleIndex);
             const nameInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="empleadoNombre"]`);
-            applyEmployeeIdToScale(index, this.value.trim(), nameInput);
-        });
-    });
-    
-    // Sincronizar nombres al perder el foco
-    tbody.querySelectorAll('[data-field="empleadoNombre"]').forEach(input => {
-        input.addEventListener('blur', function() {
-            const index = parseInt(this.dataset.scaleIndex);
-            const idInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="empleadoId"]`);
-            applyEmployeeNameToScale(index, this.value.trim(), idInput);
+            const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+            applyEmployeeIdToScale(index, this.value.trim(), nameInput, nombreInput);
         });
     });
 }
@@ -3841,13 +3842,18 @@ function saveEditedScales() {
 
         const empleadoNombreInput = row.querySelector('[data-field="empleadoNombre"]');
         const empleadoIdInput = row.querySelector('[data-field="empleadoId"]');
-        const nombreValor = empleadoNombreInput ? empleadoNombreInput.value.trim() : '';
+        const nombreValor = empleadoNombreInput ? empleadoNombreInput.value.trim().toUpperCase() : '';
         const idValor = empleadoIdInput ? empleadoIdInput.value.trim() : '';
         
         // Actualizar empleadoId y empleadoNombre directamente desde los inputs
         // No llamar a applyEmployeeIdToScale aquí porque ya estamos guardando los valores
         scale.empleadoId = idValor || null;
         scale.empleadoNombre = nombreValor || null;
+        
+        // Asegurar que el input también muestre el nombre en mayúsculas
+        if (empleadoNombreInput && nombreValor) {
+            empleadoNombreInput.value = nombreValor;
+        }
 
         // Actualizar valor de la comisión
         const valorInput = row.querySelector('[data-field="valor"]');
@@ -3945,12 +3951,26 @@ function findEmployeeIdByName(nombre, cityCode) {
 }
 
 /**
+ * Mapeo de códigos de cargo a nombres de escala
+ */
+const cargoToScaleNameMap = {
+    'AS': 'Asesor',
+    'SU': 'Supervisor',
+    'SG': 'Subgerente',
+    'GT': 'Gerente',
+    'DR': 'Director',
+    'SN': 'Subdirector Nacional',
+    'DN': 'Director Nacional'
+};
+
+/**
  * Actualiza la información del ejecutivo en una escala a partir de la identificación
  * @param {number} index - Índice de la escala
  * @param {string} identificacion - Identificación digitada
- * @param {HTMLInputElement|null} nameInputElement - Input del nombre para sincronizar (opcional)
+ * @param {HTMLInputElement|null} nameInputElement - Input del nombre del ejecutivo para sincronizar (opcional)
+ * @param {HTMLInputElement|null} nombreInputElement - Input del nombre de la escala para sincronizar (opcional)
  */
-function applyEmployeeIdToScale(index, identificacion, nameInputElement) {
+function applyEmployeeIdToScale(index, identificacion, nameInputElement, nombreInputElement) {
     if (!currentScales || !currentScales[index]) {
         return;
     }
@@ -3963,64 +3983,62 @@ function applyEmployeeIdToScale(index, identificacion, nameInputElement) {
         currentScales[index].empleadoNombre = null;
         currentScales[index].nombre = '';
         currentScales[index].nombreEscala = '';
-        currentScales[index].valor = 0;
-        currentScales[index].valorEscala = 0;
         
         if (nameInputElement) {
             nameInputElement.value = '';
         }
+        if (nombreInputElement) {
+            nombreInputElement.value = '';
+        }
         
-        // Limpiar también los campos de nombre de escala y valor en el DOM
+        // Limpiar también los campos de nombre de escala en el DOM
         const tbody = document.getElementById('editScalesTableBody');
         if (tbody) {
-            const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
-            const valorInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="valor"]`);
+            const nombreInput = nombreInputElement || tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
             if (nombreInput) {
                 nombreInput.value = '';
-            }
-            if (valorInput) {
-                valorInput.value = '';
             }
         }
         return;
     }
     
-    // Verificar si estamos en el modal de edición de escalas
-    const editModal = document.getElementById('editScalesModal');
-    const isInEditModal = editModal && editModal.style.display === 'flex';
-    const tbody = document.getElementById('editScalesTableBody');
-    const isInEditTable = tbody !== null;
-    
-    // Solo limpiar nombre de escala y valor si estamos en el modal de edición
-    if (isInEditModal && isInEditTable) {
-        // Limpiar nombre de escala y valor cuando se cambia la identificación en el modal de edición
-        currentScales[index].nombre = '';
-        currentScales[index].nombreEscala = '';
-        currentScales[index].valor = 0;
-        currentScales[index].valorEscala = 0;
-        
-        // Limpiar también los campos en el DOM del modal de edición
-        const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
-        const valorInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="valor"]`);
-        if (nombreInput) {
-            nombreInput.value = '';
-        }
-        if (valorInput) {
-            valorInput.value = '';
-        }
-    }
-    
-    // Buscar y actualizar el nombre del ejecutivo
-    let employeeName = '';
+    // Buscar datos completos del empleado
     const cityCode = getSelectedCityCode();
+    let employeeName = '';
+    let scaleName = '';
+    
     if (cleanId && cityCode) {
-        employeeName = getEmployeeNameByIdentification(cleanId, cityCode) || '';
+        const employeeData = getEmployeeDataByIdentification(cleanId, cityCode);
+        
+        if (employeeData) {
+            // Obtener nombre del empleado y convertir a mayúsculas
+            employeeName = [
+                employeeData.tPrimerApellido || employeeData.primerApellido,
+                employeeData.tSegundoApellido || employeeData.segundoApellido,
+                employeeData.tPrimerNombre || employeeData.primerNombre,
+                employeeData.tSegundoNombre || employeeData.segundoNombre
+            ].filter(Boolean).join(' ').trim().toUpperCase();
+            
+            // Obtener nombre de la escala basado en el cargo
+            const cargoCode = employeeData.cargo || employeeData.tCargo;
+            if (cargoCode && cargoToScaleNameMap[cargoCode]) {
+                scaleName = cargoToScaleNameMap[cargoCode];
+            } else if (employeeData.cargoNombre) {
+                // Si no está en el mapeo, usar el cargoNombre directamente
+                scaleName = employeeData.cargoNombre;
+            }
+        } else {
+            // Si no se encuentra el empleado, intentar solo obtener el nombre (ya viene en mayúsculas)
+            employeeName = getEmployeeNameByIdentification(cleanId, cityCode) || '';
+        }
     }
     
+    // Actualizar nombre del ejecutivo (asegurar que siempre esté en mayúsculas)
     if (employeeName) {
-        currentScales[index].empleadoNombre = employeeName;
+        const employeeNameUpper = employeeName.toUpperCase();
+        currentScales[index].empleadoNombre = employeeNameUpper;
         if (nameInputElement) {
-            nameInputElement.value = employeeName;
+            nameInputElement.value = employeeNameUpper;
         }
     } else {
         currentScales[index].empleadoNombre = null;
@@ -4029,8 +4047,37 @@ function applyEmployeeIdToScale(index, identificacion, nameInputElement) {
         }
     }
     
-    // NO actualizar nombre de escala ni valor - el usuario los ingresará manualmente
-    // Solo se actualiza el nombre del ejecutivo cuando se digita la cédula
+    // Actualizar nombre de la escala
+    if (scaleName) {
+        currentScales[index].nombre = scaleName;
+        currentScales[index].nombreEscala = scaleName;
+        if (nombreInputElement) {
+            nombreInputElement.value = scaleName;
+        } else {
+            // Si no se pasó el elemento, buscarlo en el DOM
+            const tbody = document.getElementById('editScalesTableBody');
+            if (tbody) {
+                const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+                if (nombreInput) {
+                    nombreInput.value = scaleName;
+                }
+            }
+        }
+    } else {
+        currentScales[index].nombre = '';
+        currentScales[index].nombreEscala = '';
+        if (nombreInputElement) {
+            nombreInputElement.value = '';
+        } else {
+            const tbody = document.getElementById('editScalesTableBody');
+            if (tbody) {
+                const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+                if (nombreInput) {
+                    nombreInput.value = '';
+                }
+            }
+        }
+    }
 }
 
 /**

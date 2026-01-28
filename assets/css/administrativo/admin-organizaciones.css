@@ -77,8 +77,9 @@
 }
 
 /* Importante: estado visible del overlay */
-.organizaciones-page .modal-overlay.show {
-    display: flex;
+.organizaciones-page .modal-overlay.show,
+.modal-overlay.show {
+    display: flex !important;
 }
 
 .organizaciones-page .modal {
@@ -91,6 +92,12 @@
     border: 1px solid #dbcd7a;
     position: relative;
     pointer-events: auto;
+}
+
+/* Modal grande para formularios con más campos */
+.organizaciones-page .modal-large {
+    max-width: 800px;
+    width: 95%;
 }
 
 .organizaciones-page .modal-header {
@@ -238,10 +245,10 @@
     text-transform: uppercase;
 }
 
-/* Form Rows - 3 columnas como empleados */
+/* Form Rows - 2 columnas: código pequeño y nombre más ancho */
 .organizaciones-page .form-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 2.5fr;
     gap: 1rem;
     margin-bottom: 1rem;
 }
@@ -339,7 +346,8 @@
 /* ==============================
    NOTIFICACIONES
    ============================== */
-.organizaciones-page .notification {
+.organizaciones-page .notification,
+.notification {
     position: fixed;
     top: 20px;
     right: 20px;
@@ -348,21 +356,71 @@
     color: #fff;
     font-weight: 500;
     font-size: 14px;
-    z-index: 20000;
+    z-index: 15000 !important;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     max-width: 300px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.organizaciones-page .notification.show { transform: translateX(0); }
-.organizaciones-page .notification-success { background: #28a745; }
-.organizaciones-page .notification-error { background: #dc3545; }
-.organizaciones-page .notification-warning { background: #ffc107; color: #1a1a1a; }
-.organizaciones-page .notification-info { background: #17a2b8; }
+.organizaciones-page .notification.show,
+.notification.show { 
+    transform: translateX(0); 
+    z-index: 15000 !important;
+}
+.organizaciones-page .notification-success,
+.notification-success { background: #28a745; }
+.organizaciones-page .notification-error,
+.notification-error { background: #dc3545; }
+.organizaciones-page .notification-warning,
+.notification-warning { background: #ffc107; color: #1a1a1a; }
+.organizaciones-page .notification-info,
+.notification-info { background: #17a2b8; }
 
 /* Asegurar que el modal de crear/editar quede sobre cualquier overlay residual */
 #createOrgModal {
     z-index: 6000 !important;
+}
+
+/* Asegurar que el modal de confirmación aparezca por encima del formulario de crear */
+#confirmCreateOrgModal {
+    z-index: 7000 !important;
+}
+
+#confirmCreateOrgModal .modal-overlay {
+    z-index: 7000 !important;
+}
+
+/* Asegurar que el modal de éxito aparezca por encima de todos los demás modales */
+#successCreateOrgModal {
+    z-index: 8000 !important;
+}
+
+#successCreateOrgModal .modal-overlay {
+    z-index: 8000 !important;
+}
+
+/* Asegurar que el modal de confirmación de actualización aparezca por encima del formulario */
+#confirmUpdateOrgModal {
+    z-index: 7000 !important;
+}
+
+#confirmUpdateOrgModal .modal-overlay {
+    z-index: 7000 !important;
+}
+
+/* Asegurar que el modal de éxito de actualización aparezca por encima de todos los demás modales */
+#successUpdateOrgModal {
+    z-index: 8000 !important;
+}
+
+#successUpdateOrgModal .modal-overlay {
+    z-index: 8000 !important;
+}
+
+/* Asegurar que las notificaciones aparezcan por encima de todos los modales */
+.notification,
+.organizaciones-page .notification {
+    z-index: 15000 !important;
 }
 
 /* Modal de confirmación de toggle - más pequeño */
@@ -404,28 +462,39 @@
 }
 
 /* Código - 15% */
-.organizations-section .table th:nth-child(1),
-.organizations-section .table td:nth-child(1) {
+.organizations-section .table th:nth-child(1) {
     width: 15%;
     padding: 18px 12px;
     font-size: 15px;
     font-weight: 700;
 }
 
+.organizations-section .table td:nth-child(1) {
+    width: 15%;
+    padding: 18px 12px;
+    font-size: 15px;
+    font-weight: 400;
+}
+
 /* Nombre - 40% */
-.organizations-section .table th:nth-child(2),
-.organizations-section .table td:nth-child(2) {
+.organizations-section .table th:nth-child(2) {
     width: 40%;
     padding: 18px 12px;
     font-size: 15px;
     font-weight: 700;
+}
+
+.organizations-section .table td:nth-child(2) {
+    width: 40%;
+    padding: 18px 12px;
+    font-size: 15px;
+    font-weight: 400;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 /* Estado - 15% */
-.organizations-section .table th:nth-child(3),
-.organizations-section .table td:nth-child(3) {
+.organizations-section .table th:nth-child(3) {
     width: 15%;
     padding: 18px 12px;
     font-size: 15px;
@@ -433,13 +502,28 @@
     text-align: center;
 }
 
+.organizations-section .table td:nth-child(3) {
+    width: 15%;
+    padding: 18px 12px;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: center;
+}
+
 /* Opciones - 30% */
-.organizations-section .table th:nth-child(4),
-.organizations-section .table td:nth-child(4) {
+.organizations-section .table th:nth-child(4) {
     width: 30%;
     padding: 18px 12px;
     font-size: 15px;
     font-weight: 700;
+    text-align: center;
+}
+
+.organizations-section .table td:nth-child(4) {
+    width: 30%;
+    padding: 18px 12px;
+    font-size: 15px;
+    font-weight: 400;
     text-align: center;
 }
 

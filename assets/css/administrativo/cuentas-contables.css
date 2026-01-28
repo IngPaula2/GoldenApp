@@ -1,4 +1,4 @@
-/* Estilos para Cuentas Contables - TESORERÍA - GOLDEN APP */
+/* Estilos para Cuentas Contables - ADMINISTRATIVO - GOLDEN APP */
 
 .page-header {
     display: flex;
@@ -451,6 +451,23 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
+/* Asegurar que los modales de confirmación y éxito aparezcan por encima del formulario */
+#confirmCreateAccountingAccountModal {
+    z-index: 7000 !important;
+}
+
+#successCreateAccountingAccountModal {
+    z-index: 8000 !important;
+}
+
+#confirmToggleAccountingAccountModal {
+    z-index: 7000 !important;
+}
+
+#successToggleAccountingAccountModal {
+    z-index: 8000 !important;
+}
+
 /* Notificaciones (toast) */
 .notification {
     position: fixed;
@@ -474,6 +491,125 @@
 .notification-warning { background: #ffc107; color: #1a1a1a; }
 .notification-info { background: #17a2b8; }
 
+/* ========================================
+   ESTILOS PARA SECCIONES DESPLEGABLES
+   ======================================== */
+
+.accounting-section {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.accounting-section:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+/* Fila del encabezado de sección */
+.accounting-section .section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.accounting-section .section-header-row:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    transform: translateY(-1px);
+}
+
+.accounting-section .section-title {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    line-height: 1.2;
+}
+
+.accounting-section .section-title span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.accounting-section .section-icon {
+    font-size: 1rem;
+    color: #DEB448;
+    transition: transform 0.3s ease;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.2em;
+}
+
+.accounting-section.expanded .section-icon {
+    transform: rotate(90deg);
+    color: #DEB448;
+}
+
+/* Contenido de la sección */
+.accounting-section .section-content {
+    display: none;
+    animation: slideDown 0.3s ease;
+}
+
+.accounting-section.expanded .section-content {
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para las tablas dentro de las secciones */
+.accounting-section .section-content .table {
+    margin: 0;
+    border: none;
+    width: 100%;
+}
+
+.accounting-section .section-content .table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.accounting-section .section-content .table tbody td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    color: #495057;
+}
+
+.accounting-section .section-content .table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+    transform: translateX(2px);
+    transition: all 0.2s ease;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .section-header {
@@ -491,7 +627,17 @@
         width: 95%;
         max-height: 95vh;
     }
+    
+    .accounting-section {
+        margin-bottom: 1rem;
+    }
+    
+    .accounting-section .section-header-row {
+        padding: 1rem 1.5rem;
+    }
+    
+    .accounting-section .section-content .table th,
+    .accounting-section .section-content .table td {
+        padding: 0.8rem 0.75rem;
+    }
 }
-
-
-

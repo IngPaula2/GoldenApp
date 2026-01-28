@@ -284,6 +284,37 @@
     color: #333;
 }
 
+/* Botón de retroceso (flecha hacia atrás) */
+.btn-back {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.btn-back:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+.btn-back:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
 .modal-body {
     margin-bottom: 25px;
     display: flex;

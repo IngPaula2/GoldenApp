@@ -404,6 +404,117 @@ function promptForCitySelection() {
 /**
  * Muestra el modal de crear empleado
  */
+/**
+ * Configura la validación de campos numéricos en escalas
+ * para que solo acepten números y tengan máximo 10 dígitos
+ */
+function setupEscalasNumericFieldsValidation() {
+    const escalasFields = ['asesor', 'supervisor', 'subgerente', 'gerente', 'director', 'subdirectorNacional', 'directorNacional'];
+    
+    escalasFields.forEach(fieldId => {
+        const input = document.getElementById(fieldId);
+        if (input) {
+            input.addEventListener('input', function(e) {
+                // Remover cualquier carácter que no sea número
+                let value = this.value.replace(/\D/g, '');
+                
+                // Limitar a 10 dígitos
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+                
+                this.value = value;
+            });
+            
+            // Prevenir pegar texto no numérico
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const numbersOnly = paste.replace(/\D/g, '').substring(0, 10);
+                this.value = numbersOnly;
+            });
+        }
+    });
+}
+
+/**
+ * Configura la validación de campos numéricos (identificación y celular)
+ * para que solo acepten números y tengan máximo 10 dígitos
+ */
+function setupNumericFieldsValidation() {
+    // Configurar campo de identificación
+    const identificacionInput = document.getElementById('identificacion');
+    if (identificacionInput) {
+        identificacionInput.addEventListener('input', function(e) {
+            // Remover cualquier carácter que no sea número
+            let value = this.value.replace(/\D/g, '');
+            
+            // Limitar a 10 dígitos
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            this.value = value;
+        });
+        
+        // Prevenir pegar texto no numérico
+        identificacionInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = paste.replace(/\D/g, '').substring(0, 10);
+            this.value = numbersOnly;
+        });
+    }
+    
+    // Configurar campo de celular
+    const celularInput = document.getElementById('celular');
+    if (celularInput) {
+        celularInput.addEventListener('input', function(e) {
+            // Remover cualquier carácter que no sea número
+            let value = this.value.replace(/\D/g, '');
+            
+            // Limitar a 10 dígitos
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            this.value = value;
+        });
+        
+        // Prevenir pegar texto no numérico
+        celularInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = paste.replace(/\D/g, '').substring(0, 10);
+            this.value = numbersOnly;
+        });
+    }
+    
+    // Configurar campo de búsqueda de identificación
+    const searchIdentificacionInput = document.getElementById('searchEmpleadoIdentificacion');
+    if (searchIdentificacionInput) {
+        searchIdentificacionInput.addEventListener('input', function(e) {
+            // Remover cualquier carácter que no sea número
+            let value = this.value.replace(/\D/g, '');
+            
+            // Limitar a 10 dígitos
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            this.value = value;
+        });
+        
+        // Prevenir pegar texto no numérico
+        searchIdentificacionInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = paste.replace(/\D/g, '').substring(0, 10);
+            this.value = numbersOnly;
+        });
+    }
+}
+
 function showCreateEmpleadoModal() {
     // Establecer modo como creación
     empleadoMode = 'create';
@@ -431,6 +542,9 @@ function showCreateEmpleadoModal() {
     if (createEmpleadoTitle) {
         createEmpleadoTitle.textContent = 'CREAR EMPLEADO';
     }
+    
+    // Configurar validación de campos numéricos
+    setTimeout(() => setupNumericFieldsValidation(), 100);
     
     // Cargar datos de cargos
     loadCargos();
@@ -548,6 +662,9 @@ function showSearchEmpleadoModal() {
     const modal = document.getElementById('searchEmpleadoModal');
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
+    
+    // Configurar validación de campos numéricos
+    setTimeout(() => setupNumericFieldsValidation(), 100);
 }
 
 /**
@@ -678,6 +795,22 @@ function editEmpleado(empleadoId) {
         // Establecer el estado activo en los botones toggle
         setActivo(empleado.activo || 'SI');
         
+        // Si es PYF, mostrar la fila de escalas y establecer su valor
+        if (empleado.area === 'pyf') {
+            const escalasRow = document.getElementById('escalasRow');
+            if (escalasRow) {
+                escalasRow.style.display = 'block';
+            }
+            
+            // Establecer el valor de escalas (SI o NO según lo que tenga el empleado)
+            if (empleado.escalas) {
+                setEscalas(empleado.escalas);
+            } else {
+                // Si no tiene valor de escalas, establecer como NO por defecto
+                setEscalas('NO');
+            }
+        }
+        
         // Cambiar el botón y su función según si tiene escalas
         const submitButton = document.getElementById('bCrearSubmit');
         if (submitButton) {
@@ -685,8 +818,8 @@ function editEmpleado(empleadoId) {
                 // Si es PYF y tiene escalas, mostrar botón SIGUIENTE
                 submitButton.textContent = 'SIGUIENTE';
                 submitButton.onclick = function() { 
-                    // Cargar escalas existentes en el modal
-                    cargarEscalasExistentes(empleado.escalasData);
+                    // Guardar las escalas existentes para cargarlas después de generar el formulario
+                    window.tempEscalasData = empleado.escalasData;
                     showCreateEscalasModal(); 
                 };
                 console.log('Botón actualizado a SIGUIENTE para empleado PYF con escalas:', empleadoId);
@@ -710,6 +843,9 @@ function editEmpleado(empleadoId) {
         const modal = document.getElementById('createEmpleadoModal');
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
+        
+        // Configurar validación de campos numéricos
+        setTimeout(() => setupNumericFieldsValidation(), 100);
     } else {
         showNotification('No se encontró el empleado a editar', 'error');
     }
@@ -948,6 +1084,18 @@ function handleCreateEmpleado() {
         return;
     }
     
+    // Validar que la identificación solo contenga números y tenga máximo 10 dígitos
+    if (!/^\d{1,10}$/.test(identificacion)) {
+        showNotification('La identificación debe contener solo números y tener máximo 10 dígitos', 'error');
+        return;
+    }
+    
+    // Validar que el celular solo contenga números y tenga máximo 10 dígitos
+    if (!/^\d{1,10}$/.test(celular)) {
+        showNotification('El celular debe contener solo números y tener máximo 10 dígitos', 'error');
+        return;
+    }
+    
     // Construir nombre completo
     const nombreCompleto = `${primerNombre} ${segundoNombre || ''} ${primerApellido} ${segundoApellido || ''}`.trim();
     
@@ -1019,6 +1167,18 @@ function handleUpdateEmpleado(empleadoId) {
     // Validar formato de correo
     if (!isValidEmail(correo)) {
         showNotification('Por favor, ingrese un correo electrónico válido', 'error');
+        return;
+    }
+    
+    // Validar que la identificación solo contenga números y tenga máximo 10 dígitos
+    if (!/^\d{1,10}$/.test(identificacion)) {
+        showNotification('La identificación debe contener solo números y tener máximo 10 dígitos', 'error');
+        return;
+    }
+    
+    // Validar que el celular solo contenga números y tenga máximo 10 dígitos
+    if (!/^\d{1,10}$/.test(celular)) {
+        showNotification('El celular debe contener solo números y tener máximo 10 dígitos', 'error');
         return;
     }
     
@@ -1382,6 +1542,14 @@ function showCreateEscalasModal() {
         
         // Generar formulario de escalas dinámicamente
         generateEscalasForm();
+        
+        // Si hay escalas existentes guardadas temporalmente, cargarlas después de generar el formulario
+        if (window.tempEscalasData) {
+            setTimeout(() => {
+                cargarEscalasExistentes(window.tempEscalasData);
+                window.tempEscalasData = null; // Limpiar después de usar
+            }, 150);
+        }
     }
 }
 
@@ -1433,14 +1601,14 @@ function generateEscalasForm() {
             <div class="form-group">
                 <label for="asesor" class="form-label">Asesor <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="asesor" name="tAsesor" class="form-input required" placeholder="Identificación del asesor" onblur="buscarNombreEmpleado('asesor')" required>
+                    <input type="text" id="asesor" name="tAsesor" class="form-input required" placeholder="Identificación del asesor" maxlength="10" onblur="buscarNombreEmpleado('asesor')" required>
                     <input type="text" id="asesorNombre" name="tAsesorNombre" class="form-input" placeholder="Nombre del asesor" readonly>
                 </div>
             </div>
             <div class="form-group">
                 <label for="supervisor" class="form-label">Supervisor <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="supervisor" name="tSupervisor" class="form-input required" placeholder="Identificación del supervisor" onblur="buscarNombreEmpleado('supervisor')" required>
+                    <input type="text" id="supervisor" name="tSupervisor" class="form-input required" placeholder="Identificación del supervisor" maxlength="10" onblur="buscarNombreEmpleado('supervisor')" required>
                     <input type="text" id="supervisorNombre" name="tSupervisorNombre" class="form-input" placeholder="Nombre del supervisor" readonly>
                 </div>
             </div>
@@ -1450,14 +1618,14 @@ function generateEscalasForm() {
             <div class="form-group">
                 <label for="subgerente" class="form-label">Subgerente <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="subgerente" name="tSubgerente" class="form-input required" placeholder="Identificación del subgerente" onblur="buscarNombreEmpleado('subgerente')" required>
+                    <input type="text" id="subgerente" name="tSubgerente" class="form-input required" placeholder="Identificación del subgerente" maxlength="10" onblur="buscarNombreEmpleado('subgerente')" required>
                     <input type="text" id="subgerenteNombre" name="tSubgerenteNombre" class="form-input" placeholder="Nombre del subgerente" readonly>
                 </div>
             </div>
             <div class="form-group">
                 <label for="gerente" class="form-label">Gerente <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="gerente" name="tGerente" class="form-input required" placeholder="Identificación del gerente" onblur="buscarNombreEmpleado('gerente')" required>
+                    <input type="text" id="gerente" name="tGerente" class="form-input required" placeholder="Identificación del gerente" maxlength="10" onblur="buscarNombreEmpleado('gerente')" required>
                     <input type="text" id="gerenteNombre" name="tGerenteNombre" class="form-input" placeholder="Nombre del gerente" readonly>
                 </div>
             </div>
@@ -1467,14 +1635,14 @@ function generateEscalasForm() {
             <div class="form-group">
                 <label for="director" class="form-label">Director <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="director" name="tDirector" class="form-input required" placeholder="Identificación del director" onblur="buscarNombreEmpleado('director')" required>
+                    <input type="text" id="director" name="tDirector" class="form-input required" placeholder="Identificación del director" maxlength="10" onblur="buscarNombreEmpleado('director')" required>
                     <input type="text" id="directorNombre" name="tDirectorNombre" class="form-input" placeholder="Nombre del director" readonly>
                 </div>
             </div>
             <div class="form-group">
                 <label for="subdirectorNacional" class="form-label">Subdirector Nacional <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="subdirectorNacional" name="tSubdirectorNacional" class="form-input required" placeholder="Identificación del subdirector nacional" onblur="buscarNombreEmpleado('subdirectorNacional')" required>
+                    <input type="text" id="subdirectorNacional" name="tSubdirectorNacional" class="form-input required" placeholder="Identificación del subdirector nacional" maxlength="10" onblur="buscarNombreEmpleado('subdirectorNacional')" required>
                     <input type="text" id="subdirectorNacionalNombre" name="tSubdirectorNacionalNombre" class="form-input" placeholder="Nombre del subdirector nacional" readonly>
                 </div>
             </div>
@@ -1484,7 +1652,7 @@ function generateEscalasForm() {
             <div class="form-group">
                 <label for="directorNacional" class="form-label">Director Nacional <span style="color: red;">*</span></label>
                 <div class="escalas-field-group">
-                    <input type="text" id="directorNacional" name="tDirectorNacional" class="form-input required" placeholder="Identificación del director nacional" onblur="buscarNombreEmpleado('directorNacional')" required>
+                    <input type="text" id="directorNacional" name="tDirectorNacional" class="form-input required" placeholder="Identificación del director nacional" maxlength="10" onblur="buscarNombreEmpleado('directorNacional')" required>
                     <input type="text" id="directorNacionalNombre" name="tDirectorNacionalNombre" class="form-input" placeholder="Nombre del director nacional" readonly>
                 </div>
             </div>
@@ -1503,6 +1671,9 @@ function generateEscalasForm() {
             </div>
         </div>
     `;
+    
+    // Configurar validación de campos numéricos en escalas
+    setTimeout(() => setupEscalasNumericFieldsValidation(), 100);
 }
 
 /**
@@ -1511,6 +1682,9 @@ function generateEscalasForm() {
  */
 function cargarEscalasExistentes(escalasData) {
     if (!escalasData) return;
+    
+    // Asegurar que la validación esté configurada
+    setupEscalasNumericFieldsValidation();
     
     // Pre-llenar los campos de identificación
     const campos = ['asesor', 'supervisor', 'subgerente', 'gerente', 'director', 'subdirectorNacional', 'directorNacional'];
@@ -1758,6 +1932,15 @@ function confirmCreateEmpleadoEscalas() {
         { campo: 'subdirectorNacional', nombre: 'Subdirector Nacional' },
         { campo: 'directorNacional', nombre: 'Director Nacional' }
     ];
+    
+    // Validar que todos los campos de escalas tengan máximo 10 dígitos y solo números
+    for (const { campo, nombre } of camposEscalas) {
+        const valor = escalasData[campo];
+        if (!/^\d{1,10}$/.test(valor)) {
+            showNotification(`La identificación de ${nombre} debe contener solo números y tener máximo 10 dígitos`, 'error');
+            return;
+        }
+    }
     
     // Verificar que todos los campos de escalas estén llenos
     const camposVacios = [];

@@ -407,6 +407,10 @@ textarea {
     color: #DEB448;
     transition: transform 0.3s ease;
     font-weight: 600;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .section-icon.fa-chevron-down {
@@ -506,6 +510,12 @@ textarea {
     width: 90%;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     border: 1px solid #dbcd7a;
+}
+
+/* Modal grande para formularios con más campos */
+.modal-large {
+    max-width: 800px;
+    width: 95%;
 }
 
 .modal-header {
@@ -1347,13 +1357,14 @@ textarea {
 
 .form-select {
     width: 100%;
-    padding: 12px 15px;
+    padding: 12px 40px 12px 15px;
     border: 2px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
     background-color: white;
     cursor: pointer;
     appearance: none;
+    box-sizing: border-box;
 }
 
 .form-select:focus {
@@ -1363,11 +1374,14 @@ textarea {
 
 .select-arrow {
     position: absolute;
-    right: 15px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #666;
     pointer-events: none;
+    line-height: 1;
+    font-size: 12px;
+    z-index: 1;
 }
 
 .form-input {
