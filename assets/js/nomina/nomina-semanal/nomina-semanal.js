@@ -3662,6 +3662,23 @@ function hideEditScalesModal() {
 }
 
 /**
+ * Obtiene todas las escalas disponibles en el sistema
+ * 
+ * @returns {Array<Object>} Array de objetos con código y nombre de cada escala
+ */
+function getAllAvailableScales() {
+    return [
+        { codigo: 'ASESOR', nombre: 'Asesor' },
+        { codigo: 'SUPERVISOR', nombre: 'Supervisor' },
+        { codigo: 'SUBGERENTE', nombre: 'Subgerente' },
+        { codigo: 'GERENTE', nombre: 'Gerente' },
+        { codigo: 'DIRECTOR', nombre: 'Director' },
+        { codigo: 'SUBDIRECTOR', nombre: 'Subdirector Nacional' },
+        { codigo: 'DIRECTOR_NAC', nombre: 'Director Nacional' }
+    ];
+}
+
+/**
  * Renderiza la tabla de escalas editables en el modal
  * 
  * @returns {void}
@@ -3676,6 +3693,7 @@ function renderEditScalesTable() {
     tbody.innerHTML = '';
 
     const cityCode = getSelectedCityCode();
+    const availableScales = getAllAvailableScales();
 
     currentScales.forEach((scale, index) => {
         const row = document.createElement('tr');
@@ -3696,20 +3714,25 @@ function renderEditScalesTable() {
             scale.empleadoNombre = employeeName;
         }
 
+        // Crear las opciones del select con todas las escalas disponibles
+        let selectOptions = '<option value="">Seleccione una escala</option>';
+        availableScales.forEach(availableScale => {
+            const isSelected = availableScale.nombre === scaleName ? 'selected' : '';
+            selectOptions += `<option value="${availableScale.nombre}" ${isSelected}>${availableScale.nombre}</option>`;
+        });
+
         // Al editar, se cargan los datos actuales para que el usuario solo ajuste lo necesario
 
         row.innerHTML = `
             <td>
-                <input 
-                    type="text" 
+                <select 
                     class="form-input" 
-                    value="${scaleName}"
                     data-scale-index="${index}"
                     data-field="nombre"
-                    placeholder="Nombre de la escala"
-                    readonly
-                    style="background-color: #f5f5f5; cursor: not-allowed;"
+                    style="width: 100%; cursor: pointer;"
                 >
+                    ${selectOptions}
+                </select>
             </td>
             <td>
                 <input 
@@ -3823,16 +3846,25 @@ function saveEditedScales() {
 
         const scale = currentScales[index];
 
-        // Actualizar nombre de la escala
-        const nombreInput = row.querySelector('[data-field="nombre"]');
-        if (nombreInput) {
-            const nombreValue = nombreInput.value.trim();
+        // Actualizar nombre de la escala desde el select
+        const nombreSelect = row.querySelector('[data-field="nombre"]');
+        if (nombreSelect) {
+            const nombreValue = nombreSelect.value.trim();
             // Guardar el nombre siempre, incluso si está vacío
             scale.nombre = nombreValue;
             scale.nombreEscala = nombreValue;
+            
+            // Actualizar también el código de la escala basado en el nombre seleccionado
+            const availableScales = getAllAvailableScales();
+            const selectedScale = availableScales.find(s => s.nombre === nombreValue);
+            if (selectedScale) {
+                scale.codigo = selectedScale.codigo;
+                scale.codigoEscala = selectedScale.codigo;
+            }
+            
             console.log(`📝 Escala ${index} - Nombre guardado: "${nombreValue}"`);
         } else {
-            // Si no hay input de nombre, mantener el nombre existente
+            // Si no hay select de nombre, mantener el nombre existente
             // No limpiar si ya existe un nombre guardado
             if (!scale.nombre && !scale.nombreEscala) {
                 scale.nombre = '';
@@ -3994,9 +4026,9 @@ function applyEmployeeIdToScale(index, identificacion, nameInputElement, nombreI
         // Limpiar también los campos de nombre de escala en el DOM
         const tbody = document.getElementById('editScalesTableBody');
         if (tbody) {
-            const nombreInput = nombreInputElement || tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
-            if (nombreInput) {
-                nombreInput.value = '';
+            const nombreSelect = nombreInputElement || tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+            if (nombreSelect) {
+                nombreSelect.value = '';
             }
         }
         return;
@@ -4051,15 +4083,24 @@ function applyEmployeeIdToScale(index, identificacion, nameInputElement, nombreI
     if (scaleName) {
         currentScales[index].nombre = scaleName;
         currentScales[index].nombreEscala = scaleName;
+        
+        // Actualizar también el código de la escala basado en el nombre
+        const availableScales = getAllAvailableScales();
+        const selectedScale = availableScales.find(s => s.nombre === scaleName);
+        if (selectedScale) {
+            currentScales[index].codigo = selectedScale.codigo;
+            currentScales[index].codigoEscala = selectedScale.codigo;
+        }
+        
         if (nombreInputElement) {
             nombreInputElement.value = scaleName;
         } else {
             // Si no se pasó el elemento, buscarlo en el DOM
             const tbody = document.getElementById('editScalesTableBody');
             if (tbody) {
-                const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
-                if (nombreInput) {
-                    nombreInput.value = scaleName;
+                const nombreSelect = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+                if (nombreSelect && nombreSelect.tagName === 'SELECT') {
+                    nombreSelect.value = scaleName;
                 }
             }
         }
@@ -4071,9 +4112,9 @@ function applyEmployeeIdToScale(index, identificacion, nameInputElement, nombreI
         } else {
             const tbody = document.getElementById('editScalesTableBody');
             if (tbody) {
-                const nombreInput = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
-                if (nombreInput) {
-                    nombreInput.value = '';
+                const nombreSelect = tbody.querySelector(`[data-scale-index="${index}"][data-field="nombre"]`);
+                if (nombreSelect && nombreSelect.tagName === 'SELECT') {
+                    nombreSelect.value = '';
                 }
             }
         }
