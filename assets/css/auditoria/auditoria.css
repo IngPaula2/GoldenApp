@@ -1,0 +1,1267 @@
+/**
+ * 🔍 ESTILOS AUDITORÍA - GOLDEN APP
+ *
+ * Estilos del módulo de auditoría: Comisión, Bonos y Liquidación.
+ *
+ * @author Equipo Golden Bridge
+ * @version 1.0.0
+ * @date 2025
+ */
+
+/* ========================================
+   SECCIONES DE AUDITORÍA
+   ======================================== */
+
+.auditoria-section {
+    display: none;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.auditoria-section.auditoria-section-active {
+    display: block;
+}
+
+.auditoria-section-inner {
+    padding: 24px;
+}
+
+.auditoria-section .section-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.auditoria-section .section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auditoria-section .section-header h2 i {
+    color: #DEB448;
+}
+
+/* Placeholder hasta definir contenido */
+.auditoria-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    text-align: center;
+    color: #6b7280;
+    padding: 32px;
+}
+
+.auditoria-placeholder .placeholder-icon {
+    font-size: 3rem;
+    color: #DEB448;
+    margin-bottom: 16px;
+    opacity: 0.9;
+}
+
+.auditoria-placeholder p {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.auditoria-placeholder small {
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+/* ========================================
+   SECCIÓN COMISIÓN Y BONOS - CABECERA Y TABLAS
+   ======================================== */
+
+.auditoria-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.auditoria-section-header h2 {
+    margin: 0;
+}
+
+.auditoria-section-header .section-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.current-city-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    color: #6b7280;
+}
+
+.current-city-info i {
+    color: #DEB448;
+    font-size: 0.8rem;
+}
+
+.current-city-info span {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auditoria-desc {
+    margin: 0 0 1.25rem;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.auditoria-section .data-table {
+    margin-bottom: 1.5rem;
+}
+
+.auditoria-subsection {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.auditoria-subsection h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auditoria-subsection h3 i {
+    color: #DEB448;
+}
+
+.auditoria-subsection .auditoria-desc {
+    margin-bottom: 1rem;
+}
+
+/* ========================================
+   SECCIÓN LIQUIDACIÓN - FILTROS Y REPORTE
+   ======================================== */
+.liquidacion-filtros-wrap {
+    border: 1px solid #ece3bf;
+    border-radius: 10px;
+    background: #faf9f2;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+
+.liquidacion-filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+}
+
+.liquidacion-reporte-wrap {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 16px;
+    background: #fff;
+}
+
+.liquidacion-reporte-wrap + .liquidacion-reporte-wrap {
+    margin-top: 16px;
+}
+
+.liquidacion-reporte-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.liquidacion-reporte-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1f2937;
+}
+
+.liquidacion-reporte-header small {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.liquidacion-resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.liquidacion-resumen-card {
+    border: 1px solid #ece3bf;
+    background: #faf9f2;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.liquidacion-resumen-label {
+    color: #6b7280;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.liquidacion-resumen-card strong {
+    font-size: 1rem;
+    color: #111827;
+}
+
+#tablaLiquidacionHistorico,
+#tablaLiquidacionDetalle {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#tablaLiquidacionHistorico th,
+#tablaLiquidacionHistorico td,
+#tablaLiquidacionDetalle th,
+#tablaLiquidacionDetalle td {
+    vertical-align: middle;
+}
+
+#tablaLiquidacionHistorico td:last-child {
+    white-space: nowrap;
+}
+
+#tablaLiquidacionHistorico .btn-ver-detalle-liquidacion {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.liquidacion-tipo-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.liquidacion-tipo-grid .btn {
+    justify-content: flex-start;
+}
+
+.liquidacion-resumen-grid-preview {
+    margin-top: 8px;
+}
+
+/* Estado activo/inactivo y switch ON/OFF */
+.badge {
+    display: inline-block;
+    padding: 0;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #6b7280 !important;
+    text-align: left;
+}
+
+.badge-success {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #6b7280 !important;
+}
+
+.badge-secondary {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #6b7280 !important;
+}
+
+.animated-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.animated-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: none;
+    box-shadow:
+        0 4px 8px rgba(255, 71, 87, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    max-width: 60px;
+    max-height: 30px;
+    z-index: 1;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    border: none;
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.toggle-slider:after {
+    content: "OFF";
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.animated-toggle input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #2ed573, #27c565);
+    box-shadow:
+        0 4px 8px rgba(46, 213, 115, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.animated-toggle input:checked + .toggle-slider:before {
+    transform: translateX(32px);
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.animated-toggle input:checked + .toggle-slider:after {
+    content: "ON";
+    left: 8px;
+    right: auto;
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+}
+
+.animated-toggle:hover .toggle-slider {
+    opacity: 0.9;
+}
+
+.animated-toggle:hover .toggle-slider:before {
+    box-shadow:
+        0 3px 6px rgba(0, 0, 0, 0.25),
+        0 1px 2px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+#tablaComisiones td:last-child,
+#tablaBonos td:last-child,
+#tablaBonosConcurso td:last-child {
+    white-space: nowrap;
+}
+
+#tablaBonos,
+#tablaBonosConcurso {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#tablaComisiones .btn-editar-comision,
+#tablaBonos .btn-editar-bono,
+#tablaBonosConcurso .btn-editar-bono {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 6px;
+}
+
+/* ========================================
+   MODALES - MISMO ESTILO QUE RESTО DE LA APP
+   ======================================== */
+
+#modalTipoLiquidacion.modal-overlay,
+#modalCrearLiquidacion.modal-overlay,
+#modalBuscarLiquidacion.modal-overlay,
+#modalTipoReporteLiquidacion.modal-overlay,
+#modalResultadosLiquidacion.modal-overlay,
+#selectCityModal.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(2px);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#modalTipoLiquidacion.modal-overlay.show,
+#modalCrearLiquidacion.modal-overlay.show,
+#modalBuscarLiquidacion.modal-overlay.show,
+#modalTipoReporteLiquidacion.modal-overlay.show,
+#modalResultadosLiquidacion.modal-overlay.show,
+#selectCityModal.modal-overlay.show {
+    display: flex;
+}
+
+#modalTipoLiquidacion .modal,
+#modalCrearLiquidacion .modal,
+#modalBuscarLiquidacion .modal,
+#modalTipoReporteLiquidacion .modal,
+#modalResultadosLiquidacion .modal,
+#selectCityModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #dbcd7a;
+    width: 95%;
+    position: relative;
+}
+
+#modalCrearLiquidacion .modal {
+    max-width: 720px;
+}
+
+#modalTipoLiquidacion .modal-header,
+#modalCrearLiquidacion .modal-header,
+#modalBuscarLiquidacion .modal-header,
+#modalTipoReporteLiquidacion .modal-header,
+#modalResultadosLiquidacion .modal-header,
+#selectCityModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+#modalTipoLiquidacion .modal-header h3,
+#modalCrearLiquidacion .modal-header h3,
+#modalBuscarLiquidacion .modal-header h3,
+#modalTipoReporteLiquidacion .modal-header h3,
+#modalResultadosLiquidacion .modal-header h3,
+#selectCityModal .modal-header h3 {
+    margin: 0;
+    color: #374151;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+#modalTipoLiquidacion .modal-close,
+#modalCrearLiquidacion .modal-close,
+#modalBuscarLiquidacion .modal-close,
+#modalTipoReporteLiquidacion .modal-close,
+#modalResultadosLiquidacion .modal-close,
+#selectCityModal .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+#modalTipoLiquidacion .modal-body,
+#modalCrearLiquidacion .modal-body,
+#modalBuscarLiquidacion .modal-body,
+#modalTipoReporteLiquidacion .modal-body,
+#modalResultadosLiquidacion .modal-body,
+#selectCityModal .modal-body {
+    margin-bottom: 20px;
+}
+
+#modalTipoLiquidacion .modal-footer,
+#modalCrearLiquidacion .modal-footer,
+#modalBuscarLiquidacion .modal-footer,
+#modalTipoReporteLiquidacion .modal-footer,
+#modalResultadosLiquidacion .modal-footer,
+#selectCityModal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+#modalTipoLiquidacion .form-input,
+#modalTipoLiquidacion .form-select,
+#modalCrearLiquidacion .form-input,
+#modalCrearLiquidacion .form-select,
+#modalBuscarLiquidacion .form-input,
+#modalBuscarLiquidacion .form-select,
+#modalTipoReporteLiquidacion .form-input,
+#modalTipoReporteLiquidacion .form-select,
+#selectCityModal .form-input,
+#selectCityModal .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+}
+
+#modalTipoLiquidacion .select-container,
+#modalCrearLiquidacion .select-container,
+#modalBuscarLiquidacion .select-container,
+#modalTipoReporteLiquidacion .select-container {
+    position: relative;
+    width: 100%;
+}
+
+#modalTipoLiquidacion .form-select,
+#modalCrearLiquidacion .form-select,
+#modalBuscarLiquidacion .form-select,
+#modalTipoReporteLiquidacion .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.5rem;
+    width: 100%;
+    min-height: 42px;
+}
+
+#modalTipoLiquidacion .select-arrow,
+#modalCrearLiquidacion .select-arrow,
+#modalBuscarLiquidacion .select-arrow,
+#modalTipoReporteLiquidacion .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+#modalTipoLiquidacion .form-input:focus,
+#modalTipoLiquidacion .form-select:focus,
+#modalCrearLiquidacion .form-input:focus,
+#modalCrearLiquidacion .form-select:focus,
+#modalBuscarLiquidacion .form-input:focus,
+#modalBuscarLiquidacion .form-select:focus,
+#modalTipoReporteLiquidacion .form-input:focus,
+#modalTipoReporteLiquidacion .form-select:focus,
+#selectCityModal .form-input:focus,
+#selectCityModal .form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.15);
+}
+
+#modalTipoLiquidacion .form-group {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+#modalResultadosLiquidacion .modal {
+    max-width: 1200px;
+}
+
+#modalResultadosLiquidacion .modal-body {
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+.liq-reporte-ciudades-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 8px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.liq-reporte-ciudades-list label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+}
+
+/* Select city: igual al patrón visual de otras interfaces */
+#selectCityModal.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000 !important;
+    backdrop-filter: blur(5px);
+}
+
+#selectCityModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #dbcd7a;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+#selectCityModal .modal-header {
+    margin-bottom: 25px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    border-bottom: none;
+}
+
+#selectCityModal .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+}
+
+#selectCityModal .modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+#selectCityModal .modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+#selectCityModal .modal-body {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    align-items: stretch;
+    min-height: 0;
+}
+
+#selectCityModal .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 0;
+    border-top: none;
+}
+
+#selectCityModal .select-container {
+    position: relative;
+}
+
+#selectCityModal .form-select {
+    padding-right: 2.5rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+#selectCityModal .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+/* Overlay y contenedor (estilo cartera / admin-cargos) */
+#modalComision.modal-overlay,
+#modalBono.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(2px);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#modalComision.modal-overlay.show,
+#modalBono.modal-overlay.show {
+    display: flex;
+}
+
+#modalComision .modal,
+#modalBono .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #dbcd7a;
+    max-width: 720px;
+    width: 95%;
+    position: relative;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+
+#modalComision .modal-header,
+#modalBono .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#modalComision .modal-header h3,
+#modalBono .modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+#modalComision .modal-close,
+#modalBono .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #1a1a1a;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+#modalComision .modal-close:hover,
+#modalBono .modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#modalComision .modal-body,
+#modalBono .modal-body {
+    margin-bottom: 25px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-right: 5px;
+    max-height: 60vh;
+}
+
+#modalComision .modal-body::-webkit-scrollbar,
+#modalBono .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#modalComision .modal-body::-webkit-scrollbar-track,
+#modalBono .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#modalComision .modal-body::-webkit-scrollbar-thumb,
+#modalBono .modal-body::-webkit-scrollbar-thumb {
+    background: #DEB448;
+    border-radius: 4px;
+}
+
+#modalComision .modal-footer,
+#modalBono .modal-footer {
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: auto;
+    padding-top: 20px;
+    flex-shrink: 0;
+}
+
+#modalComision .modal-footer .btn,
+#modalBono .modal-footer .btn {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#modalComision .modal-footer .btn-primary,
+#modalBono .modal-footer .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+#modalComision .modal-footer .btn-primary:hover,
+#modalBono .modal-footer .btn-primary:hover {
+    background: #d4a942;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+#modalComision .modal-footer .btn-secondary,
+#modalBono .modal-footer .btn-secondary {
+    background: #6c757d;
+    color: #fff;
+}
+
+#modalComision .modal-footer .btn-secondary:hover,
+#modalBono .modal-footer .btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Formularios dentro de modales (estilo unificado) */
+#modalComision .form-row,
+#modalBono .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#modalComision .form-row .form-group,
+#modalBono .form-row .form-group {
+    flex: 1;
+    min-width: 180px;
+}
+
+#modalComision .form-group,
+#modalBono .form-group {
+    margin-bottom: 0.75rem;
+}
+
+#modalComision .form-label,
+#modalBono .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+#modalComision .form-input,
+#modalBono .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #1a1a1a;
+    box-sizing: border-box;
+}
+
+#modalComision .form-input:focus,
+#modalBono .form-input:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+#modalComision .select-container,
+#modalBono .select-container {
+    position: relative;
+}
+
+#modalComision .form-select,
+#modalBono .form-select {
+    width: 100%;
+    padding: 12px 15px;
+    padding-right: 2.5rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #1a1a1a;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+#modalComision .form-select:focus,
+#modalBono .form-select:focus {
+    outline: none;
+    border-color: #DEB448;
+    box-shadow: 0 0 0 3px rgba(222, 180, 72, 0.1);
+}
+
+#modalComision .select-arrow,
+#modalBono .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+/* Contenedor porcentaje / dinero: número + sufijo % o $ */
+.input-percent-wrap,
+.input-money-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+
+.input-percent-wrap .form-input,
+.input-money-wrap .form-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-suffix {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.input-percent-wrap .input-suffix {
+    color: #1a1a1a;
+}
+
+.form-group-optional {
+    margin-bottom: 1rem;
+}
+
+#modalComision .radio-group,
+#modalBono .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+#modalComision .radio-label,
+#modalBono .radio-label,
+#modalComision .checkbox-label,
+#modalBono .checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.meses-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
+}
+
+.meses-checkbox-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   TABLA DE RANGOS DENTRO DEL MODAL
+   ======================================== */
+
+.auditoria-rangos-wrap {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.rangos-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.rangos-header .form-label {
+    margin: 0;
+}
+
+.rangos-table-wrap {
+    overflow-x: auto;
+}
+
+.table-rangos {
+    font-size: 0.9rem;
+}
+
+.table-rangos th,
+.table-rangos td {
+    padding: 0.5rem 0.5rem;
+}
+
+.table-rangos .form-input {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    min-width: 80px;
+}
+
+.table-rangos .btn-remove-row {
+    padding: 0.25rem 0.5rem;
+    color: #dc3545;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.table-rangos .btn-remove-row:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Botones pequeños en tablas de rangos (dentro del modal) */
+#modalComision .table-rangos .form-input,
+#modalBono .table-rangos .form-input {
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    font-size: 14px;
+}
+
+#modalComision .table-rangos .form-input:focus,
+#modalBono .table-rangos .form-input:focus {
+    border-color: #DEB448;
+    box-shadow: 0 0 0 2px rgba(222, 180, 72, 0.1);
+}
+
+/* ========================================
+  AVISOS Y MODALES DE CONFIRMACIÓN/ÉXITO
+  ======================================== */
+#confirmActionAuditoriaModal.modal-overlay,
+#successActionAuditoriaModal.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+    backdrop-filter: blur(2px);
+    padding: 20px;
+}
+
+#confirmActionAuditoriaModal.modal-overlay.show,
+#successActionAuditoriaModal.modal-overlay.show {
+    display: flex;
+}
+
+#confirmActionAuditoriaModal .modal,
+#successActionAuditoriaModal .modal {
+    background: rgba(229, 227, 227, 0.925);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #dbcd7a;
+    width: 95%;
+    max-width: 420px;
+}
+
+#confirmActionAuditoriaModal .modal-header,
+#successActionAuditoriaModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+#confirmActionAuditoriaModal .modal-header h3,
+#successActionAuditoriaModal .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+}
+
+#confirmActionAuditoriaModal .modal-body,
+#successActionAuditoriaModal .modal-body {
+    margin-bottom: 18px;
+}
+
+#confirmActionAuditoriaModal .modal-body p,
+#successActionAuditoriaModal .modal-body p {
+    margin: 0;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.4;
+}
+
+#confirmActionAuditoriaModal .modal-footer,
+#successActionAuditoriaModal .modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#confirmActionAuditoriaModal .btn,
+#successActionAuditoriaModal .btn {
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#confirmActionAuditoriaModal .btn-primary,
+#successActionAuditoriaModal .btn-primary {
+    background: #DEB448;
+    color: #1a1a1a;
+}
+
+#confirmActionAuditoriaModal .btn-secondary {
+    background: #6c757d;
+    color: #fff;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 3000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 340px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    background: #28a745;
+}
+
+.notification-error {
+    background: #dc3545;
+}
+
+.notification-warning {
+    background: #ffc107;
+    color: #1a1a1a;
+}
+
+.notification-info {
+    background: #17a2b8;
+}

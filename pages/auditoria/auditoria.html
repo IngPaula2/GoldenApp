@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<!--
+    AUDITORÍA - GOLDEN APP
+    
+    Módulo de auditoría con secciones: Comisión, Bonos y Liquidación.
+    
+    @author Equipo Golden Bridge
+    @version 1.0.0
+    @date 2025
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Auditoría</title>
+    
+    <!-- ========================================
+         RECURSOS EXTERNOS Y DEPENDENCIAS
+         ======================================== -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../assets/css/administrativo/main.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../assets/css/auditoria/auditoria.css">
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <!-- ========================================
+         SIDEBAR DE NAVEGACIÓN
+         ======================================== -->
+    
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="../administrativo/admin-titulares.html" class="nav-link">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../facturacion/contratos/fac-contratos.html" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../tesoreria/ingreso-caja/ingreso-caja.html" class="nav-link">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../nomina/nomina-semanal/nomina-semanal.html" class="nav-link">
+                        <i class="fas fa-coins nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../cartera/asignar-factura/asignar-factura.html" class="nav-link">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="auditoria.html" class="nav-link">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../contabilidad/contabilidad.html" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         ======================================== -->
+    
+    <main class="main-content">
+        <nav class="top-nav">
+            <ul class="top-nav-list">
+                <li class="top-nav-item active">
+                    <a href="#" class="top-nav-link" data-auditoria-section="comision">Comisión</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link" data-auditoria-section="bonos">Bonos</a>
+                </li>
+                <li class="top-nav-item">
+                    <a href="#" class="top-nav-link" data-auditoria-section="liquidacion">Liquidación</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="content-area">
+            <!-- Sección Comisión -->
+            <section id="section-comision" class="auditoria-section auditoria-section-active">
+                <div class="auditoria-section-inner">
+                    <div class="section-header auditoria-section-header">
+                        <h2>Porcentajes de liquidación</h2>
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-primary" id="btnCrearComision">
+                                <i class="fas fa-plus"></i> Crear comisión
+                            </button>
+                        </div>
+                    </div>
+                    <div class="data-table">
+                        <table class="table" id="tablaComisiones">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Cargo</th>
+                                    <th>Rangos / %</th>
+                                    <th>Mín. cuentas</th>
+                                    <th>Estado</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyComisiones">
+                                <tr class="no-data-row">
+                                    <td colspan="6" class="no-data-message">
+                                        <div class="no-data-content">
+                                            <i class="fas fa-percent"></i>
+                                            <p>No hay configuraciones de comisión</p>
+                                            <small>Use "Crear comisión" para definir porcentajes por cargo</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección Bonos -->
+            <section id="section-bonos" class="auditoria-section">
+                <div class="auditoria-section-inner">
+                    <div class="section-header auditoria-section-header">
+                        <h2>Premios y bonos</h2>
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-primary" id="btnCrearBono">
+                                <i class="fas fa-plus"></i> Crear bono
+                            </button>
+                        </div>
+                    </div>
+                    <div class="data-table">
+                        <table class="table" id="tablaBonos">
+                            <colgroup>
+                                <col style="width: 28%;">
+                                <col style="width: 22%;">
+                                <col style="width: 24%;">
+                                <col style="width: 13%;">
+                                <col style="width: 13%;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Cargo</th>
+                                    <th>Rangos / Premio</th>
+                                    <th>Estado</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyBonos">
+                                <tr class="no-data-row">
+                                    <td colspan="5" class="no-data-message">
+                                        <div class="no-data-content">
+                                            <i class="fas fa-gift"></i>
+                                            <p>No hay configuraciones de bonos</p>
+                                            <small>Use "Crear bono" para definir premios por cargo</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="auditoria-subsection" id="subsectionBonosConcurso">
+                        <h3>Bonos concurso</h3>
+                        <div class="data-table">
+                            <table class="table" id="tablaBonosConcurso">
+                                <colgroup>
+                                    <col style="width: 28%;">
+                                    <col style="width: 22%;">
+                                    <col style="width: 24%;">
+                                    <col style="width: 13%;">
+                                    <col style="width: 13%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre / Cargo</th>
+                                        <th>Rangos</th>
+                                        <th>Meses autorizados</th>
+                                        <th>Estado</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyBonosConcurso">
+                                    <tr class="no-data-row">
+                                        <td colspan="5" class="no-data-message">
+                                            <div class="no-data-content">
+                                                <i class="fas fa-trophy"></i>
+                                                <p>No hay bonos concurso</p>
+                                                <small>Crear bono y marcar como "Bono concurso" con meses autorizados</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección Liquidación -->
+            <section id="section-liquidacion" class="auditoria-section">
+                <div class="auditoria-section-inner">
+                    <div class="section-header auditoria-section-header">
+                        <div class="section-title">
+                            <h2>Liquidación</h2>
+                            <div class="current-city-info" id="currentCityInfo">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span id="currentCityName">Seleccione una ciudad</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-primary" id="changeCityButton">
+                                Cambiar Ciudad
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btnBuscarLiquidacion">
+                                Buscar
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btnReporteLiquidacion">
+                                Reporte
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btnCrearLiquidacion">
+                                Crear liquidación
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="liquidacion-reporte-wrap" id="liquidacionHistoricoWrap">
+                        <div class="liquidacion-reporte-header">
+                            <h3>Liquidaciones</h3>
+                            <small id="liqHistoricoCount">0 registros</small>
+                        </div>
+
+                        <div class="data-table">
+                            <table class="table" id="tablaLiquidacionHistorico">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo liquidación</th>
+                                        <th>Mes</th>
+                                        <th>Rango</th>
+                                        <th>Registros</th>
+                                        <th>Puntos totales</th>
+                                        <th>Valor liquidado</th>
+                                        <th>Fecha creación</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyLiquidacionHistorico">
+                                    <tr class="no-data-row">
+                                        <td colspan="8" class="no-data-message">
+                                            <div class="no-data-content">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                                <p>No hay liquidaciones creadas</p>
+                                                <small>Use "Crear liquidación" para generar el primer proceso</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="liquidacion-reporte-wrap" id="liquidacionDetalleWrap" style="display: none;">
+                        <div class="liquidacion-reporte-header">
+                            <button type="button" class="btn btn-primary btn-small" id="btnVolverLiquidaciones">
+                                Volver
+                            </button>
+                            <h3 id="liqReporteTitulo">Detalle de liquidación seleccionada</h3>
+                            <small id="liqRangoLabel">Sin liquidación seleccionada</small>
+                        </div>
+
+                        <div class="liquidacion-resumen-grid">
+                            <div class="liquidacion-resumen-card">
+                                <span class="liquidacion-resumen-label">Registros</span>
+                                <strong id="liqResumenRegistros">0</strong>
+                            </div>
+                            <div class="liquidacion-resumen-card">
+                                <span class="liquidacion-resumen-label">Cuentas</span>
+                                <strong id="liqResumenCuentas">0</strong>
+                            </div>
+                            <div class="liquidacion-resumen-card">
+                                <span class="liquidacion-resumen-label">Valor asignado</span>
+                                <strong id="liqResumenValorAsignado">$0</strong>
+                            </div>
+                            <div class="liquidacion-resumen-card">
+                                <span class="liquidacion-resumen-label">Ingresos en rango</span>
+                                <strong id="liqResumenIngresos">$0</strong>
+                            </div>
+                            <div class="liquidacion-resumen-card">
+                                <span class="liquidacion-resumen-label">Puntos totales</span>
+                                <strong id="liqResumenPuntos">0.000</strong>
+                            </div>
+                            <div class="liquidacion-resumen-card">
+                                <span class="liquidacion-resumen-label">Valor liquidado</span>
+                                <strong id="liqResumenPagosAplicados">$0</strong>
+                            </div>
+                        </div>
+
+                        <div class="data-table">
+                            <table class="table" id="tablaLiquidacionDetalle">
+                                <thead>
+                                    <tr>
+                                        <th>Ejecutivo</th>
+                                        <th>Ingreso</th>
+                                        <th>Fecha</th>
+                                        <th>Factura</th>
+                                        <th>Valor</th>
+                                        <th>Mes</th>
+                                        <th>Año</th>
+                                        <th>Punto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyLiquidacionDetalle">
+                                    <tr class="no-data-row">
+                                        <td colspan="8" class="no-data-message">
+                                            <div class="no-data-content">
+                                                <i class="fas fa-file-alt"></i>
+                                                <p>Seleccione una liquidación para ver el detalle</p>
+                                                <small>Use el botón "Ver detalle" en el histórico</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODALES - LIQUIDACIÓN
+         ======================================== -->
+    <div class="modal-overlay" id="modalTipoLiquidacion">
+        <div class="modal" style="max-width: 560px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">CREAR LIQUIDACIÓN</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalTipoLiquidacion" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="liqTipoLiquidacionSelect" class="form-label">Tipo de liquidación *</label>
+                    <div class="select-container">
+                        <select id="liqTipoLiquidacionSelect" class="form-select">
+                            <option value="">Seleccione el tipo de liquidación</option>
+                            <option value="por_ejecutivo">Ejecutivo de Cuenta - por ejecutivo</option>
+                            <option value="por_filial">Ejecutivo de Cuenta - por filial</option>
+                            <option value="prejuridico">Liquidación pre jurídico</option>
+                            <option value="casas_externas">Casas cobranzas externas</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnCancelarModalTipoLiquidacion">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarModalTipoLiquidacion">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalCrearLiquidacion">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="modalCrearLiquidacionTitulo">CREAR LIQUIDACIÓN EC</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalCrearLiquidacion" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="liqCreateTipo" value="">
+                <div class="liquidacion-filtros-grid">
+                    <div class="form-group" id="liqCreateCiudadesWrap" style="display: none;">
+                        <label class="form-label">Ciudades para liquidar *</label>
+                        <div id="liqCreateCiudadesList" class="liq-reporte-ciudades-list"></div>
+                    </div>
+                    <div class="form-group" id="liqCreateFilialWrap" style="display: none;">
+                        <label for="liqCreateFilial" class="form-label">Filial *</label>
+                        <div class="select-container">
+                            <select id="liqCreateFilial" class="form-select">
+                                <option value="">Seleccione la filial</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group" id="liqCreateEjecutivoWrap" style="display: none;">
+                        <label for="liqCreateEjecutivoId" class="form-label">Identificación ejecutivo *</label>
+                        <input type="text" id="liqCreateEjecutivoId" class="form-input" placeholder="Ingrese identificación del ejecutivo">
+                    </div>
+                    <div class="form-group">
+                        <label for="liqCreateMes" class="form-label">Mes liquidación *</label>
+                        <input type="month" id="liqCreateMes" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="liqCreateFechaInicio" class="form-label">Fecha inicial *</label>
+                        <input type="date" id="liqCreateFechaInicio" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="liqCreateFechaFin" class="form-label">Fecha final *</label>
+                        <input type="date" id="liqCreateFechaFin" class="form-input" required>
+                    </div>
+                </div>
+                <div class="liquidacion-resumen-grid liquidacion-resumen-grid-preview">
+                    <div class="liquidacion-resumen-card">
+                        <span class="liquidacion-resumen-label">Ciudades detectadas</span>
+                        <strong id="liqPreviewCiudades">0</strong>
+                    </div>
+                    <div class="liquidacion-resumen-card">
+                        <span class="liquidacion-resumen-label">Ejecutivos detectados</span>
+                        <strong id="liqPreviewEjecutivos">0</strong>
+                    </div>
+                    <div class="liquidacion-resumen-card">
+                        <span class="liquidacion-resumen-label">Asignaciones detectadas</span>
+                        <strong id="liqPreviewAsignaciones">0</strong>
+                    </div>
+                    <div class="liquidacion-resumen-card">
+                        <span class="liquidacion-resumen-label">Ingresos en rango</span>
+                        <strong id="liqPreviewIngresos">$0</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnCancelarModalCrearLiquidacion">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarCrearLiquidacion">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalBuscarLiquidacion">
+        <div class="modal" style="max-width: 680px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">BUSCAR LIQUIDACIÓN</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalBuscarLiquidacion" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="liquidacion-filtros-grid">
+                    <div class="form-group">
+                        <label for="liqBuscarMes" class="form-label">Mes liquidación</label>
+                        <input type="month" id="liqBuscarMes" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="liqBuscarFechaInicio" class="form-label">Fecha inicial</label>
+                        <input type="date" id="liqBuscarFechaInicio" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="liqBuscarFechaFin" class="form-label">Fecha final</label>
+                        <input type="date" id="liqBuscarFechaFin" class="form-input">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnLimpiarBuscarLiquidacion">Limpiar</button>
+                <button type="button" class="btn btn-primary" id="btnAplicarBuscarLiquidacion">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalTipoReporteLiquidacion">
+        <div class="modal" style="max-width: 760px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONE EL TIPO DE REPORTE</h3>
+                <button type="button" class="modal-close" id="btnCerrarTipoReporteLiquidacion" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="liqTipoReporteSelect" class="form-label">Tipo de reporte *</label>
+                    <div class="select-container">
+                        <select id="liqTipoReporteSelect" class="form-select">
+                            <option value="">Seleccione el tipo de reporte</option>
+                            <option value="REPORTE DETALLADO POR EJECUTIVO">REPORTE DETALLADO POR EJECUTIVO</option>
+                            <option value="RESUMEN LIQUIDACIÓN EJECUTIVOS CON ASIGNACIÓN EN DOS CIUDADES">RESUMEN LIQUIDACIÓN EJECUTIVOS CON ASIGNACIÓN EN DOS CIUDADES</option>
+                            <option value="RESUMEN LIQUIDACIÓN EJECUTIVOS, UNA FILIAL Y LIQUIDACIÓN DIRECTOR ADMINISTRATIVO">RESUMEN LIQUIDACIÓN EJECUTIVOS, UNA FILIAL Y LIQUIDACIÓN DIRECTOR ADMINISTRATIVO</option>
+                            <option value="RESUMEN LIQUIDACIÓN SUPERVISOR NACIONAL">RESUMEN LIQUIDACIÓN SUPERVISOR NACIONAL</option>
+                            <option value="REPORTE DETALLADO">REPORTE DETALLADO</option>
+                            <option value="RESUMEN LIQUIDACIÓN PREJURIDICO">RESUMEN LIQUIDACIÓN PREJURIDICO</option>
+                            <option value="CASAS COBRANZAS EXTERNAS: REPORTE DETALLADO">CASAS COBRANZAS EXTERNAS: REPORTE DETALLADO</option>
+                            <option value="RESUMEN LIQUIDACIÓN GENERAL">RESUMEN LIQUIDACIÓN GENERAL</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+                <div class="form-group" id="liqReporteEjecutivoWrap" style="display: none;">
+                    <label for="liqReporteEjecutivoId" class="form-label">Identificación ejecutivo *</label>
+                    <input type="text" id="liqReporteEjecutivoId" class="form-input" placeholder="Ingrese identificación del ejecutivo">
+                </div>
+                <div class="form-group" id="liqReporteCiudadesWrap" style="display: none;">
+                    <label class="form-label">Ciudades para el reporte *</label>
+                    <div id="liqReporteCiudadesList" class="liq-reporte-ciudades-list"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnCancelarTipoReporteLiquidacion">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarTipoReporteLiquidacion">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalResultadosLiquidacion">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">RESULTADOS DE BÚSQUEDA - LIQUIDACIÓN</h3>
+                <button type="button" class="modal-close" id="btnCerrarResultadosLiquidacion" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table" id="tablaResultadosLiquidacion">
+                        <thead>
+                            <tr>
+                                <th>Tipo liquidación</th>
+                                <th>Mes</th>
+                                <th>Rango</th>
+                                <th>Registros</th>
+                                <th>Puntos totales</th>
+                                <th>Valor liquidado</th>
+                                <th>Fecha creación</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyResultadosLiquidacion">
+                            <tr class="no-data-row">
+                                <td colspan="8" class="no-data-message">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <p>No se encontraron resultados</p>
+                                        <small>Ajuste los filtros e intente de nuevo</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnCerrarResultadosLiquidacionFooter">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+        <div class="modal" style="max-width: 520px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
+                <button type="button" class="modal-close" id="btnCerrarSelectCityModal" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select" required>
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALES - COMISIÓN Y BONOS
+         ======================================== -->
+
+    <!-- Modal Crear/Editar Comisión -->
+    <div class="modal-overlay" id="modalComision">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="modalComisionTitulo">CREAR COMISIÓN</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalComision" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="comisionIdEdit" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="comisionTipo" class="form-label">Tipo de cartera / configuración *</label>
+                        <div class="select-container">
+                            <select id="comisionTipo" class="form-select" required>
+                                <option value="">Seleccione tipo</option>
+                                <option value="cartera_personal">Cartera Personal (mín. 100 cuentas)</option>
+                                <option value="verificador">Verificador</option>
+                                <option value="director_administrativo">Director Administrativo</option>
+                                <option value="supervisor_cartera">Supervisor Cartera</option>
+                                <option value="cartera_filial">Cartera de Filial</option>
+                                <option value="cartera_nacional">Cartera Nacional</option>
+                                <option value="prejuridicos_internos">Prejurídicos Internos</option>
+                                <option value="prejuridicos_externos">Prejurídicos Externos</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="comisionCargo" class="form-label">Cargo *</label>
+                        <div class="select-container">
+                            <select id="comisionCargo" class="form-select" required>
+                                <option value="">Seleccione cargo</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-optional" id="comisionMinCuentasWrap">
+                    <label for="comisionMinCuentas" class="form-label">Mínimo cuentas (cartera personal)</label>
+                    <input type="number" id="comisionMinCuentas" class="form-input" min="1" max="9999999999" value="100" placeholder="100">
+                </div>
+                <div class="form-group" id="comisionPorcentajeFijoWrap" style="display: none;">
+                    <label for="comisionPorcentajeFijo" class="form-label">Porcentaje de liquidación *</label>
+                    <div class="input-percent-wrap">
+                        <input type="text" id="comisionPorcentajeFijo" class="form-input" inputmode="decimal" placeholder="Ej: 3.5">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+                <div class="auditoria-rangos-wrap" id="comisionRangosWrap">
+                    <div class="rangos-header">
+                        <label class="form-label">Rangos por % de recaudo → % liquidación</label>
+                        <button type="button" class="btn btn-small" id="btnAgregarRangoComision"><i class="fas fa-plus"></i> Agregar rango</button>
+                    </div>
+                    <div class="rangos-table-wrap">
+                        <table class="table table-rangos" id="tablaRangosComision">
+                            <thead>
+                                <tr>
+                                    <th>Desde %</th>
+                                    <th>Hasta %</th>
+                                    <th>% Liquidación</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRangosComision"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="auditoria-rangos-wrap" id="comisionRangosMontoWrap" style="display: none;">
+                    <div class="rangos-header">
+                        <label class="form-label">Rangos por monto recaudado ($) → % liquidación</label>
+                        <button type="button" class="btn btn-small" id="btnAgregarRangoComisionMonto"><i class="fas fa-plus"></i> Agregar rango</button>
+                    </div>
+                    <div class="rangos-table-wrap">
+                        <table class="table table-rangos" id="tablaRangosComisionMonto">
+                            <thead>
+                                <tr>
+                                    <th>Desde $</th>
+                                    <th>Hasta $</th>
+                                    <th>% Liquidación</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRangosComisionMonto"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelarComision">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarComision">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar Bono -->
+    <div class="modal-overlay" id="modalBono">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="modalBonoTitulo">CREAR BONO</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalBono" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bonoIdEdit" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bonoTipo" class="form-label">Tipo de cartera / configuración *</label>
+                        <div class="select-container">
+                            <select id="bonoTipo" class="form-select" required>
+                                <option value="">Seleccione tipo</option>
+                                <option value="cartera_personal">Cartera Personal</option>
+                                <option value="cartera_filial">Cartera de Filial</option>
+                                <option value="cartera_nacional">Cartera Nacional</option>
+                                <option value="prejuridicos_internos">Prejurídicos Internos (por monto)</option>
+                                <option value="bonos_concurso">Bonos concurso</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bonoCargo" class="form-label">Cargo *</label>
+                        <div class="select-container">
+                            <select id="bonoCargo" class="form-select" required>
+                                <option value="">Seleccione cargo</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Criterio del premio</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="bonoCriterio" value="porcentaje" checked> Por % de recaudo</label>
+                        <label class="radio-label"><input type="radio" name="bonoCriterio" value="monto"> Por monto recaudado ($)</label>
+                    </div>
+                </div>
+                <div class="form-group" id="bonoConcursoWrap">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="bonoEsConcurso" value="1"> Bono concurso (incluir en meses autorizados)
+                    </label>
+                </div>
+                <div class="form-group form-group-optional" id="bonoMesesWrap" style="display: none;">
+                    <label class="form-label">Meses autorizados</label>
+                    <div class="meses-checkbox-grid" id="bonoMesesAutorizados"></div>
+                </div>
+                <div class="auditoria-rangos-wrap">
+                    <div class="rangos-header">
+                        <label class="form-label" id="labelRangosBono">Rangos → Valor bono ($)</label>
+                        <button type="button" class="btn btn-small" id="btnAgregarRangoBono"><i class="fas fa-plus"></i> Agregar rango</button>
+                    </div>
+                    <div class="rangos-table-wrap">
+                        <table class="table table-rangos" id="tablaRangosBono">
+                            <thead>
+                                <tr>
+                                    <th id="thBonoDesde">Desde %</th>
+                                    <th id="thBonoHasta">Hasta %</th>
+                                    <th>Valor bono ($)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRangosBono"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelarBono">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarBono">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación de acciones -->
+    <div id="confirmActionAuditoriaModal" class="modal-overlay">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3 id="confirmActionAuditoriaTitle">Confirmación</h3>
+                <button class="modal-close" id="btnCerrarConfirmActionAuditoria" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmActionAuditoriaMessage">¿Está segur@ de continuar?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelarConfirmActionAuditoria">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarActionAuditoria">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito de acciones -->
+    <div id="successActionAuditoriaModal" class="modal-overlay">
+        <div class="modal modal-success">
+            <div class="modal-header">
+                <h3>OPERACIÓN EXITOSA</h3>
+                <button class="modal-close" id="btnCerrarSuccessActionAuditoria" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="successActionAuditoriaMessage">La acción se realizó exitosamente.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAceptarSuccessActionAuditoria">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
+    
+    <script src="../../assets/js/auditoria/auditoria.js"></script>
+</body>
+</html>

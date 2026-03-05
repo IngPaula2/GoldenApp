@@ -95,13 +95,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../auditoria/auditoria.html" class="nav-link">
                         <i class="fas fa-search nav-icon"></i>
                         <span>Auditoria</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="../contabilidad/contabilidad.html" class="nav-link">
                         <i class="fas fa-calculator nav-icon"></i>
                         <span>Contabilidad</span>
                     </a>
@@ -163,8 +163,15 @@
                 <div class="section-header">
                     <div class="section-title">
                         <h2>Cuentas Contables</h2>
+                        <div class="current-city-info">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="currentCityName">Seleccione una ciudad</span>
+                        </div>
                     </div>
                     <div class="action-buttons">
+                        <button class="btn btn-primary" id="changeCityButton" style="display: none;">
+                            Cambiar Ciudad
+                        </button>
                         <button class="btn btn-primary" onclick="showCreateAccountingAccountModal('debito')">
                             Crear Cuenta Débito
                         </button>
@@ -364,6 +371,32 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="cancelLogout()">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="confirmLogout()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Ciudad -->
+    <div class="modal-overlay" id="selectCityModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">SELECCIONE LA CIUDAD</h3>
+                <button class="modal-close" id="btnCerrarSelectCityModal" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="citySelect" class="form-label">Ciudad *</label>
+                    <div class="select-container">
+                        <select id="citySelect" class="form-select">
+                            <option value="">Seleccione la ciudad</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="bSeleccionarCiudad">Seleccionar</button>
             </div>
         </div>
     </div>

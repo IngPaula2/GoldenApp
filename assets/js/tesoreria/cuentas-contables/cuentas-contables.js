@@ -14,6 +14,32 @@
 // ========================================
 
 let accountingAccountsData = [];
+const STORAGE_ACCOUNTS_BY_CITY = 'accountingAccountsDataByCity';
+
+function toCityCode(value) {
+    return String(value || '').trim().toUpperCase();
+}
+
+function getSelectedCityCode() {
+    try {
+        return toCityCode(sessionStorage.getItem('selectedCity') || '');
+    } catch (e) {
+        return '';
+    }
+}
+
+function getCityNameByCode(cityCode) {
+    const code = toCityCode(cityCode);
+    if (!code) return '';
+    try {
+        const raw = localStorage.getItem('ciudadesData');
+        const data = raw ? JSON.parse(raw) : {};
+        const city = data && data[code] ? data[code] : null;
+        return city && city.nombre ? String(city.nombre) : '';
+    } catch (e) {
+        return '';
+    }
+}
 
 // ========================================
 // INICIALIZACIÓN
@@ -29,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (accountingAccountsTableBody) {
             initializeModals();
             initializeUserDropdown();
+            initializeCitySelector();
             initializeUppercaseInputs();
             initializeNumericFormatting();
             loadAccountingAccountsData();
@@ -42,6 +69,112 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('❌ Error crítico al cargar la interfaz:', error);
     }
 });
+
+// ========================================
+// SELECCIÓN DE CIUDAD
+// ========================================
+
+function updateCurrentCityName(cityCode) {
+    const el = document.getElementById('currentCityName');
+    if (!el) return;
+    const code = toCityCode(cityCode);
+    if (!code) {
+        el.textContent = 'Seleccione una ciudad';
+        return;
+    }
+    const name = getCityNameByCode(code);
+    el.textContent = name ? `${code} - ${String(name).toUpperCase()}` : code;
+}
+
+function updateChangeCityButtonVisibility() {
+    const btn = document.getElementById('changeCityButton');
+    if (!btn) return;
+    btn.style.display = getSelectedCityCode() ? 'inline-flex' : 'none';
+}
+
+function populateCitySelectOptions() {
+    const citySelect = document.getElementById('citySelect');
+    if (!citySelect) return;
+    let ciudadesData = {};
+    try {
+        ciudadesData = JSON.parse(localStorage.getItem('ciudadesData') || '{}');
+    } catch (e) {
+        ciudadesData = {};
+    }
+    citySelect.innerHTML = '<option value="">Seleccione la ciudad</option>';
+    Object.values(ciudadesData || {})
+        .filter(c => c && c.codigo && c.activo !== false)
+        .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)))
+        .forEach(c => {
+            const opt = document.createElement('option');
+            const code = toCityCode(c.codigo);
+            opt.value = code;
+            opt.textContent = `${code} - ${String(c.nombre || '').toUpperCase()}`;
+            citySelect.appendChild(opt);
+        });
+}
+
+function showSelectCityModal() {
+    const modal = document.getElementById('selectCityModal');
+    if (!modal) return;
+    populateCitySelectOptions();
+    const citySelect = document.getElementById('citySelect');
+    const selected = getSelectedCityCode();
+    if (citySelect) citySelect.value = selected || '';
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideSelectCityModal(force) {
+    const modal = document.getElementById('selectCityModal');
+    if (!modal) return;
+    if (!force && !getSelectedCityCode()) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function handleSelectCity() {
+    const citySelect = document.getElementById('citySelect');
+    const selectedCity = citySelect ? toCityCode(citySelect.value) : '';
+    if (!selectedCity) {
+        showNotification('Por favor, seleccione una ciudad', 'warning');
+        return;
+    }
+    try {
+        sessionStorage.setItem('selectedCity', selectedCity);
+    } catch (e) {
+        // No-op
+    }
+    updateCurrentCityName(selectedCity);
+    updateChangeCityButtonVisibility();
+    hideSelectCityModal(true);
+    loadAccountingAccountsData();
+    showNotification(`Ciudad seleccionada: ${selectedCity}${getCityNameByCode(selectedCity) ? ` - ${getCityNameByCode(selectedCity)}` : ''}`, 'success');
+}
+
+function initializeCitySelector() {
+    updateCurrentCityName(getSelectedCityCode());
+    updateChangeCityButtonVisibility();
+
+    const btnChangeCity = document.getElementById('changeCityButton');
+    const btnSelectCity = document.getElementById('bSeleccionarCiudad');
+    const btnCloseSelectCity = document.getElementById('btnCerrarSelectCityModal');
+    const modalSelectCity = document.getElementById('selectCityModal');
+
+    if (btnChangeCity) btnChangeCity.addEventListener('click', showSelectCityModal);
+    if (btnSelectCity) btnSelectCity.addEventListener('click', handleSelectCity);
+    if (btnCloseSelectCity) btnCloseSelectCity.addEventListener('click', () => hideSelectCityModal(false));
+    if (modalSelectCity) {
+        modalSelectCity.addEventListener('click', function(e) {
+            if (e.target === this) hideSelectCityModal(false);
+        });
+    }
+
+    showSelectCityModal();
+    if (!getSelectedCityCode()) {
+        showNotification('Seleccione una ciudad para gestionar cuentas contables.', 'warning');
+    }
+}
 
 // ========================================
 // GESTIÓN DE MODALES
@@ -100,6 +233,11 @@ function hideAllModals() {
 // ========================================
 
 function showCreateAccountingAccountModal() {
+    if (!getSelectedCityCode()) {
+        showNotification('Seleccione una ciudad para crear cuentas contables', 'warning');
+        showSelectCityModal();
+        return;
+    }
     const modal = document.getElementById('createAccountingAccountModal');
     if (modal) {
         modal.style.display = 'flex';
@@ -123,9 +261,16 @@ function clearCreateAccountingAccountForm() {
 // ========================================
 
 function loadAccountingAccountsData() {
+    const selectedCity = getSelectedCityCode();
+    if (!selectedCity) {
+        accountingAccountsData = [];
+        renderAccountingAccountsTable(accountingAccountsData);
+        return;
+    }
     try {
-        const raw = localStorage.getItem('accountingAccountsData');
-        accountingAccountsData = raw ? JSON.parse(raw) : [];
+        const byCityRaw = localStorage.getItem(STORAGE_ACCOUNTS_BY_CITY);
+        const byCity = byCityRaw ? JSON.parse(byCityRaw) : {};
+        accountingAccountsData = (byCity && Array.isArray(byCity[selectedCity])) ? byCity[selectedCity] : [];
         if (!Array.isArray(accountingAccountsData)) accountingAccountsData = [];
     } catch (e) {
         console.error('Error al cargar datos de cuentas contables:', e);
@@ -138,6 +283,22 @@ function loadAccountingAccountsData() {
 function renderAccountingAccountsTable(list) {
     const tbody = document.getElementById('accountingAccountsTableBody');
     if (!tbody) return;
+    
+    const selectedCity = getSelectedCityCode();
+    if (!selectedCity) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-data-message">
+                    <div class="no-data-content">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Seleccione una ciudad</p>
+                        <small>Use el botón "Cambiar Ciudad" para cargar la información</small>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
     
     tbody.innerHTML = '';
     
@@ -184,6 +345,11 @@ function renderAccountingAccountsTable(list) {
 function handleCreateAccountingAccount() {
     const form = document.getElementById('createAccountingAccountForm');
     if (!form) return;
+    if (!getSelectedCityCode()) {
+        showNotification('Seleccione una ciudad antes de crear cuentas contables', 'warning');
+        showSelectCityModal();
+        return;
+    }
     
     // Validar campos requeridos
     const codigoCuenta = document.getElementById('accountCode')?.value.replace(/[^\d]/g, '').substring(0, 10).trim();
@@ -263,7 +429,7 @@ function confirmCreateAccountingAccount() {
     // Guardar en localStorage
     try {
         accountingAccountsData.push(accountingAccount);
-        localStorage.setItem('accountingAccountsData', JSON.stringify(accountingAccountsData));
+        saveAccountingAccountsData();
         
         // Limpiar datos temporales
         window.tempAccountingAccountData = null;
@@ -368,8 +534,16 @@ function closeSuccessToggleAccountingAccountModal() {
 }
 
 function saveAccountingAccountsData() {
+    const selectedCity = getSelectedCityCode();
+    if (!selectedCity) {
+        showNotification('Seleccione una ciudad antes de guardar', 'warning');
+        return;
+    }
     try {
-        localStorage.setItem('accountingAccountsData', JSON.stringify(accountingAccountsData));
+        const raw = localStorage.getItem(STORAGE_ACCOUNTS_BY_CITY);
+        const byCity = raw ? JSON.parse(raw) : {};
+        byCity[selectedCity] = Array.isArray(accountingAccountsData) ? accountingAccountsData : [];
+        localStorage.setItem(STORAGE_ACCOUNTS_BY_CITY, JSON.stringify(byCity));
     } catch (e) {
         console.error('Error al guardar datos:', e);
         showNotification('Error al guardar los datos', 'error');
@@ -447,9 +621,13 @@ function initializeNumericFormatting() {
  * @returns {Array} Array de cuentas contables
  */
 function getAccountingAccountsData() {
+    const selectedCity = getSelectedCityCode();
+    if (!selectedCity) return [];
     try {
-        const raw = localStorage.getItem('accountingAccountsData');
-        return raw ? JSON.parse(raw) : [];
+        const rawByCity = localStorage.getItem(STORAGE_ACCOUNTS_BY_CITY);
+        const byCity = rawByCity ? JSON.parse(rawByCity) : {};
+        if (byCity && Array.isArray(byCity[selectedCity])) return byCity[selectedCity];
+        return [];
     } catch (e) {
         return [];
     }

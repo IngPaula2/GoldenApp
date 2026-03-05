@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Liquidación</title>
+    <link rel="stylesheet" href="../../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../../assets/css/nomina/reportes/reporte-semanal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            .toolbar {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+            }
+            .sheet-break {
+                page-break-before: always;
+            }
+        }
+        .resultados-wrap {
+            margin-top: 24px;
+            max-width: 520px;
+            border: 1px dotted #444;
+        }
+        .resultados-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .resultados-wrap td {
+            border: 1px dotted #444;
+            padding: 6px 8px;
+            font-weight: 700;
+        }
+        .resultados-wrap td:last-child {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container" id="reportRoot">
+        <div class="report-header">
+            <div>
+                <div class="report-title">GOLDEN BRIDGE CORP. S.A.S</div>
+                <div class="report-subtitle">
+                    REPORTE DE LIQUIDACIÓN - <span id="reportTipo"></span> - CIUDAD: <span id="reportCiudad"></span> - MES: <span id="reportMes"></span> - RANGO: <span id="reportRango"></span> - PÁGINA: <span id="paginaActual">1</span>
+                </div>
+            </div>
+            <div class="toolbar">
+                <div class="pagination-controls">
+                    <button class="btn" onclick="goFirst()" title="Primera página"><i class="fas fa-angle-double-left"></i></button>
+                    <button class="btn" onclick="goPrevious()" title="Página anterior"><i class="fas fa-angle-left"></i></button>
+                    <input type="number" id="currentPage" value="1" min="1" onchange="goToPage(this.value)">
+                    <span>de <span id="totalPages">1</span></span>
+                    <button class="btn" onclick="goNext()" title="Página siguiente"><i class="fas fa-angle-right"></i></button>
+                    <button class="btn" onclick="goLast()" title="Última página"><i class="fas fa-angle-double-right"></i></button>
+                </div>
+                <div class="zoom-controls">
+                    <button class="btn" onclick="setZoom(-0.1)" title="Alejar"><i class="fas fa-search-minus"></i></button>
+                    <span id="zoomLevel">100%</span>
+                    <button class="btn" onclick="setZoom(0.1)" title="Acercar"><i class="fas fa-search-plus"></i></button>
+                </div>
+                <div class="export-controls">
+                    <button class="btn" onclick="exportExcel()" title="Exportar Excel" style="background: #28a745; color: white; border-color: #28a745;"><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn" onclick="exportDOC()" title="Exportar Word" style="background: #007bff; color: white; border-color: #007bff;"><i class="fas fa-file-word"></i> Word</button>
+                    <button class="btn" onclick="exportPDF()" title="Exportar PDF" style="background: #dc3545; color: white; border-color: #dc3545;"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+            </div>
+        </div>
+        <div id="tableWrap">
+            <table>
+                <thead id="thead"></thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+        <div class="sheet-break"></div>
+        <div class="resultados-wrap" id="resultadosWrap">
+            <table>
+                <tbody>
+                    <tr><td colspan="2">RESULTADOS</td></tr>
+                    <tr><td>CUENTAS ASIGNADAS</td><td id="resCuentasAsignadas">0</td></tr>
+                    <tr><td>CUENTAS COBRADAS</td><td id="resCuentasCobradas">0</td></tr>
+                    <tr><td>PORCENTAJE</td><td id="resPorcentaje">0,00%</td></tr>
+                    <tr><td>MONTO ASIGNADO</td><td id="resMontoAsignado">$ 0</td></tr>
+                    <tr><td>MONTO COBRADO AL DÍA</td><td id="resMontoCobradoDia">$ 0</td></tr>
+                    <tr><td>NOTAS DÉBITO-</td><td id="resNotasDebito">$ 0</td></tr>
+                    <tr><td>NOTAS CREDITO+</td><td id="resNotasCredito">$ 0</td></tr>
+                    <tr><td>TOTAL MONTO A LIQUIDAR</td><td id="resTotalLiquidar">$ 0</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">© 2025 - GOLDEN APP</div>
+    </div>
+
+    <script src="../../../assets/js/auditoria/reportes/reporte-liquidacion.js"></script>
+</body>
+</html>
