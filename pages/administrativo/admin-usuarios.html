@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Bridge - Administrar Usuarios</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/css/reset.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard-base.css">
+    <link rel="stylesheet" href="../../assets/css/administrativo/admin-usuarios.css">
+</head>
+<body class="dashboard-page">
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="user-info">
+                <i class="fas fa-user user-icon"></i>
+                <span class="user-name">Auxiliar Admin</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+                <div class="dropdown-item admin-users-item">
+                    <i class="fas fa-users-cog dropdown-icon"></i>
+                    <span>ADMINISTRAR USUARIOS</span>
+                </div>
+                <div class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                    <span>CERRAR SESIÓN</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_ADMIN">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_FACTURACION">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span>Facturación</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_TESORERIA">
+                        <i class="fas fa-building nav-icon"></i>
+                        <span>Tesorería</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_NOMINA">
+                        <i class="fas fa-coins nav-icon"></i>
+                        <span>Nómina</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_CARTERA">
+                        <i class="fas fa-wallet nav-icon"></i>
+                        <span>Cartera</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_AUDITORIA">
+                        <i class="fas fa-search nav-icon"></i>
+                        <span>Auditoria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-app-route="MODULE_CONTABILIDAD">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-logo">
+            <div class="logo-container">
+                <img src="../../assets/images/LOGO GOLDEN BRIDGE  SIN FONDO OF.png" alt="Golden Bridge" class="logo-image">
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-area">
+            <section class="usuarios-section">
+                <div class="section-header">
+                    <h2>Administrar Usuarios</h2>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-primary" id="btnReporteRoles" title="Ver roles creados en pantalla">Reporte de roles</button>
+                        <button type="button" class="btn btn-primary" id="btnCrearRol">Crear Rol</button>
+                        <button type="button" class="btn btn-primary" id="btnBuscarUsuarios">Buscar</button>
+                        <button type="button" class="btn btn-primary" id="btnCrearUsuario">Crear usuario</button>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table class="table" id="tablaUsuarios">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre completo</th>
+                                <th>Cargo</th>
+                                <th>Email</th>
+                                <th>Accesos</th>
+                                <th>Ciudades</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUsuarios"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modalUsuario">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalUsuarioTitulo">Crear usuario</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalUsuario" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="usuarioEditId" value="">
+
+                <div class="stepper" id="usuarioStepper">
+                    <div class="stepper-item active" data-step-indicator="1">1. Información</div>
+                    <div class="stepper-item" data-step-indicator="2">2. Ciudades</div>
+                </div>
+
+                <section class="wizard-step active" data-step="1">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="usuarioEstado" class="form-label">Estado *</label>
+                            <select id="usuarioEstado" class="form-select">
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuarioRol" class="form-label">Rol *</label>
+                            <select id="usuarioRol" class="form-select">
+                                <option value="">Seleccione un rol</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="usuarioNombre" class="form-label">Nombre completo *</label>
+                            <input type="text" id="usuarioNombre" class="form-input" placeholder="Nombre del usuario">
+                        </div>
+                        <div class="form-group">
+                            <label for="usuarioEmail" class="form-label">Email *</label>
+                            <input type="email" id="usuarioEmail" class="form-input" placeholder="correo@dominio.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="usuarioPassword" class="form-label">Contraseña <span id="passwordHint">(solo al crear)</span></label>
+                        <input type="password" id="usuarioPassword" class="form-input" placeholder="Mínimo 8 caracteres y 1 carácter especial">
+                        <small id="usuarioPasswordError" class="form-error-message"></small>
+                    </div>
+                </section>
+
+                <section class="wizard-step" data-step="2">
+                    <div class="form-group">
+                        <label class="form-label">Acceso a ciudades *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="usuarioScopeCiudad" value="todas" checked> Todas las ciudades</label>
+                            <label><input type="radio" name="usuarioScopeCiudad" value="seleccion"> Solo ciudades seleccionadas</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="usuarioCiudadesWrap" style="display:none;">
+                        <label class="form-label">Seleccionar ciudades habilitadas *</label>
+                        <div id="usuarioCiudadesList" class="roles-grid"></div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelarModalUsuario">Cancelar</button>
+                <button class="btn btn-secondary" id="btnAnteriorUsuarioStep" style="display:none;">Anterior</button>
+                <button class="btn btn-primary" id="btnSiguienteUsuarioStep">Continuar</button>
+                <button class="btn btn-primary" id="btnGuardarUsuario">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalBuscarUsuarios">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Buscar usuarios</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalBuscarUsuarios" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="buscarTextoUsuarios" class="form-label">Usuario / Nombre / Email</label>
+                    <input type="text" id="buscarTextoUsuarios" class="form-input" placeholder="Buscar...">
+                </div>
+                <div class="form-group">
+                    <label for="buscarEstadoUsuarios" class="form-label">Estado</label>
+                    <select id="buscarEstadoUsuarios" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnLimpiarBusquedaUsuarios">Limpiar</button>
+                <button class="btn btn-primary" id="btnAplicarBusquedaUsuarios">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalReporteRoles">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">Reporte de roles</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalReporteRoles" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table roles-reporte-wrap">
+                    <table class="table roles-reporte-table" id="tablaReporteRoles">
+                        <thead>
+                            <tr>
+                                <th>Nombre del rol</th>
+                                <th>Cargo</th>
+                                <th>Módulos</th>
+                                <th>Permisos</th>
+                                <th>N° secciones</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReporteRoles"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCerrarModalReporteRolesFooter">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalRol">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalRolTitulo">Crear rol</h3>
+                <button type="button" class="modal-close" id="btnCerrarModalRol" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="rolEditId" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rolNombre" class="form-label">Nombre del rol *</label>
+                        <input type="text" id="rolNombre" class="form-input" placeholder="Ej: COORDINADOR CARTERA">
+                    </div>
+                    <div class="form-group">
+                        <label for="rolCargo" class="form-label">Cargo *</label>
+                        <select id="rolCargo" class="form-select">
+                            <option value="">Seleccione un cargo administrativo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Módulos del aplicativo *</label>
+                    <div id="rolesList" class="roles-grid"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Permisos por sección del programa *</label>
+                    <div id="permisosList" class="permisos-grid permisos-por-seccion-wrap"></div>
+                    <small class="form-help">Marque la casilla solo en las secciones a las que el rol podrá ingresar. En cada una habilitada elija <strong>Lector</strong> (solo consulta) o <strong>Editor</strong> (crear/editar/eliminar). Las secciones sin marcar quedan sin acceso, aunque el módulo esté seleccionado arriba.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelarModalRol">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarRol">Crear rol</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalResultadosBusquedaUsuarios">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">Resultados de búsqueda</h3>
+                <button type="button" class="modal-close" id="btnCerrarResultadosBusquedaUsuarios" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-table">
+                    <table class="table" id="tablaResultadosBusquedaUsuarios">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre completo</th>
+                                <th>Cargo</th>
+                                <th>Email</th>
+                                <th>Accesos</th>
+                                <th>Ciudades</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyResultadosBusquedaUsuarios"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCerrarResultadosBusquedaUsuariosFooter">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalDetalleUsuario">
+        <div class="modal modal-results">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalle de usuario</h3>
+                <button type="button" class="modal-close" id="btnCerrarDetalleUsuario" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="detalleUsuarioBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCerrarDetalleUsuarioFooter">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmSaveRolModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmSaveRolTitle">CREAR ROL</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="confirmSaveRolText">¿Está segur@ que desea crear este rol?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelSaveRol">Cancelar</button>
+                <button class="btn btn-primary" id="btnConfirmSaveRol">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successSaveRolModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p class="modal-message" id="successSaveRolText">Rol creado exitosamente.</p>
+                <button class="btn btn-primary" id="btnCloseSuccessSaveRol">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmToggleUsuarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmToggleUsuarioTitle">CAMBIAR ESTADO</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="confirmToggleUsuarioText">¿Está segur@ que desea cambiar el estado de este usuario?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelToggleUsuario">Cancelar</button>
+                <button class="btn btn-primary" id="btnConfirmToggleUsuario">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successToggleUsuarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p class="modal-message" id="successToggleUsuarioText">El estado del usuario se actualizó correctamente.</p>
+                <button class="btn btn-primary" id="btnCloseSuccessToggleUsuario">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmSaveUsuarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmSaveUsuarioTitle">CREAR USUARIO</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="confirmSaveUsuarioText">¿Está segur@ que desea crear este usuario?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelSaveUsuario">Cancelar</button>
+                <button class="btn btn-primary" id="btnConfirmSaveUsuario">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successSaveUsuarioModal">
+        <div class="modal modal-success">
+            <div class="modal-body">
+                <p class="modal-message" id="successSaveUsuarioText">Usuario creado exitosamente.</p>
+                <button class="btn btn-primary" id="btnCloseSuccessSaveUsuario">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="infoUsuarioModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header">
+                <h3 class="modal-title" id="infoUsuarioTitle">ATENCIÓN</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="infoUsuarioText"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btnCloseInfoUsuario">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/utils/routes.js"></script>
+
+    <script src="../../assets/js/administrativo/admin-layout.js"></script>
+    <script src="../../assets/js/administrativo/admin-usuarios.js"></script>
+</body>
+</html>

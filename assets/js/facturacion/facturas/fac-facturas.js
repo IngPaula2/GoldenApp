@@ -278,14 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 function initializeModals() {
-    // Cerrar modales al hacer clic fuera
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideAllModals();
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     
     // Cerrar modales con Escape
     document.addEventListener('keydown', function(e) {
@@ -473,15 +466,7 @@ function hideCreateInvoiceModal() {
     window.__editingInvoiceId = null;
 }
 
-// Cerrar modal de crear factura al hacer clic fuera del cuadro
 document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('createInvoiceModal');
-    if (overlay) {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) hideCreateInvoiceModal();
-        });
-    }
-
     // Teclado: Enter confirma, Escape cierra para modales conocidos
     document.addEventListener('keydown', function(e) {
         const anyOpen = [
@@ -1331,9 +1316,6 @@ function hideInvoiceResultsModal(){
     if (overlay) overlay.style.display = 'none';
 }
 
-// Cerrar modal de resultados al hacer clic fuera
-document.getElementById('invoiceResultsModal')?.addEventListener('click', function(e){ if (e.target === this) hideInvoiceResultsModal(); });
-
 // ========================================
 // FUNCIONES UTILITARIAS
 // ========================================
@@ -1514,7 +1496,7 @@ function initializeUserDropdown() {
                 
                 if (this.classList.contains('logout-item')) {
                     // Redirigir inmediatamente al login
-                    window.location.href = '../../index.html';
+                    window.location.href = window.AppRoutes.resolve('LOGIN');
                 } else if (this.classList.contains('admin-users-item')) {
                     alert('Funcionalidad de administrar usuarios en desarrollo');
                 }

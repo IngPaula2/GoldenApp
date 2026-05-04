@@ -39,7 +39,7 @@ function initUserDropdown() {
         e.stopPropagation();
 
         if (item.classList.contains('admin-users-item')) {
-            window.location.href = '../administrativo/admin-empleados.html';
+            window.location.href = window.AppRoutes.resolve('ADMIN_USUARIOS');
             return;
         }
         if (item.classList.contains('logout-item')) {
@@ -52,17 +52,11 @@ function initUserDropdown() {
 
     var btnCancelar = document.getElementById('btnCancelarLogout');
     var btnConfirmar = document.getElementById('btnConfirmarLogout');
-    var modalLogout = document.getElementById('confirmLogoutModal');
 
     if (btnCancelar) btnCancelar.addEventListener('click', hideConfirmLogoutModal);
     if (btnConfirmar) {
         btnConfirmar.addEventListener('click', function () {
-            window.location.href = '/index.html';
-        });
-    }
-    if (modalLogout) {
-        modalLogout.addEventListener('click', function (e) {
-            if (e.target === this) hideConfirmLogoutModal();
+            window.location.href = window.AppRoutes.resolve('LOGIN');
         });
     }
 }
@@ -153,13 +147,6 @@ function initMigrarTesoreriaFlow() {
         });
     }
 
-    ['modalMigrarSiigoTesoreria', 'confirmMigrarSiigoTesoreriaModal', 'successMigrarSiigoTesoreriaModal'].forEach(function (id) {
-        var modal = document.getElementById(id);
-        if (!modal) return;
-        modal.addEventListener('click', function (e) {
-            if (e.target === this) hideModalById(id);
-        });
-    });
 }
 
 function initMigrarCarteraFlow() {
@@ -235,13 +222,6 @@ function initMigrarCarteraFlow() {
         });
     }
 
-    ['modalMigrarSiigoCartera', 'confirmMigrarSiigoCarteraModal', 'successMigrarSiigoCarteraModal'].forEach(function (id) {
-        var modal = document.getElementById(id);
-        if (!modal) return;
-        modal.addEventListener('click', function (e) {
-            if (e.target === this) hideModalById(id);
-        });
-    });
 }
 
 function showModalById(id) {

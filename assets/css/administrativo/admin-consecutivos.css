@@ -53,6 +53,8 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
     overflow: hidden;
+    height: auto;
+    min-height: 0;
 }
 
 /* Formulario de consecutivos */
@@ -162,7 +164,9 @@
 .consecutivos-section .data-table {
     background: #fff;
     border-radius: 8px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-top: 1rem;
 }
@@ -327,12 +331,11 @@
         font-size: 14px;
     }
     
-    .consecutivos-section .data-table {
-        overflow-x: auto;
-    }
-    
     .consecutivos-section .table {
-        min-width: 600px;
+        display: table !important;
+        table-layout: auto !important;
+        min-width: 900px !important;
+        width: 900px !important;
         font-size: 0.75rem;
     }
     
@@ -340,12 +343,17 @@
     .consecutivos-section .table td {
         padding: 0.5rem 0.25rem;
         min-width: 80px;
+        white-space: nowrap;
     }
     
-    /* Ocultar columnas menos importantes en móvil */
+    /* Mantener todas las columnas visibles en móvil */
+    .consecutivos-section .table th:nth-child(4),
+    .consecutivos-section .table td:nth-child(4),
+    .consecutivos-section .table th:nth-child(5),
+    .consecutivos-section .table td:nth-child(5),
     .consecutivos-section .table th:nth-child(6),
     .consecutivos-section .table td:nth-child(6) {
-        display: none;
+        display: table-cell !important;
     }
 }
 
@@ -381,21 +389,26 @@
     
     .consecutivos-section .table {
         font-size: 0.7rem;
-        min-width: 500px;
+        display: table !important;
+        table-layout: auto !important;
+        min-width: 980px !important;
+        width: 980px !important;
     }
     
     .consecutivos-section .table th,
     .consecutivos-section .table td {
         padding: 0.4rem 0.2rem;
         min-width: 70px;
+        white-space: nowrap;
     }
-    
-    /* Ocultar más columnas en pantallas muy pequeñas */
+
     .consecutivos-section .table th:nth-child(4),
     .consecutivos-section .table td:nth-child(4),
     .consecutivos-section .table th:nth-child(5),
-    .consecutivos-section .table td:nth-child(5) {
-        display: none;
+    .consecutivos-section .table td:nth-child(5),
+    .consecutivos-section .table th:nth-child(6),
+    .consecutivos-section .table td:nth-child(6) {
+        display: table-cell !important;
     }
 }
 
@@ -421,7 +434,8 @@
     
     .consecutivos-section .table {
         font-size: 0.65rem;
-        min-width: 400px;
+        min-width: 1040px !important;
+        width: 1040px !important;
     }
     
     .consecutivos-section .table th,

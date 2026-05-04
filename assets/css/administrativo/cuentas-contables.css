@@ -665,6 +665,35 @@
 }
 
 /* Responsive */
+@media (max-width: 991px) {
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .action-buttons .btn {
+        flex: 1 1 auto;
+        min-width: min(100%, 140px);
+        justify-content: center;
+    }
+
+    .data-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .accounting-section .section-content .table {
+        min-width: 520px;
+    }
+}
+
 @media (max-width: 768px) {
     .section-header {
         flex-direction: column;
@@ -675,6 +704,10 @@
     .action-buttons {
         width: 100%;
         flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+        min-width: 100%;
     }
     
     .modal {
@@ -687,11 +720,58 @@
     }
     
     .accounting-section .section-header-row {
-        padding: 1rem 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 1rem 1.25rem;
+    }
+
+    .accounting-section .section-title {
+        width: 100%;
     }
     
     .accounting-section .section-content .table th,
     .accounting-section .section-content .table td {
         padding: 0.8rem 0.75rem;
+    }
+
+    /* Fuerza visibilidad completa de columnas (estado/opciones) en móvil */
+    .accounting-section .section-content .table th,
+    .accounting-section .section-content .table td {
+        display: table-cell !important;
+        white-space: nowrap;
+    }
+
+    .accounting-section .section-content {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .accounting-section .section-content .table {
+        width: max-content;
+        min-width: 100%;
+    }
+
+    .form-row.two-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Anula reglas globales que ocultan columnas 3 y 4 en otras vistas */
+    .accounting-section .section-content .table th:nth-child(3),
+    .accounting-section .section-content .table td:nth-child(3),
+    .accounting-section .section-content .table th:nth-child(4),
+    .accounting-section .section-content .table td:nth-child(4) {
+        display: table-cell !important;
+    }
+}
+
+@media (min-width: 1400px) {
+    .content-area {
+        max-width: min(1600px, 100%);
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
     }
 }

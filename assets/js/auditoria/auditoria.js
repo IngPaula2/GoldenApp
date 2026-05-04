@@ -163,7 +163,7 @@
             e.stopPropagation();
 
             if (item.classList.contains('admin-users-item')) {
-                window.location.href = '../administrativo/admin-empleados.html';
+                window.location.href = window.AppRoutes.resolve('ADMIN_EMPLEADOS');
                 return;
             }
             if (item.classList.contains('logout-item')) {
@@ -172,7 +172,7 @@
                     'CERRAR SESIÓN',
                     '¿Está seguro de que desea cerrar sesión?',
                     function () {
-                        window.location.href = '/index.html';
+                        window.location.href = window.AppRoutes.resolve('LOGIN');
                     },
                     '',
                     null,
@@ -1440,7 +1440,10 @@
     }
 
     function normalizeExecutiveId(value) {
-        return String(value || '').trim().toUpperCase();
+        var raw = String(value || '').trim().toUpperCase();
+        if (!raw) return '';
+        // Permite comparar identificaciones aunque el usuario escriba puntos/guiones/espacios.
+        return raw.replace(/[^0-9A-Z]/g, '');
     }
 
     function inDateRange(value, start, end) {
@@ -1622,7 +1625,43 @@
     }
 
     function leerRegistrosCarteraGlobal() {
-        var out = [];
+        var map = {};
+        function dedupeKey(city, factura, cuota, holderId) {
+            return [
+                toCityCode(city),
+                String(factura || '').trim().toUpperCase(),
+                String(cuota || '').trim(),
+                String(holderId || '').trim()
+            ].join('|');
+        }
+        function mergeRecordsFromArray(records, cityFallback) {
+            if (!Array.isArray(records)) return;
+            records.forEach(function (r) {
+                var factura = String(r.factura || r.invoiceNumber || '').trim().toUpperCase();
+                var cuota = String(r.cuota || '').trim();
+                var ejecutivo = normalizeExecutiveId(r.ejecutivo || r.executiveId || '');
+                if (!factura || !cuota || !ejecutivo) return;
+                var city = toCityCode(r.codciudad || cityFallback);
+                var holderId = String(r.identifica || r.holderId || '').trim();
+                var row = {
+                    id: r.id || ('cartera_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
+                    city: city,
+                    executiveId: ejecutivo,
+                    holderId: holderId,
+                    factura: factura,
+                    cuota: cuota,
+                    tipoIngreso: String(r.tipoingres || '').trim(),
+                    valor: toNumber(r.valor),
+                    valorPago: toNumber(r.valorpago),
+                    fechaPago: r.fechapago || r.fecha || '',
+                    cancelado: String(r.cancelado || '').trim().toUpperCase(),
+                    vto: r.vto || r.fechaVencimiento || r.fechavto || r.fechavenci || ''
+                };
+                map[dedupeKey(city, factura, cuota, holderId)] = row;
+            });
+        }
+
+        // 1) Historial por titular (carteraHistory_ciudad_idtitular)
         for (var i = 0; i < localStorage.length; i++) {
             var key = localStorage.key(i);
             if (!key || key.indexOf('carteraHistory_') !== 0) continue;
@@ -1631,28 +1670,36 @@
             if (parts.length < 2) continue;
             var city = toCityCode(parts.shift());
             var recordsRaw = parseJsonSafe(localStorage.getItem(key), []);
-            var records = Array.isArray(recordsRaw) ? recordsRaw : [];
-            records.forEach(function (r) {
-                var factura = String(r.factura || r.invoiceNumber || '').trim().toUpperCase();
-                var cuota = String(r.cuota || '').trim();
-                var ejecutivo = normalizeExecutiveId(r.ejecutivo || r.executiveId || '');
-                if (!factura || !cuota || !ejecutivo) return;
-                out.push({
-                    id: r.id || ('cartera_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
-                    city: toCityCode(r.codciudad || city),
-                    executiveId: ejecutivo,
-                    holderId: String(r.identifica || r.holderId || '').trim(),
-                    factura: factura,
-                    cuota: cuota,
-                    tipoIngreso: String(r.tipoingres || '').trim(),
-                    valor: toNumber(r.valor),
-                    valorPago: toNumber(r.valorpago),
-                    fechaPago: r.fechapago || r.fecha || '',
-                    cancelado: String(r.cancelado || '').trim().toUpperCase()
-                });
-            });
+            mergeRecordsFromArray(recordsRaw, city);
         }
-        return out;
+
+        // 2) Cartera viva por ciudad (cartera_CODIGO) — aquí persisten los ejecutivos tras «Asignar factura»
+        for (var j = 0; j < localStorage.length; j++) {
+            var k = localStorage.key(j);
+            if (!k || k.indexOf('cartera_') !== 0) continue;
+            if (k.indexOf('carteraHistory_') === 0) continue;
+            if (k.length <= 8) continue;
+            var suf = k.slice(8);
+            if (suf.indexOf('_') >= 0) continue;
+            var cityLive = toCityCode(suf);
+            if (!cityLive) continue;
+            var liveRaw = parseJsonSafe(localStorage.getItem(k), []);
+            mergeRecordsFromArray(liveRaw, cityLive);
+        }
+
+        return Object.keys(map).map(function (dk) { return map[dk]; });
+    }
+
+    function ejecutivoTieneAsignacionesEnCiudad(cityCode, ejecutivoNorm) {
+        var city = toCityCode(cityCode);
+        var exec = normalizeExecutiveId(ejecutivoNorm);
+        if (!city || !exec) return false;
+        var byCity = leerAssignmentsByCity();
+        var list = byCity[city];
+        if (!Array.isArray(list)) return false;
+        return list.some(function (a) {
+            return normalizeExecutiveId(a && a.executiveId) === exec;
+        });
     }
 
     function leerHistoricoLiquidaciones() {
@@ -1836,6 +1883,7 @@
 
     function buildDetalleLiquidacionEC(tipo, mes, fechaInicio, fechaFin, ejecutivoIdFiltro, selectedCity) {
         var carteraRecords = leerRegistrosCarteraGlobal();
+        var assignmentsByCity = leerAssignmentsByCity();
         var ingresosByCity = leerIngresosPorCiudad();
         var historico = leerHistoricoLiquidaciones();
         var carryIndex = buildCarryIndexFromHistorico(historico);
@@ -1919,6 +1967,78 @@
                     String(a.invoiceNumber).localeCompare(String(b.invoiceNumber));
             });
         }
+
+        // Fallback: cuando la cartera no trae filas con ejecutivo, usar asignaciones guardadas.
+        // Aplica para cualquier tipo con ciudad (por_ejecutivo, por_filial, prejuridico por ciudad).
+        if (!detalle.length && cityFilter) {
+            var asgList = Array.isArray(assignmentsByCity[cityFilter]) ? assignmentsByCity[cityFilter] : [];
+            var flatAccounts = [];
+            asgList.forEach(function (asg) {
+                var asgExecNorm = normalizeExecutiveId(asg && asg.executiveId);
+                if (ejecutivoObjetivo && asgExecNorm !== ejecutivoObjetivo) return;
+                (Array.isArray(asg.accounts) ? asg.accounts : []).forEach(function (acc, idx) {
+                    var invoice = String(acc && acc.invoiceNumber || '').trim().toUpperCase();
+                    if (!invoice) return;
+                    flatAccounts.push({
+                        executiveId: asgExecNorm || '',
+                        invoiceNumber: invoice,
+                        cuotaCodigo: String(acc && (acc.cuotaAsignada || acc.pendingInstallment || (idx + 1)) || '').trim(),
+                        valorAsignado: toNumber(acc && (acc.valor || acc.value || asg.totalValue || 0))
+                    });
+                });
+            });
+
+            if (flatAccounts.length) {
+                detalle = flatAccounts.map(function (acc) {
+                    var execForRow = normalizeExecutiveId(acc.executiveId || ejecutivoObjetivo || '');
+                    var ingresoKey = [cityFilter, execForRow, acc.invoiceNumber].join('|').toUpperCase();
+                    var ingresoInfo = ingresosDetalleIndex[ingresoKey] || { total: 0, tipos: {}, fechaUltima: '', ingresoRef: '', reciboRef: '' };
+                    var pagoEnRango = toNumber(ingresoInfo.total);
+                    var cuotaMes = toNumber(acc.valorAsignado);
+                    var pendiente = Math.max(cuotaMes - pagoEnRango, 0);
+                    var tiposIngreso = Object.keys(ingresoInfo.tipos || {});
+                    var calc = calcularReglaEC({
+                        cuotaMes: cuotaMes,
+                        pendiente: pendiente,
+                        pago: pagoEnRango,
+                        carryPrevPuntos: 0,
+                        carryPrevMonto: 0,
+                        isCuotaInicial: String(acc.cuotaCodigo || '') === '0'
+                    });
+                    return {
+                        id: generarId(),
+                        tipo: tipo === 'por_filial' ? 'Por filial' : 'Por ejecutivo',
+                        city: cityFilter,
+                        executiveId: execForRow,
+                        executiveName: execForRow,
+                        invoiceNumber: acc.invoiceNumber,
+                        cuotaCodigo: acc.cuotaCodigo || '-',
+                        holderName: '',
+                        vto: '',
+                        tipoIngreso: tiposIngreso.length ? tiposIngreso.join(' / ') : '-',
+                        ingresoRef: ingresoInfo.ingresoRef || '',
+                        recibo: ingresoInfo.reciboRef || '',
+                        fechaPago: ingresoInfo.fechaUltima || '',
+                        holderId: '-',
+                        cuotaMes: cuotaMes,
+                        pendiente: pendiente,
+                        pagoAplicado: pagoEnRango,
+                        puntos: calc.puntos,
+                        regla: calc.regla,
+                        valorLiquidado: calc.valorLiquidado,
+                        trace: 'Detalle construido desde asignaciones del ejecutivo.',
+                        proximaVigenciaEligible: false,
+                        proximaVigenciaIncluir: false,
+                        proximaVigenciaPuntos: 0,
+                        proximaVigenciaMonto: 0,
+                        carryPuntosPendientes: 0,
+                        carryMontoPendiente: 0,
+                        valorAsignado: cuotaMes
+                    };
+                });
+            }
+        }
+
         return detalle;
     }
 
@@ -2163,7 +2283,11 @@
             ? buildDetalleLiquidacionPrejuridico(mes, fechaInicio, fechaFin, ciudadesPrejuridico)
             : buildDetalleLiquidacionEC(tipo, mes, fechaInicio, fechaFin, ejecutivoId, liquidacionState.selectedCity);
         if (!detalle.length) {
-            showNotification('No se encontraron asignaciones para liquidar en el rango seleccionado.', 'error');
+            if (tipo === 'por_ejecutivo' && ejecutivoId && ejecutivoTieneAsignacionesEnCiudad(liquidacionState.selectedCity, ejecutivoId)) {
+                showNotification('Hay asignación de cuentas para ese ejecutivo, pero no aparecen líneas de cartera con su identificación en esta ciudad. Revise ciudad seleccionada, sincronización de cartera o el rango de fechas.', 'error');
+            } else {
+                showNotification('No se encontraron asignaciones para liquidar en el rango seleccionado.', 'error');
+            }
             return false;
         }
         var totales = calcularTotalesLiquidacion(detalle);
@@ -2708,26 +2832,54 @@
 
         var ultimoPorCiudad = {};
         historico.forEach(function (r) {
-            var city = toCityCode(r.cityCode);
-            if (!city) return;
-            if (!ultimoPorCiudad[city]) {
-                ultimoPorCiudad[city] = r;
-                return;
-            }
             var actual = new Date(r.fechaCreacion || 0).getTime();
-            var previo = new Date(ultimoPorCiudad[city].fechaCreacion || 0).getTime();
-            if (actual >= previo) ultimoPorCiudad[city] = r;
+            var cityFromRecord = toCityCode(r.cityCode);
+            var cities = [];
+
+            // 1) Ciudad directa del registro (cuando aplica por ciudad)
+            if (cityFromRecord && cityFromRecord !== 'NACIONAL' && cityFromRecord !== '-') {
+                cities.push(cityFromRecord);
+            }
+
+            // 2) Ciudades detectadas en el detalle (cubre liquidaciones nacionales)
+            (Array.isArray(r.detalle) ? r.detalle : []).forEach(function (d) {
+                var c = toCityCode(d && d.city);
+                if (!c || c === 'NACIONAL' || c === '-') return;
+                if (cities.indexOf(c) === -1) cities.push(c);
+            });
+
+            cities.forEach(function (city) {
+                if (!ultimoPorCiudad[city]) {
+                    ultimoPorCiudad[city] = r;
+                    return;
+                }
+                var previo = new Date(ultimoPorCiudad[city].fechaCreacion || 0).getTime();
+                if (actual >= previo) ultimoPorCiudad[city] = r;
+            });
         });
 
-        var rows = Object.keys(ultimoPorCiudad).sort().map(function (city) {
-            var liq = ultimoPorCiudad[city];
-            var detalle = liq && liq.detalle ? liq.detalle : [];
+        // Incluir siempre todas las ciudades activas, tengan o no datos en liquidación.
+        var allCityCodes = {};
+        getCiudadesActivas().forEach(function (c) {
+            var code = toCityCode(c && c.codigo);
+            if (code) allCityCodes[code] = true;
+        });
+        Object.keys(ultimoPorCiudad).forEach(function (city) {
+            var code = toCityCode(city);
+            if (code) allCityCodes[code] = true;
+        });
+
+        var rows = Object.keys(allCityCodes).sort().map(function (city) {
+            var liq = ultimoPorCiudad[city] || null;
+            var detalle = (liq && Array.isArray(liq.detalle) ? liq.detalle : []).filter(function (d) {
+                return toCityCode(d && d.city) === city;
+            });
             var cuentasAsignadas = detalle.length;
             var cuentasCobradas = detalle.filter(function (d) { return toNumber(d.pagoAplicado) > 0; }).length;
             var montoAsignado = detalle.reduce(function (acc, d) { return acc + toNumber(d.valorAsignado || d.cuotaMes); }, 0);
             var recaudoDia = detalle.reduce(function (acc, d) { return acc + toNumber(d.pagoAplicado); }, 0);
             var totalRecaudo = detalle.reduce(function (acc, d) { return acc + toNumber(d.valorLiquidado); }, 0);
-            var cityName = (liq.cityName || getCityNameByCode(city) || city).toUpperCase();
+            var cityName = ((liq && liq.cityName) || getCityNameByCode(city) || city).toUpperCase();
             return {
                 nombre: 'CARTERA NORMAL ' + cityName,
                 cuentasAsignadas: cuentasAsignadas,
@@ -2935,18 +3087,35 @@
             if (!ejecutivoObjetivo) return true;
             return normalizeExecutiveId(d.executiveId || d.executiveName) === ejecutivoObjetivo;
         });
-        var rowsDetalle = rowsBase.map(function (d) {
-            var cityCode = toCityCode(d.city || liq.cityCode || liquidacionState.selectedCity || '');
+        var rowsDetalle = rowsBase.map(function (d, idx) {
             var titular = d.holderName || getTitularNombreByCity(d.city || liq.cityCode, d.holderId) || '-';
+            var ingresoValue = String(d.ingresoRef || d.tipoIngreso || '').trim();
+            var puntosFinal = toNumber(d.puntos) + (d.proximaVigenciaEligible && d.proximaVigenciaIncluir ? toNumber(d.proximaVigenciaPuntos) : 0);
+            var nuevoSaldo = Math.max(toNumber(d.cuotaMes) - toNumber(d.pagoAplicado), 0);
+            var ejecutivoId = normalizeExecutiveId(d.executiveId || d.executiveName || '');
+            var ejecutivoNombre = getExecutiveNameByCityAndId(d.city || liq.cityCode || liquidacionState.selectedCity || '', ejecutivoId) || d.executiveName || ejecutivoId || '-';
             return {
+                no: idx + 1,
+                cto: d.invoiceNumber || '-',
                 factura: d.invoiceNumber || '-',
                 matricula: d.cuotaCodigo || '-',
+                cedula: ejecutivoId || '-',
                 cc: d.holderId || '-',
+                nombre: String(ejecutivoNombre).toUpperCase(),
                 titular: String(titular).toUpperCase(),
-                ingreso: d.tipoIngreso || cityCode || '-',
+                vto: d.vto || '',
+                valorCuota: toNumber(d.cuotaMes),
+                saldoActual: toNumber(d.pendiente),
+                nuevoSaldo: nuevoSaldo,
+                cta: d.cuotaCodigo || '-',
+                ingreso: ingresoValue || '-',
+                recibo: d.recibo || '-',
                 rc: d.recibo || '-',
+                valorPago: toNumber(d.pagoAplicado),
+                fechaPag: d.fechaPago || '',
                 fecha: d.fechaPago || '',
-                valor: toNumber(d.pagoAplicado)
+                valor: toNumber(d.pagoAplicado),
+                puntos: puntosFinal
             };
         });
         var cuentasAsignadas = rowsDetalle.length;
@@ -3141,16 +3310,59 @@
         }
         var select = document.getElementById('liqTipoReporteSelect');
         var inputEjecutivo = document.getElementById('liqReporteEjecutivoId');
+        var inputFechaInicio = document.getElementById('liqReporteFechaInicio');
+        var inputFechaFin = document.getElementById('liqReporteFechaFin');
         if (select && !select.value) {
             select.value = 'REPORTE DETALLADO POR EJECUTIVO';
         }
         if (inputEjecutivo) inputEjecutivo.value = '';
+        if (inputFechaInicio) inputFechaInicio.value = '';
+        if (inputFechaFin) inputFechaFin.value = '';
         populateReporteCiudadesList();
         actualizarVisibilidadCamposTipoReporteLiquidacion();
         openModalById('modalTipoReporteLiquidacion');
     }
 
-    function abrirReporteLiquidacion(tipoReporteSeleccionado, ejecutivoIdFiltro, ciudadesSeleccionadas) {
+    function getLiquidacionesParaReporteDetallado(fechaInicio, fechaFin) {
+        var inicio = String(fechaInicio || '').trim();
+        var fin = String(fechaFin || '').trim();
+        return (liquidacionState.historico || []).filter(function (r) {
+            if (!recordMatchesSelectedCity(r, liquidacionState.selectedCity)) return false;
+            var liqStart = isoDateLabel(r.fechaInicio);
+            var liqEnd = isoDateLabel(r.fechaFin);
+            if (inicio && fin) return rangesOverlap(liqStart, liqEnd, inicio, fin);
+            if (inicio) return !liqEnd || liqEnd >= inicio;
+            if (fin) return !liqStart || liqStart <= fin;
+            return true;
+        });
+    }
+
+    function buildLiquidacionFromRecords(records) {
+        var list = Array.isArray(records) ? records : [];
+        if (!list.length) return null;
+        var start = list.map(function (r) { return String(r.fechaInicio || ''); }).filter(Boolean).sort()[0] || '';
+        var end = list.map(function (r) { return String(r.fechaFin || ''); }).filter(Boolean).sort().slice(-1)[0] || '';
+        var mes = list.map(function (r) { return String(r.mes || ''); }).filter(Boolean).sort().slice(-1)[0] || '-';
+        var detalle = [];
+        list.forEach(function (r) {
+            (r.detalle || []).forEach(function (d) { detalle.push(d); });
+        });
+        return {
+            id: generarId(),
+            tipo: 'por_ejecutivo',
+            tipoLabel: 'Liquidaciones consolidadas para reporte',
+            ejecutivoId: '',
+            cityCode: liquidacionState.selectedCity || '-',
+            cityName: getCityNameByCode(liquidacionState.selectedCity || '') || '',
+            mes: mes,
+            fechaInicio: start,
+            fechaFin: end,
+            fechaCreacion: new Date().toISOString(),
+            detalle: detalle
+        };
+    }
+
+    function abrirReporteLiquidacion(tipoReporteSeleccionado, ejecutivoIdFiltro, ciudadesSeleccionadas, fechaInicioFiltro, fechaFinFiltro) {
         if (tipoReporteSeleccionado === 'RESUMEN LIQUIDACIÓN EJECUTIVOS CON ASIGNACIÓN EN DOS CIUDADES') {
             var reportMultiCity = prepararReporteResumenDosCiudades(tipoReporteSeleccionado, ciudadesSeleccionadas || []);
             if (!reportMultiCity || !reportMultiCity.rows || !reportMultiCity.rows.length) {
@@ -3194,15 +3406,25 @@
             return;
         }
 
-        var liq = findSelectedLiquidacion();
-        if (!liq || !recordMatchesSelectedCity(liq, liquidacionState.selectedCity)) {
-            var disponibles = filterHistorico(liquidacionState.historico, liquidacionState.filtros || { mes: '', fechaInicio: '', fechaFin: '' });
-            if (!disponibles.length) {
-                showNotification('No hay liquidaciones disponibles para generar reporte.', 'warning');
+        var liq = null;
+        if (tipoReporteSeleccionado === 'REPORTE DETALLADO POR EJECUTIVO') {
+            var records = getLiquidacionesParaReporteDetallado(fechaInicioFiltro, fechaFinFiltro);
+            if (!records.length) {
+                showNotification('No hay liquidaciones en el rango de fechas seleccionado.', 'warning');
                 return;
             }
-            liq = disponibles[disponibles.length - 1];
-            liquidacionState.selectedId = liq.id;
+            liq = buildLiquidacionFromRecords(records);
+        } else {
+            liq = findSelectedLiquidacion();
+            if (!liq || !recordMatchesSelectedCity(liq, liquidacionState.selectedCity)) {
+                var disponibles = filterHistorico(liquidacionState.historico, liquidacionState.filtros || { mes: '', fechaInicio: '', fechaFin: '' });
+                if (!disponibles.length) {
+                    showNotification('No hay liquidaciones disponibles para generar reporte.', 'warning');
+                    return;
+                }
+                liq = disponibles[disponibles.length - 1];
+                liquidacionState.selectedId = liq.id;
+            }
         }
         if (tipoReporteSeleccionado === 'CASAS COBRANZAS EXTERNAS: REPORTE DETALLADO') {
             var reportCasas = prepararReporteCasasCobranzaExternas(liq, tipoReporteSeleccionado);
@@ -3251,10 +3473,14 @@
     function actualizarVisibilidadCamposTipoReporteLiquidacion() {
         var select = document.getElementById('liqTipoReporteSelect');
         var wrapEjecutivo = document.getElementById('liqReporteEjecutivoWrap');
+        var wrapRango = document.getElementById('liqReporteRangoWrap');
         var wrapCiudades = document.getElementById('liqReporteCiudadesWrap');
         var tipo = select ? String(select.value || '').trim() : '';
         if (wrapEjecutivo) {
             wrapEjecutivo.style.display = (tipo === 'REPORTE DETALLADO POR EJECUTIVO') ? 'block' : 'none';
+        }
+        if (wrapRango) {
+            wrapRango.style.display = (tipo === 'REPORTE DETALLADO POR EJECUTIVO') ? 'block' : 'none';
         }
         if (wrapCiudades) {
             wrapCiudades.style.display = (tipo === 'RESUMEN LIQUIDACIÓN EJECUTIVOS CON ASIGNACIÓN EN DOS CIUDADES') ? 'block' : 'none';
@@ -3266,13 +3492,19 @@
         var tipoReporte = select ? String(select.value || '').trim() : '';
         var inputEjecutivo = document.getElementById('liqReporteEjecutivoId');
         var ejecutivoId = normalizeExecutiveId(inputEjecutivo ? inputEjecutivo.value : '');
+        var fechaInicio = (document.getElementById('liqReporteFechaInicio') || {}).value || '';
+        var fechaFin = (document.getElementById('liqReporteFechaFin') || {}).value || '';
         var ciudadesSeleccionadas = getSelectedReporteCiudades();
         if (!tipoReporte) {
             showNotification('Seleccione el tipo de reporte.', 'warning');
             return;
         }
-        if (tipoReporte === 'REPORTE DETALLADO POR EJECUTIVO' && !ejecutivoId) {
-            showNotification('Digite la identificación del ejecutivo para este reporte.', 'warning');
+        if (tipoReporte === 'REPORTE DETALLADO POR EJECUTIVO' && (!fechaInicio || !fechaFin)) {
+            showNotification('Seleccione el rango de fechas para el reporte detallado por ejecutivo.', 'warning');
+            return;
+        }
+        if (tipoReporte === 'REPORTE DETALLADO POR EJECUTIVO' && fechaInicio > fechaFin) {
+            showNotification('La fecha inicial no puede ser mayor a la fecha final.', 'warning');
             return;
         }
         if (tipoReporte === 'RESUMEN LIQUIDACIÓN EJECUTIVOS CON ASIGNACIÓN EN DOS CIUDADES' && ciudadesSeleccionadas.length < 2) {
@@ -3280,7 +3512,7 @@
             return;
         }
         cerrarModalTipoReporteLiquidacion();
-        abrirReporteLiquidacion(tipoReporte, ejecutivoId, ciudadesSeleccionadas);
+        abrirReporteLiquidacion(tipoReporte, ejecutivoId, ciudadesSeleccionadas, fechaInicio, fechaFin);
     }
 
     function renderResultadosBusquedaLiquidacion(rows) {
@@ -3484,18 +3716,7 @@
             });
         }
 
-        var modalTipo = document.getElementById('modalTipoLiquidacion');
-        var modalCrear = document.getElementById('modalCrearLiquidacion');
-        var modalBuscar = document.getElementById('modalBuscarLiquidacion');
-        var modalTipoReporte = document.getElementById('modalTipoReporteLiquidacion');
-        var modalResultados = document.getElementById('modalResultadosLiquidacion');
-        var modalSelectCity = document.getElementById('selectCityModal');
-        if (modalTipo) modalTipo.addEventListener('click', function (e) { if (e.target === this) cerrarModalTipoLiquidacion(); });
-        if (modalCrear) modalCrear.addEventListener('click', function (e) { if (e.target === this) cerrarModalCrearLiquidacion(); });
-        if (modalBuscar) modalBuscar.addEventListener('click', function (e) { if (e.target === this) closeBuscarLiquidacionModal(); });
-        if (modalTipoReporte) modalTipoReporte.addEventListener('click', function (e) { if (e.target === this) cerrarModalTipoReporteLiquidacion(); });
-        if (modalResultados) modalResultados.addEventListener('click', function (e) { if (e.target === this) closeResultadosLiquidacionModal(); });
-        if (modalSelectCity) modalSelectCity.addEventListener('click', function (e) { if (e.target === this) hideSelectCityModal(false); });
+        // Modales de liquidación: no cerrar al clic fuera del overlay (solo X o botones).
 
     }
 
@@ -3581,24 +3802,11 @@
             });
         }
 
-        document.getElementById('modalComision').addEventListener('click', function (e) {
-            if (e.target === this) cerrarModalComision();
-        });
-        document.getElementById('modalBono').addEventListener('click', function (e) {
-            if (e.target === this) cerrarModalBono();
-        });
-
         document.getElementById('btnCerrarConfirmActionAuditoria').addEventListener('click', cerrarConfirmacionAccion);
         document.getElementById('btnCancelarConfirmActionAuditoria').addEventListener('click', cerrarConfirmacionAccion);
         document.getElementById('btnConfirmarActionAuditoria').addEventListener('click', confirmarAccion);
         document.getElementById('btnCerrarSuccessActionAuditoria').addEventListener('click', cerrarExitoAccion);
         document.getElementById('btnAceptarSuccessActionAuditoria').addEventListener('click', cerrarExitoAccion);
-        document.getElementById('confirmActionAuditoriaModal').addEventListener('click', function (e) {
-            if (e.target === this) cerrarConfirmacionAccion();
-        });
-        document.getElementById('successActionAuditoriaModal').addEventListener('click', function (e) {
-            if (e.target === this) cerrarExitoAccion();
-        });
     }
 
     if (document.readyState === 'loading') {

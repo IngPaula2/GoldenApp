@@ -335,6 +335,31 @@
     }
 }
 
+/* ========================================
+  CABECERAS DE MÓDULO EN MÓVIL (ADMINISTRATIVO)
+  ======================================== */
+@media (max-width: 768px) {
+    body.dashboard-page .section-header .action-buttons {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+        width: 100%;
+    }
+
+    body.dashboard-page .section-header .action-buttons .btn {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    body.dashboard-page .section-header .action-buttons .btn {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.84rem;
+    }
+}
+
 /* Loading Spinner */
 .loading-spinner {
     width: 40px;

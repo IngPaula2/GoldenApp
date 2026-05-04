@@ -105,6 +105,24 @@
                 { key: 'total', label: 'TOTAL GIRO', type: 'money' }
             ];
         }
+        if (currentMode === 'resumen_liquidacion') {
+            return [
+                { key: 'ciudad', label: 'CIUDAD' },
+                { key: 'nombre', label: 'NOMBRE' },
+                { key: 'cargo', label: 'CARGO' },
+                { key: 'cuentasAsignadas', label: 'CTAS ASIG.' },
+                { key: 'cuentasCobradas', label: 'CTS COBR' },
+                { key: 'porcentajeCobrado', label: '%', type: 'percent' },
+                { key: 'montoAsignado', label: 'MONTO ASIG', type: 'money' },
+                { key: 'recaudoDia', label: 'RECAUDO DÍA', type: 'money' },
+                { key: 'recaudo', label: 'RECAUDO TOTAL', type: 'money' },
+                { key: 'porcentajeLiquidacion', label: '% LIQUID', type: 'percent' },
+                { key: 'totalRecaudo', label: 'TOTAL RECAUDO', type: 'money' },
+                { key: 'premiosOficiales', label: 'PREMIOS OFICIALES', type: 'money' },
+                { key: 'premiosConcurso', label: 'PREMIOS CONCURSO', type: 'money' },
+                { key: 'total', label: 'TOTAL', type: 'money' }
+            ];
+        }
         if (isResumenMode()) {
             return [
                 { key: 'ciudad', label: 'CIUDAD' },
@@ -123,6 +141,23 @@
                 { key: 'premiosOficiales', label: 'PREMIOS OFICIALES', type: 'money' },
                 { key: 'premiosConcurso', label: 'PREMIOS CONCURSO', type: 'money' },
                 { key: 'total', label: 'TOTAL', type: 'money' }
+            ];
+        }
+        if (currentMode === 'detallado') {
+            return [
+                { key: 'no', label: 'No' },
+                { key: 'cto', label: 'Ingreso' },
+                { key: 'cedula', label: 'CÉDULA' },
+                { key: 'nombre', label: 'NOMBRE' },
+                { key: 'vto', label: 'VTO.', type: 'date' },
+                { key: 'valorCuota', label: 'VALOR CUOTA', type: 'money' },
+                { key: 'saldoActual', label: 'SALDO ACTUAL', type: 'money' },
+                { key: 'nuevoSaldo', label: 'NUEVO SALDO', type: 'money' },
+                { key: 'cta', label: 'CTA.' },
+                { key: 'recibo', label: 'RECIBO' },
+                { key: 'valorPago', label: 'VALOR PAGO', type: 'money' },
+                { key: 'fechaPag', label: 'FECHA PAG', type: 'date' },
+                { key: 'puntos', label: 'PUNTOS', type: 'points' }
             ];
         }
         return [
@@ -148,7 +183,7 @@
     function buildHeader() {
         var thead = document.getElementById('thead');
         if (!thead) return;
-        if (currentMode === 'detallado' || currentMode === 'detallado_casas_externas') {
+        if (currentMode === 'detallado_casas_externas') {
             var periodLabel = formatMonthShort(reportMeta && reportMeta.mes);
             thead.innerHTML = '<tr>' +
                 '<th rowspan="2">FACTURA</th>' +
@@ -217,7 +252,7 @@
             return;
         }
         var res = (reportMeta && reportMeta.resumenResultados) ? reportMeta.resumenResultados : null;
-        if (!res || isResumenMode() || currentMode === 'detallado') {
+        if (!res || isResumenMode()) {
             wrap.style.display = 'none';
             return;
         }
@@ -236,15 +271,65 @@
         setText('resTotalLiquidar', '$ ' + formatMoney(res.totalMontoLiquidar || 0));
     }
 
-    function buildTableHtmlForExport(allRows) {
+    function getColumnLabelForWordExport(c) {
+        if (currentMode !== 'detallado') return c.label;
+        var map = {
+            'VALOR CUOTA': 'V. CUOTA',
+            'SALDO ACTUAL': 'SALDO ACT.',
+            'NUEVO SALDO': 'NVO SALDO',
+            'VALOR PAGO': 'V. PAGO',
+            'FECHA PAG': 'F. PAG',
+            'PUNTOS': 'PTS.'
+        };
+        return map[c.label] || c.label;
+    }
+
+    function buildTableHtmlForExport(allRows, opts) {
+        opts = opts || {};
+        var forWord = !!opts.word;
         var cols = getColumns();
-        var head = '<tr>' + cols.map(function (c) { return '<th>' + c.label + '</th>'; }).join('') + '</tr>';
+        var head = '<tr>' + cols.map(function (c) {
+            var lab = forWord ? getColumnLabelForWordExport(c) : c.label;
+            return '<th>' + lab + '</th>';
+        }).join('') + '</tr>';
         var body = allRows.map(function (r) {
             return '<tr>' + cols.map(function (c) {
-                return '<td>' + formatValueByType(r[c.key], c.type) + '</td>';
+                var align = (c.type === 'money' || c.type === 'percent' || c.type === 'points') ? ' style="text-align:right"' : '';
+                return '<td' + align + '>' + formatValueByType(r[c.key], c.type) + '</td>';
             }).join('') + '</tr>';
         }).join('');
-        return '<table border="1" cellspacing="0" cellpadding="4"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+        if (forWord) {
+            var colgroup = '<colgroup>' + cols.map(function () {
+                return '<col style="width:' + (100 / Math.max(cols.length, 1)).toFixed(2) + '%">';
+            }).join('') + '</colgroup>';
+            return '<table border="1" cellspacing="0" cellpadding="0" class="word-export-table">' + colgroup +
+                '<thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+        }
+        return '<table border="1" cellspacing="0" cellpadding="4" style="width:100%;border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+    }
+
+    function buildResumenHtmlForExport() {
+        if (!reportMeta || !reportMeta.resumenResultados || currentMode === 'resumen_dos_ciudades') return '';
+        var tblStyle = 'border="1" cellspacing="0" cellpadding="4" style="width:100%;max-width:520px;border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;"';
+        if (currentMode === 'detallado_casas_externas') {
+            var casas = reportMeta.resumenResultados;
+            return '<h4>RESULTADOS</h4><table ' + tblStyle + '>' +
+                '<tr><td>TOTAL RECAUDO</td><td style="text-align:right">$ ' + formatMoney(casas.totalRecaudo || 0) + '</td></tr>' +
+                '<tr><td>PORCENTAJE</td><td style="text-align:right">' + formatPercent(casas.porcentaje || 0) + '</td></tr>' +
+                '<tr><td>VALOR A LIQUIDAR</td><td style="text-align:right">$ ' + formatMoney(casas.valorLiquidar || 0) + '</td></tr>' +
+                '</table>';
+        }
+        var r = reportMeta.resumenResultados;
+        return '<h4>RESULTADOS</h4><table ' + tblStyle + '>' +
+            '<tr><td>CUENTAS ASIGNADAS</td><td style="text-align:right">' + (r.cuentasAsignadas || 0) + '</td></tr>' +
+            '<tr><td>CUENTAS COBRADAS</td><td style="text-align:right">' + (r.cuentasCobradas || 0) + '</td></tr>' +
+            '<tr><td>PORCENTAJE</td><td style="text-align:right">' + formatPercent(r.porcentaje || 0) + '</td></tr>' +
+            '<tr><td>MONTO ASIGNADO</td><td style="text-align:right">$ ' + formatMoney(r.montoAsignado || 0) + '</td></tr>' +
+            '<tr><td>MONTO COBRADO AL DÍA</td><td style="text-align:right">$ ' + formatMoney(r.montoCobradoAlDia || 0) + '</td></tr>' +
+            '<tr><td>NOTAS DÉBITO-</td><td style="text-align:right">$ ' + formatMoney(r.notasDebito || 0) + '</td></tr>' +
+            '<tr><td>NOTAS CREDITO+</td><td style="text-align:right">$ ' + formatMoney(r.notasCredito || 0) + '</td></tr>' +
+            '<tr><td>TOTAL MONTO A LIQUIDAR</td><td style="text-align:right">$ ' + formatMoney(r.totalMontoLiquidar || 0) + '</td></tr>' +
+            '</table>';
     }
 
     function exportExcel() {
@@ -252,20 +337,7 @@
             alert('No hay datos para exportar');
             return;
         }
-        var resumenHtml = '';
-        if (reportMeta && reportMeta.resumenResultados && currentMode !== 'resumen_dos_ciudades') {
-            var r = reportMeta.resumenResultados;
-            resumenHtml = '<h4>RESULTADOS</h4><table border="1" cellspacing="0" cellpadding="4">' +
-                '<tr><td>CUENTAS ASIGNADAS</td><td>' + (r.cuentasAsignadas || 0) + '</td></tr>' +
-                '<tr><td>CUENTAS COBRADAS</td><td>' + (r.cuentasCobradas || 0) + '</td></tr>' +
-                '<tr><td>PORCENTAJE</td><td>' + formatPercent(r.porcentaje || 0) + '</td></tr>' +
-                '<tr><td>MONTO ASIGNADO</td><td>$ ' + formatMoney(r.montoAsignado || 0) + '</td></tr>' +
-                '<tr><td>MONTO COBRADO AL DÍA</td><td>$ ' + formatMoney(r.montoCobradoAlDia || 0) + '</td></tr>' +
-                '<tr><td>NOTAS DÉBITO-</td><td>$ ' + formatMoney(r.notasDebito || 0) + '</td></tr>' +
-                '<tr><td>NOTAS CREDITO+</td><td>$ ' + formatMoney(r.notasCredito || 0) + '</td></tr>' +
-                '<tr><td>TOTAL MONTO A LIQUIDAR</td><td>$ ' + formatMoney(r.totalMontoLiquidar || 0) + '</td></tr>' +
-                '</table>';
-        }
+        var resumenHtml = buildResumenHtmlForExport();
         var html = '<html><head><meta charset="utf-8"><title>Reporte Liquidación</title></head><body>' +
             '<h3>' + (reportMeta.tipoReporte || 'REPORTE DE LIQUIDACIÓN') + '</h3>' +
             buildTableHtmlForExport(rows) + '<br>' + resumenHtml + '</body></html>';
@@ -283,10 +355,31 @@
             alert('No hay datos para exportar');
             return;
         }
+        var resumenHtml = buildResumenHtmlForExport();
+        var wordStyles =
+            '@page WordSection1 { size: 11.0in 8.5in; mso-page-orientation: landscape; margin: 0.35in 0.4in 0.35in 0.4in; }' +
+            'div.WordSection1 { page: WordSection1; }' +
+            'body { font-family: Arial, sans-serif; margin: 0; font-size: 10pt; mso-hyphenate: none; }' +
+            'h3, h4 { margin: 10px 0 6px; }' +
+            'table.word-export-table { width: 100%; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; ' +
+            'table-layout: fixed; font-size: 8pt; mso-width-source: userset; }' +
+            'table.word-export-table th, table.word-export-table td { border: 1px solid #000; padding: 2px 3px; vertical-align: top; ' +
+            'word-wrap: break-word; overflow-wrap: break-word; }' +
+            'table.word-export-table th { background: #f0f0f0; font-size: 7.5pt; font-weight: bold; line-height: 1.15; }' +
+            'table.word-resumen { width: 100%; max-width: 520px; border-collapse: collapse; font-size: 10pt; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }' +
+            'table.word-resumen td { border: 1px solid #000; padding: 4px 8px; }';
         var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">' +
-            '<head><meta charset="utf-8"><title>Reporte Liquidación</title></head><body>' +
+            '<head><meta charset="utf-8"><meta name="ProgId" content="Word.Document">' +
+            '<meta name="Generator" content="GoldenApp">' +
+            '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom>' +
+            '<w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->' +
+            '<style type="text/css">' + wordStyles + '</style>' +
+            '</head><body>' +
+            '<div class="WordSection1">' +
             '<h3>' + (reportMeta.tipoReporte || 'REPORTE DE LIQUIDACIÓN') + '</h3>' +
-            buildTableHtmlForExport(rows) + '</body></html>';
+            buildTableHtmlForExport(rows, { word: true }) + '<br>' +
+            resumenHtml.replace(/<table /g, '<table class="word-resumen" ') +
+            '</div></body></html>';
         var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
@@ -297,7 +390,49 @@
     }
 
     function exportPDF() {
-        window.print();
+        if (!rows.length) {
+            alert('No hay datos para exportar');
+            return;
+        }
+        var savedPage = page;
+        var savedSize = pageSize;
+        var savedZoom = zoom;
+        page = 1;
+        pageSize = Math.max(rows.length, 1);
+        zoom = 1;
+        var root = document.getElementById('reportRoot');
+        if (root) {
+            root.style.transform = 'scale(1)';
+            root.style.transformOrigin = 'top left';
+        }
+        var zl = document.getElementById('zoomLevel');
+        if (zl) zl.textContent = '100%';
+        renderTable();
+        updatePagination();
+        var restored = false;
+        var restore = function () {
+            if (restored) return;
+            restored = true;
+            page = savedPage;
+            pageSize = savedSize;
+            zoom = savedZoom;
+            if (root) {
+                root.style.transform = 'scale(' + zoom + ')';
+            }
+            if (zl) zl.textContent = Math.round(zoom * 100) + '%';
+            renderTable();
+            updatePagination();
+            window.removeEventListener('afterprint', restore);
+        };
+        window.addEventListener('afterprint', restore);
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                window.print();
+            });
+        });
+        window.setTimeout(function () {
+            if (!restored) restore();
+        }, 2500);
     }
 
     function init() {

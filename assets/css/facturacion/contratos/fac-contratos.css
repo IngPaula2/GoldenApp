@@ -341,6 +341,51 @@
 /* Modal de edición debe aparecer al frente de resultados de búsqueda */
 #createContractModal {
     z-index: 10000 !important;
+    padding: 1rem;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Crear contrato: cuerpo con scroll y pie siempre dentro del panel (max-height + overflow) */
+#createContractModal .modal.modal-large {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: calc(100vh - 2rem);
+    width: min(1000px, calc(100vw - 2rem));
+    overflow: hidden;
+}
+
+#createContractModal .modal-header {
+    flex-shrink: 0;
+}
+
+#createContractModal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+#createContractModal .modal-footer {
+    flex-shrink: 0;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Formulario crear contrato: columnas adaptables */
+#createContractModal .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+@media (min-width: 1100px) {
+    #createContractModal .form-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* Modal de confirmación debe aparecer al frente de todo */
@@ -900,6 +945,33 @@
     .form-row {
         grid-template-columns: 1fr;
     }
+
+    /* Crear/actualizar contrato: evitar cortes en móvil */
+    #createContractModal .modal.modal-large {
+        width: min(96vw, 560px);
+        max-width: min(96vw, 560px);
+        max-height: calc(100vh - 1.25rem);
+        padding: 16px 14px;
+    }
+
+    #createContractModal .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    #createContractModal .modal-body {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #createContractModal .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    #createContractModal .modal-footer .btn {
+        flex: 1 1 140px;
+    }
     
     .modal {
         width: 95%;
@@ -917,13 +989,17 @@
         padding: 1rem;
     }
     
-    .action-buttons {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .btn {
+    .section-header .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
         width: 100%;
+    }
+
+    .section-header .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 42px;
     }
     
     .plan-selector-container {
@@ -955,9 +1031,9 @@
         font-size: 1.125rem;
     }
     
-    .btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+    .section-header .action-buttons .btn {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.84rem;
     }
 }
 
@@ -1308,8 +1384,9 @@ td:nth-child(7) {
 
 /* Mantener tamaño y justificación constante de la tabla */
 .contracts-table {
-    table-layout: fixed;
-    width: 100%;
+    table-layout: auto;
+    width: max-content;
+    min-width: 100%;
 }
 
 .contracts-table th,
@@ -1318,8 +1395,8 @@ td:nth-child(7) {
     vertical-align: middle;
     padding: 12px 8px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
 }
 
 /* Columnas específicas con ancho fijo - Actualizado sin columna de factura */
@@ -1549,6 +1626,25 @@ td:nth-child(7) {
     text-align: center;
     min-width: 120px;
 } /* Opciones */
+
+@media (max-width: 768px) {
+    .data-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .contracts-table {
+        width: max-content;
+        min-width: 100%;
+    }
+
+    .contracts-table th,
+    .contracts-table td {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+    }
+}
 
 /* ========================================
    ESTILOS PARA RESULTADOS DE BÚSQUEDA

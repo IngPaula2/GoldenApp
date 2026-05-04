@@ -46,30 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 function initializeModals() {
-    // Cerrar modales al hacer clic fuera (excepto confirmación/éxito)
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                // No permitir cerrar el modal de ciudad haciendo clic fuera si no hay ciudad seleccionada
-                if (this.id === 'selectCityModal') {
-                    const city = getSelectedCityCode();
-                    if (!city) {
-                        return; // No cerrar si no hay ciudad seleccionada
-                    }
-                }
-                // No cerrar modales de confirmación o éxito haciendo clic fuera
-                if (this.id === 'confirmCreateInflowModal' || 
-                    this.id === 'successCreateInflowModal' ||
-                    this.id === 'confirmUpdateInflowModal' ||
-                    this.id === 'successUpdateInflowModal' ||
-                    this.id === 'confirmToggleInflowModal' ||
-                    this.id === 'successToggleInflowModal') {
-                    return;
-                }
-                hideAllModals();
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     
     // Cerrar modales con Escape (excepto confirmación y éxito)
     document.addEventListener('keydown', function(e) {
@@ -513,8 +490,9 @@ function formatNumberWithDecimals(num) {
 }
 
 function selectCashInflow(cashInflow) {
-    const concepto = cashInflow.observaciones || '';
-    const valor = cashInflow.valor || 0;
+    const concepto = buildCashInflowConceptLabel(cashInflow);
+    const valorNum = parseCashInflowStoredValor(cashInflow.valor);
+    const valorSafe = Number.isFinite(valorNum) ? Math.max(0, Math.trunc(valorNum)) : 0;
     
     if (isEditingMode) {
         // Modo edición
@@ -529,7 +507,7 @@ function selectCashInflow(cashInflow) {
             dataInput.value = JSON.stringify(cashInflow);
         }
         if (valueInput) {
-            valueInput.value = formatNumber(valor);
+            valueInput.value = formatNumber(valorSafe);
         }
     } else {
         // Modo creación
@@ -544,7 +522,7 @@ function selectCashInflow(cashInflow) {
             dataInput.value = JSON.stringify(cashInflow);
         }
         if (valueInput) {
-            valueInput.value = formatNumber(valor);
+            valueInput.value = formatNumber(valorSafe);
         }
     }
     
@@ -653,7 +631,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../../../index.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 function initializeUppercaseInputs() {
@@ -989,6 +967,60 @@ function renderBankInflowTable(list) {
 // OPERACIONES CRUD
 // ========================================
 
+/** Valor numérico guardado en ingreso a caja (número o texto con separadores). */
+function parseCashInflowStoredValor(raw) {
+    if (raw === undefined || raw === null || raw === '') return NaN;
+    if (typeof raw === 'number' && !Number.isNaN(raw)) return raw;
+    const digits = String(raw).replace(/[^\d]/g, '');
+    if (!digits) return NaN;
+    return parseInt(digits, 10);
+}
+
+/**
+ * Texto de concepto para ingreso a banco: el ingreso a caja puede tener observaciones vacías.
+ */
+function buildCashInflowConceptLabel(cashInflow) {
+    if (!cashInflow || typeof cashInflow !== 'object') return '';
+    const obs = String(cashInflow.observaciones ?? '').trim();
+    if (obs) return obs;
+    const codigo = String(cashInflow.tipoIngresoCodigo ?? cashInflow.tipo ?? '').trim();
+    const nombre = String(cashInflow.tipoIngresoNombre ?? '').trim();
+    if (codigo && nombre) return `${codigo} — ${nombre}`;
+    if (codigo) return codigo;
+    if (nombre) return nombre;
+    const num = cashInflow.numero;
+    if (num !== undefined && num !== null && String(num).trim() !== '') {
+        return `Ingreso a caja #${String(num).trim()}`;
+    }
+    return 'Sin concepto';
+}
+
+function getCashInflowFromHiddenInputById(hiddenInputId) {
+    const raw = document.getElementById(hiddenInputId)?.value?.trim();
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
+
+function getBankInflowConceptFromForm(conceptInputId, hiddenInputId) {
+    const fromInput = (document.getElementById(conceptInputId)?.value || '').trim();
+    if (fromInput) return fromInput;
+    const linked = getCashInflowFromHiddenInputById(hiddenInputId);
+    return linked ? buildCashInflowConceptLabel(linked) : '';
+}
+
+function getBankInflowValorDigitsFromForm(valueInputId, hiddenInputId) {
+    const fromInput = (document.getElementById(valueInputId)?.value || '').replace(/[^\d]/g, '');
+    if (fromInput) return fromInput;
+    const linked = getCashInflowFromHiddenInputById(hiddenInputId);
+    if (!linked) return '';
+    const n = parseCashInflowStoredValor(linked.valor);
+    return Number.isFinite(n) && n >= 0 ? String(Math.trunc(n)) : '';
+}
+
 function clearCreateInflowForm() {
     const form = document.getElementById('createInflowForm');
     if (form) form.reset();
@@ -1004,15 +1036,20 @@ function handleCreateInflow() {
     const form = document.getElementById('createInflowForm');
     if (!form) return;
     
-    // Validar campos requeridos
+    // Validar campos requeridos (concepto/valor pueden inferirse del ingreso a caja vinculado)
     const numero = document.getElementById('inflowNumber')?.value.trim();
     const cuenta = document.getElementById('inflowAccount')?.value.trim();
     const fechaHoy = document.getElementById('inflowDateToday')?.value;
     const fechaDocumento = document.getElementById('inflowDocumentDate')?.value;
-    const valor = document.getElementById('inflowValue')?.value.replace(/[^\d]/g, '');
+    const valor = getBankInflowValorDigitsFromForm('inflowValue', 'inflowCashInflowData');
     const papeleta = document.getElementById('inflowVoucher')?.value.trim();
-    const concepto = document.getElementById('inflowConcept')?.value.trim();
+    const concepto = getBankInflowConceptFromForm('inflowConcept', 'inflowCashInflowData');
+    const tieneIngresoCaja = !!getCashInflowFromHiddenInputById('inflowCashInflowData');
     
+    if (!tieneIngresoCaja) {
+        showNotification('Debe seleccionar un ingreso a caja con el botón «Seleccionar».', 'warning');
+        return;
+    }
     if (!numero || !cuenta || !fechaHoy || !fechaDocumento || !valor || !papeleta || !concepto) {
         showNotification('Por favor, complete todos los campos requeridos', 'warning');
         return;
@@ -1033,9 +1070,9 @@ function confirmCreateInflow() {
     const cuenta = document.getElementById('inflowAccount')?.value.trim();
     const fechaHoy = document.getElementById('inflowDateToday')?.value;
     const fechaDocumento = document.getElementById('inflowDocumentDate')?.value;
-    const valor = parseInt(document.getElementById('inflowValue')?.value.replace(/[^\d]/g, '') || '0', 10);
+    const valor = parseInt(getBankInflowValorDigitsFromForm('inflowValue', 'inflowCashInflowData') || '0', 10);
     const papeleta = document.getElementById('inflowVoucher')?.value.trim();
-    const concepto = document.getElementById('inflowConcept')?.value.trim();
+    const concepto = getBankInflowConceptFromForm('inflowConcept', 'inflowCashInflowData');
     const cashInflowData = document.getElementById('inflowCashInflowData')?.value || '';
     
     // Extraer número de ingreso a caja del JSON si existe
@@ -1104,9 +1141,9 @@ function handleUpdateInflow() {
     const cuenta = document.getElementById('editInflowAccount')?.value.trim();
     const fechaHoy = document.getElementById('editInflowDateToday')?.value;
     const fechaDocumento = document.getElementById('editInflowDocumentDate')?.value;
-    const valor = document.getElementById('editInflowValue')?.value.replace(/[^\d]/g, '');
+    const valor = getBankInflowValorDigitsFromForm('editInflowValue', 'editInflowCashInflowData');
     const papeleta = document.getElementById('editInflowVoucher')?.value.trim();
-    const concepto = document.getElementById('editInflowConcept')?.value.trim();
+    const concepto = getBankInflowConceptFromForm('editInflowConcept', 'editInflowCashInflowData');
     const cashInflowData = document.getElementById('editInflowCashInflowData')?.value || '';
     
     // Extraer número de ingreso a caja del JSON si existe
@@ -1142,9 +1179,9 @@ function confirmUpdateInflow() {
     const cuenta = document.getElementById('editInflowAccount')?.value.trim();
     const fechaHoy = document.getElementById('editInflowDateToday')?.value;
     const fechaDocumento = document.getElementById('editInflowDocumentDate')?.value;
-    const valor = parseInt(document.getElementById('editInflowValue')?.value.replace(/[^\d]/g, '') || '0', 10);
+    const valor = parseInt(getBankInflowValorDigitsFromForm('editInflowValue', 'editInflowCashInflowData') || '0', 10);
     const papeleta = document.getElementById('editInflowVoucher')?.value.trim();
-    const concepto = document.getElementById('editInflowConcept')?.value.trim();
+    const concepto = getBankInflowConceptFromForm('editInflowConcept', 'editInflowCashInflowData');
     const cashInflowData = document.getElementById('editInflowCashInflowData')?.value || '';
     
     // Extraer número de ingreso a caja del JSON si existe

@@ -93,19 +93,6 @@ function initializeUserDropdown() {
 }
 
 function initializeModals() {
-    // Cerrar modal al hacer clic fuera (solo si hay ciudad seleccionada)
-    const cityModalOverlay = document.getElementById('selectCityModal');
-    if (cityModalOverlay) {
-        cityModalOverlay.addEventListener('click', function(e) {
-            if (e.target === cityModalOverlay) {
-                const selectedCity = getSelectedCityCode();
-                if (selectedCity) {
-                    hideSelectCityModal();
-                }
-            }
-        });
-    }
-    
     // Botón seleccionar ciudad
     const bSeleccionarCiudad = document.getElementById('bSeleccionarCiudad');
     if (bSeleccionarCiudad) {
@@ -141,16 +128,6 @@ function initializeModals() {
     if (bBuscarTitular) {
         bBuscarTitular.addEventListener('click', function() {
             showSearchTitularModal();
-        });
-    }
-    
-    // Cerrar modal de resultados al hacer clic fuera
-    const resultsModal = document.getElementById('resultsModal');
-    if (resultsModal) {
-        resultsModal.addEventListener('click', function(e) {
-            if (e.target === resultsModal) {
-                hideResultsModal();
-            }
         });
     }
     
@@ -509,7 +486,7 @@ function cancelLogout() {
 
 function confirmLogout() {
     sessionStorage.clear();
-    window.location.href = '../../login.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 // ========================================

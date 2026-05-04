@@ -123,36 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeModals() {
     
-    // Cerrar modales al hacer clic fuera (excepto modal de ciudad y confirmación/éxito)
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                // No permitir cerrar el modal de ciudad haciendo clic fuera si no hay ciudad seleccionada
-                if (this.id === 'selectCityModal') {
-                    const city = getSelectedCityCode();
-                    if (!city) {
-                        return; // No cerrar si no hay ciudad seleccionada
-                    }
-                }
-                // No cerrar modales de confirmación o éxito haciendo clic fuera
-                if (this.id === 'confirmCreateInflowModal' || 
-                    this.id === 'successCreateInflowModal' ||
-                    this.id === 'confirmUpdateInflowModal' ||
-                    this.id === 'successUpdateInflowModal' ||
-                    this.id === 'confirmToggleInflowModal' ||
-                    this.id === 'successToggleInflowModal') {
-                    return;
-                }
-                // Cerrar modal de detalles con clic fuera
-                if (this.id === 'createInflowDetailsModal') {
-                    hideCreateInflowDetailsModal();
-                    return;
-                }
-                hideAllModals();
-            }
-        });
-    });
-    
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     // Cerrar modales con Escape (excepto confirmación y éxito)
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {

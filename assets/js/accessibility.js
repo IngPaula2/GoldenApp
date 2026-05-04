@@ -94,6 +94,11 @@
             var isTextInput = tag === 'input' || tag === 'textarea' || tag === 'select' || isEditable;
 
             if (e.key === 'Escape') {
+                var overlayEl = document.getElementById(openId);
+                if (overlayEl && overlayEl.getAttribute('data-close-on-escape') === 'false') {
+                    e.preventDefault();
+                    return;
+                }
                 var closeBtn = document.querySelector('#'+openId+' .modal .modal-close');
                 if (closeBtn) closeBtn.click();
             } else if (e.key === 'Enter' && !isTextInput) {

@@ -113,14 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 function initializeModals() {
-    // Cerrar modales al hacer clic fuera
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideAllModals();
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     // Evitar que clics dentro del contenido del modal se propaguen al overlay
     document.querySelectorAll('.modal-overlay .modal').forEach(mod => {
         mod.addEventListener('click', function(e){ e.stopPropagation(); });
@@ -2078,7 +2071,7 @@ function initializeUserDropdown() {
                 
                 if (this.classList.contains('logout-item')) {
                     // Redirigir inmediatamente al login
-                    window.location.href = '../../index.html';
+                    window.location.href = window.AppRoutes.resolve('LOGIN');
                 } else if (this.classList.contains('admin-users-item')) {
                     alert('Funcionalidad de administrar usuarios en desarrollo');
                 }

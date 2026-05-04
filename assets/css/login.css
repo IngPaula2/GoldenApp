@@ -16,41 +16,58 @@
 /* Estilos específicos para la página de login */
 .login-page {
     min-height: 100vh;
+    min-height: 100dvh;
+    min-height: 100svh;
     background-color: var(--color-background);
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    /* Solo notch / safe area; el centrado vertical del formulario no añade “aire” extra arriba */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0);
+    padding-bottom: calc(2.75rem + env(safe-area-inset-bottom, 0px));
+    padding-left: env(safe-area-inset-left, 0);
+    box-sizing: border-box;
 }
 
 /* ========================================
    ELEMENTOS DECORATIVOS
    ======================================== */
 
-/* Elementos decorativos de fondo */
+/* Elementos decorativos de fondo (fixed al viewport para que lleguen al borde superior aunque el flex centre el formulario) */
 .background-decoration {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    min-height: 100dvh;
+    min-height: 100svh;
     pointer-events: none;
     z-index: 1;
+    overflow: visible;
 }
 
-/* Figura de la esquina superior derecha */
+/* Figura de la esquina superior derecha (SVG o contenedor) */
 .decoration-top-right {
-    position: fixed;
-    top: -5%;
-    right: -5%;
-    width: 60%;
-    height: 60%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(58vw, 520px);
+    height: auto;
+    aspect-ratio: 673 / 721;
+    display: block;
     opacity: 1;
     z-index: 1;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.08));
     pointer-events: none;
+    /* Menos salida hacia fuera del viewport = menos corte “recto” en móvil */
+    transform: translate(5%, -3%);
 }
 
 /* Círculos en la esquina inferior izquierda */
@@ -66,10 +83,8 @@
     height: 724px;
     background: rgba(236, 211, 129, 0.59);
     opacity: 1;
-    position: absolute;
     bottom: -362px;
     left: -362px;
-    border-radius: 50%;
 }
 
 .circle-2 {
@@ -77,10 +92,8 @@
     height: 572px;
     background: rgba(236, 211, 129, 0.6);
     opacity: 1;
-    position: absolute;
     bottom: -286px;
     left: -286px;
-    border-radius: 50%;
 }
 
 .circle-3 {
@@ -88,10 +101,8 @@
     height: 438px;
     background: rgba(236, 211, 129, 1);
     opacity: 1;
-    position: absolute;
     bottom: -219px;
     left: -219px;
-    border-radius: 50%;
 }
 
 /* ========================================
@@ -257,10 +268,11 @@
 
 /* Footer */
 .login-footer {
-    position: absolute;
-    bottom: 2rem;
-    left: 2rem;
+    position: fixed;
+    bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.35rem));
+    left: max(1.25rem, calc(env(safe-area-inset-left, 0px) + 0.35rem));
     z-index: 10;
+    max-width: calc(100vw - 2.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
 }
 
 .login-footer p {
@@ -278,26 +290,24 @@
 /* Pantallas grandes (desktop) */
 @media (min-width: 1200px) {
     .decoration-top-right {
-        width: 65%;
-        height: 65%;
-        top: -5%;
-        right: -17%;
+        width: min(50vw, 640px);
+        transform: translate(4%, -4%);
     }
-    
+
     .circle-1 {
         width: 900px;
         height: 900px;
         bottom: -450px;
         left: -450px;
     }
-    
+
     .circle-2 {
         width: 700px;
         height: 700px;
         bottom: -350px;
         left: -350px;
     }
-    
+
     .circle-3 {
         width: 550px;
         height: 550px;
@@ -305,106 +315,106 @@
         left: -275px;
     }
 }
+
 @media (max-width: 768px) {
     .login-container {
-        padding: 4rem 3rem;
-        margin: 1rem;
+        padding: 2.25rem 1.5rem;
+        margin: 0 auto;
+        width: min(100%, 22rem);
     }
-    
+
     .logo-icon {
         width: 200px;
         height: 80px;
     }
-    
+
     .logo-golden {
         font-size: 3rem;
     }
-    
+
     .logo-bridge {
         font-size: 1.6rem;
     }
-    
-    /* Figuras decorativas responsivas */
+
+    /* Esquinas: figuras más contenidas para evitar corte recto en el borde del teléfono */
     .decoration-top-right {
-        width: 55%;
-        height: 55%;
-        top: -8%;
-        right: -8%;
+        width: min(88vw, 360px);
+        transform: translate(0, -4%);
     }
-    
+
     .circle-1 {
-        width: 500px;
-        height: 500px;
-        bottom: -250px;
-        left: -250px;
+        width: 360px;
+        height: 360px;
+        bottom: -180px;
+        left: -180px;
+        opacity: 0.5;
     }
-    
+
     .circle-2 {
-        width: 400px;
-        height: 400px;
-        bottom: -200px;
-        left: -200px;
+        width: 280px;
+        height: 280px;
+        bottom: -140px;
+        left: -140px;
     }
-    
+
     .circle-3 {
-        width: 300px;
-        height: 300px;
-        bottom: -150px;
-        left: -150px;
+        width: 200px;
+        height: 200px;
+        bottom: -100px;
+        left: -100px;
     }
 }
 
 @media (max-width: 480px) {
     .login-container {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 1.1rem;
+        margin: 0.5rem auto;
     }
-    
+
     .logo {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .logo-icon {
         width: 150px;
         height: 100px;
     }
-    
+
     .logo-text {
         align-items: center;
     }
-    
+
     .login-footer {
-        bottom: 1rem;
-        left: 1rem;
+        bottom: max(0.85rem, calc(env(safe-area-inset-bottom, 0px) + 0.35rem));
+        left: max(0.85rem, calc(env(safe-area-inset-left, 0px) + 0.35rem));
     }
-    
-    /* Figuras decorativas para móviles pequeños */
+
     .decoration-top-right {
-        width: 50%;
-        height: 50%;
-        top: -10%;
-        right: -10%;
+        width: min(80vw, 300px);
+        transform: translate(0, -3%);
     }
-    
+
     .circle-1 {
-        width: 400px;
-        height: 400px;
-        bottom: -200px;
-        left: -200px;
+        width: 300px;
+        height: 300px;
+        bottom: -150px;
+        left: -150px;
+        opacity: 0.45;
     }
-    
+
     .circle-2 {
-        width: 320px;
-        height: 320px;
-        bottom: -160px;
-        left: -160px;
+        width: 235px;
+        height: 235px;
+        bottom: -118px;
+        left: -118px;
     }
-    
+
     .circle-3 {
-        width: 240px;
-        height: 240px;
-        bottom: -120px;
-        left: -120px;
+        width: 175px;
+        height: 175px;
+        bottom: -88px;
+        left: -88px;
     }
 }
 
@@ -414,44 +424,35 @@
         width: 180px;
         height: 120px;
     }
-    
+
     .login-container {
-        padding: 1rem 0.5rem;
-    }
-    
-    .decoration-top-right {
-        width: 45%;
-        height: 45%;
-        top: -12%;
-        right: -12%;
+        padding: 1rem 0.75rem;
     }
 
-    /* Figuras decorativas para móviles pequeños */
     .decoration-top-right {
-        width: 50%;
-        height: 50%;
-        top: -10%;
-        right: -10%;
+        width: min(78vw, 260px);
+        transform: translate(0, -2%);
     }
-    
+
     .circle-1 {
-        width: 200px;
-        height: 400px;
-        bottom: -200px;
-        left: -200px;
+        width: 260px;
+        height: 260px;
+        bottom: -130px;
+        left: -130px;
+        opacity: 0.42;
     }
-    
+
     .circle-2 {
-        width: 320px;
-        height: 320px;
-        bottom: -160px;
-        left: -160px;
+        width: 200px;
+        height: 200px;
+        bottom: -100px;
+        left: -100px;
     }
-    
+
     .circle-3 {
-        width: 240px;
-        height: 240px;
-        bottom: -120px;
-        left: -120px;
+        width: 150px;
+        height: 150px;
+        bottom: -75px;
+        left: -75px;
     }
 } 

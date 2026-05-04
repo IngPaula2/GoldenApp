@@ -126,6 +126,25 @@
     margin-bottom: 1rem;
 }
 
+/* Modal principal de Planes: más ancho para evitar recortes de campos */
+#createPlanModal .modal-large {
+    width: min(1100px, calc(100vw - 32px));
+    max-width: min(1100px, calc(100vw - 32px));
+}
+
+/* Garantiza que cada control pueda encogerse sin romper el grid */
+#createPlanModal .form-group {
+    min-width: 0;
+}
+
+#createPlanModal .form-input,
+#createPlanModal .form-select,
+#createPlanModal .price-input-container,
+#createPlanModal .select-container {
+    width: 100%;
+    min-width: 0;
+}
+
 /* Form Inputs - Estilo empleados */
 .form-input {
     width: 100%;
@@ -1827,5 +1846,143 @@ input[type="number"] {
     font-weight: 500 !important;
 }
 
+/* ==============================
+   AJUSTE RESPONSIVE DEL FORMULARIO (CREATE PLAN)
+   ============================== */
+
+/* Equilibrado: no pequeño ni pantalla completa en desktop */
+#createPlanModal .modal.modal-large {
+    width: clamp(860px, 88vw, 1080px) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 40px) !important;
+    overflow-y: auto !important;
+}
+
+/* En escritorio, mantener 3 columnas reales para el formulario */
+#createPlanModal .form-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Asegura que el contenido use todo el ancho disponible del modal */
+#createPlanModal .modal-body,
+#createPlanModal #createPlanForm {
+    width: 100%;
+    min-width: 0;
+}
+
+/* ==============================
+   RESPONSIVE GLOBAL (PLANES)
+   ============================== */
+
+/* Pantallas grandes */
+@media (min-width: 1600px) {
+    body.dashboard-page.planes-page .content-area {
+        max-width: 1720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .plans-section .table th,
+    .plans-section .table td {
+        padding: 16px 14px;
+        font-size: 15px;
+    }
+}
+
+/* Laptop / tablet horizontal */
+@media (max-width: 1200px) {
+    .section-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .section-header .action-buttons {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    #createPlanModal .form-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .top-nav-list {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .top-nav-link {
+        white-space: nowrap;
+    }
+
+    .plans-section .data-table {
+        overflow-x: auto;
+    }
+
+    .plans-section .table {
+        min-width: 980px;
+    }
+
+    #createPlanModal .modal-large,
+    #planResultsModal .modal,
+    #planDetailsModal .modal {
+        width: min(980px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+        margin: 12px;
+    }
+}
+
+/* Móvil */
+@media (max-width: 768px) {
+    .content-area {
+        padding: 10px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .section-header .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .section-header .action-buttons .btn {
+        width: 100%;
+    }
+
+    #createPlanModal .form-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .modal {
+        padding: 16px;
+    }
+
+    .modal-body {
+        max-height: 65vh;
+        overflow-y: auto;
+    }
+
+    #createPlanModal .modal-footer {
+        flex-direction: column;
+    }
+
+    #createPlanModal .modal-footer .btn {
+        width: 100%;
+    }
+
+    #planResultsModal .table,
+    .plans-section .table {
+        min-width: 920px;
+    }
+}
 
 

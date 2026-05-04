@@ -59,43 +59,43 @@
         <nav class="sidebar-nav">
             <ul class="nav-list">
                 <li class="nav-item">
-                    <a href="../administrativo/admin-titulares.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_ADMIN">
                         <i class="fas fa-clipboard-list nav-icon"></i>
                         <span>Administrativo</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="../facturacion/contratos/fac-contratos.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_FACTURACION">
                         <i class="fas fa-receipt nav-icon"></i>
                         <span>Facturación</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="../tesoreria/ingreso-caja/ingreso-caja.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_TESORERIA">
                         <i class="fas fa-building nav-icon"></i>
                         <span>Tesorería</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="../nomina/nomina-semanal/nomina-semanal.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_NOMINA">
                         <i class="fas fa-coins nav-icon"></i>
                         <span>Nómina</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="../cartera/asignar-factura/asignar-factura.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_CARTERA">
                         <i class="fas fa-wallet nav-icon"></i>
                         <span>Cartera</span>
                     </a>
                 </li>
                 <li class="nav-item active">
-                    <a href="auditoria.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_AUDITORIA">
                         <i class="fas fa-search nav-icon"></i>
                         <span>Auditoria</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="../contabilidad/contabilidad.html" class="nav-link">
+                    <a href="#" class="nav-link" data-app-route="MODULE_CONTABILIDAD">
                         <i class="fas fa-calculator nav-icon"></i>
                         <span>Contabilidad</span>
                     </a>
@@ -537,8 +537,20 @@
                     </div>
                 </div>
                 <div class="form-group" id="liqReporteEjecutivoWrap" style="display: none;">
-                    <label for="liqReporteEjecutivoId" class="form-label">Identificación ejecutivo *</label>
+                    <label for="liqReporteEjecutivoId" class="form-label">Identificación ejecutivo (opcional)</label>
                     <input type="text" id="liqReporteEjecutivoId" class="form-input" placeholder="Ingrese identificación del ejecutivo">
+                </div>
+                <div id="liqReporteRangoWrap" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="liqReporteFechaInicio" class="form-label">Fecha inicial *</label>
+                            <input type="date" id="liqReporteFechaInicio" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="liqReporteFechaFin" class="form-label">Fecha final *</label>
+                            <input type="date" id="liqReporteFechaFin" class="form-input">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group" id="liqReporteCiudadesWrap" style="display: none;">
                     <label class="form-label">Ciudades para el reporte *</label>
@@ -840,6 +852,9 @@
          SCRIPTS
          ======================================== -->
     
+    <script src="../../assets/js/utils/routes.js"></script>
+    
+    <script src="../../assets/js/administrativo/admin-layout.js"></script>
     <script src="../../assets/js/auditoria/auditoria.js"></script>
 </body>
 </html>

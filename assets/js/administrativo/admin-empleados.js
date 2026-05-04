@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 if (this.classList.contains('logout-item')) {
                     // Redirigir inmediatamente al login
-                    window.location.href = '../../index.html';
+                    window.location.href = window.AppRoutes.resolve('LOGIN');
                 } else if (this.classList.contains('admin-users-item')) {
                     alert('Funcionalidad de administrar usuarios en desarrollo');
                 }
@@ -99,7 +99,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../../index.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 // ========================================
@@ -314,8 +314,6 @@ function promptForCitySelection() {
                 </div>
             </div>`;
         document.body.appendChild(container);
-        // Cerrar al hacer clic fuera (solo para el modal inyectado)
-        container.addEventListener('click', (e) => { if (e.target === container) { container.style.display = 'none'; document.body.style.overflow = 'auto'; } });
         // Botón aceptar del modal inyectado (si existe)
         const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
         if (bSeleccionar) {
@@ -3301,21 +3299,8 @@ function initializePage() {
         loadEmpleadosFromStorage();
     });
     
-    // CONFIGURACIÓN DE MODALES: Cerrar al hacer clic fuera
     const modals = document.querySelectorAll('.modal-overlay');
-    modals.forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = 'auto';
-                
-                // Limpiar datos temporales si se cierra el modal de confirmación
-                if (modal.id === 'confirmCreateEmpleadoModal') {
-                    window.tempEmpleadoData = null;
-                }
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     
     // Cerrar modales con tecla Escape
     document.addEventListener('keydown', (e) => {
@@ -3426,7 +3411,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Funcionalidad de cerrar sesión
                     sessionStorage.removeItem('isAuthenticated');
                     sessionStorage.removeItem('username');
-                    window.location.href = '../../index.html';
+                    window.location.href = window.AppRoutes.resolve('LOGIN');
                 } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
                     // Navegar a administración de usuarios
                     console.log('Navegando a administrar usuarios');

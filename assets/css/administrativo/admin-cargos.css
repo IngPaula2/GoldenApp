@@ -1632,3 +1632,102 @@ textarea {
     text-align: center;
     padding: 0.75rem 0.5rem;
 }
+
+@media (max-width: 991px) {
+    .cargo-section .data-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        overflow-y: visible;
+    }
+
+    .cargos-section .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .cargos-section .action-buttons {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .cargos-section .action-buttons .btn {
+        flex: 1 1 auto;
+        min-width: min(100%, 160px);
+    }
+
+    /* Cargos móvil: permitir ver TODAS las columnas (incluye activar/desactivar) */
+    #content-administrativo .data-table,
+    #content-pyf .data-table,
+    #content-servicio .data-table {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    #content-administrativo .table,
+    #content-pyf .table,
+    #content-servicio .table {
+        display: table !important;
+        table-layout: auto !important;
+        min-width: 900px !important;
+        width: max-content !important;
+    }
+
+    #content-administrativo .table th,
+    #content-administrativo .table td,
+    #content-pyf .table th,
+    #content-pyf .table td,
+    #content-servicio .table th,
+    #content-servicio .table td {
+        white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    /* No ocultar columnas en móvil */
+    .section-content .table th:nth-child(3),
+    .section-content .table td:nth-child(3),
+    .section-content .table th:nth-child(4),
+    .section-content .table td:nth-child(4) {
+        display: table-cell !important;
+    }
+
+    /* El deslizamiento debe ocurrir dentro del bloque expandido */
+    .cargo-section .section-content {
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .cargo-section .section-content .table {
+        display: table !important;
+        min-width: 900px !important;
+        width: 900px !important;
+        table-layout: auto !important;
+    }
+
+    /* Evitar ocultamiento de columnas en responsive previo */
+    .cargo-section .section-content .table th:nth-child(3),
+    .cargo-section .section-content .table td:nth-child(3),
+    .cargo-section .section-content .table th:nth-child(4),
+    .cargo-section .section-content .table td:nth-child(4),
+    .cargo-section .section-content .table th:nth-child(5),
+    .cargo-section .section-content .table td:nth-child(5) {
+        display: table-cell !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .cargo-section .section-content .table {
+        min-width: 980px !important;
+        width: 980px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .cargo-section .section-content .table {
+        min-width: 1040px !important;
+        width: 1040px !important;
+    }
+}

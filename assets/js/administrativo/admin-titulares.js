@@ -596,7 +596,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../../index.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 // [BACKEND] Punto de integración general (Titulares):
@@ -1827,51 +1827,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // EVENTOS DE MODALES
     // ========================================
-    
-    // Cerrar modal de selección de ciudad al hacer clic fuera
-    modalOverlay.addEventListener('click', function(e) {
-        if (e.target === modalOverlay) {
-            hideModal();
-        }
-    });
-    
-    // Cerrar modal de crear titular al hacer clic fuera
-    createTitularModalOverlay.addEventListener('click', function(e) {
-        if (e.target === createTitularModalOverlay) {
-            hideCreateTitularModal();
-        }
-    });
-    
-         // Cerrar modal de crear beneficiario al hacer clic fuera
-     createBeneficiarioModalOverlay.addEventListener('click', function(e) {
-         if (e.target === createBeneficiarioModalOverlay) {
-             hideCreateBeneficiarioModal();
-         }
-     });
-     
-     // Cerrar modal de buscar titular al hacer clic fuera
-     searchTitularModalOverlay.addEventListener('click', function(e) {
-         if (e.target === searchTitularModalOverlay) {
-             hideSearchTitularModal();
-         }
-     });
-     
-     // Cerrar modal de buscar beneficiario al hacer clic fuera
-     searchBeneficiarioModalOverlay.addEventListener('click', function(e) {
-         if (e.target === searchBeneficiarioModalOverlay) {
-             hideSearchBeneficiarioModal();
-         }
-     });
-     
-     // Cerrar modal de confirmación de logout al hacer clic fuera
-     const confirmLogoutModal = document.getElementById('confirmLogoutModal');
-     if (confirmLogoutModal) {
-         confirmLogoutModal.addEventListener('click', function(e) {
-             if (e.target === confirmLogoutModal) {
-                 cancelLogout();
-             }
-         });
-     }
+    // Los modales solo se cierran con la X o botones del formulario (no al clic fuera del overlay).
      
      // Cerrar modales con la tecla Escape
      document.addEventListener('keydown', function(e) {
@@ -1898,42 +1854,8 @@ document.addEventListener('DOMContentLoaded', function() {
          }
      });
     
-    // ========================================
-    // NAVEGACIÓN DEL SIDEBAR
-    // ========================================
-    
-    // Funcionalidad de navegación del sidebar
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remover clase activa de todos los elementos
-            navItems.forEach(nav => nav.classList.remove('active'));
-            // Agregar clase activa al elemento clickeado
-            this.classList.add('active');
-            
-            // Mostrar modal de selección de ciudad al navegar a cualquier sección
-            showModal();
-        });
-    });
-    
-    // ========================================
-    // NAVEGACIÓN SUPERIOR
-    // ========================================
-    
-    // Funcionalidad de navegación superior
-    const topNavItems = document.querySelectorAll('.top-nav-item');
-    topNavItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remover clase activa de todos los elementos
-            topNavItems.forEach(nav => nav.classList.remove('active'));
-            // Agregar clase activa al elemento clickeado
-            this.classList.add('active');
-            
-            // Mostrar modal de selección de ciudad al navegar a cualquier sección
-            showModal();
-        });
-    });
-    
+    // Navegación lateral y superior: enlaces con data-app-route (admin-layout.js + AppRoutes).
+
     // ========================================
     // PERFIL DE USUARIO Y DROPDOWN
     // ========================================
@@ -2095,12 +2017,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>`;
             document.body.appendChild(container);
-            container.addEventListener('click', (e) => {
-                if (e.target === container) {
-                    container.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            });
             const bSeleccionar = container.querySelector('#bSeleccionarCiudad');
             bSeleccionar.addEventListener('click', () => {
                 const sel = container.querySelector('#citySelect');
@@ -2849,58 +2765,6 @@ document.addEventListener('DOMContentLoaded', function() {
             hideCreateBeneficiarioModal();
         });
     }
-    
-    // ========================================
-    // FUNCIONALIDAD RESPONSIVE
-    // ========================================
-    
-    /**
-     * Crea el botón toggle para el sidebar en dispositivos móviles
-     */
-    function createMobileToggle() {
-        const sidebar = document.querySelector('.sidebar');
-        const toggleButton = document.createElement('button');
-        toggleButton.className = 'mobile-toggle';
-        toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-        toggleButton.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: #DEB448;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #1a1a1a;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        `;
-        
-        toggleButton.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-        });
-        
-        document.body.appendChild(toggleButton);
-        
-        // Mostrar botón toggle en móviles
-        function checkMobile() {
-            if (window.innerWidth <= 768) {
-                toggleButton.style.display = 'flex';
-            } else {
-                toggleButton.style.display = 'none';
-                sidebar.classList.remove('open');
-            }
-        }
-        
-        window.addEventListener('resize', checkMobile);
-        checkMobile();
-    }
-    
-    createMobileToggle();
     
     // ========================================
     // INICIALIZACIÓN

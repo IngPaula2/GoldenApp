@@ -74,6 +74,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const upsertBranchModalOverlay = document.querySelector('#upsertBranchModal.modal-overlay');
     const cityResultsModalOverlay = document.querySelector('#cityResultsModal.modal-overlay');
     const branchResultsModalOverlay = document.querySelector('#branchResultsModal.modal-overlay');
+
+    // --- Crear ciudad: bloqueo fuerte (clics no deben llegar al dashboard debajo) ---
+    if (createCityModalOverlay && createCityModalOverlay.parentNode) {
+        document.body.appendChild(createCityModalOverlay);
+    }
+    function swallowPointerOutsideCreateCityPanel(e) {
+        if (!createCityModalOverlay || createCityModalOverlay.style.display !== 'flex') return;
+        const panel = createCityModalOverlay.querySelector('.modal');
+        if (!panel) return;
+        if (panel.contains(e.target)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    }
+    document.addEventListener('pointerdown', swallowPointerOutsideCreateCityPanel, true);
+    document.addEventListener('mousedown', swallowPointerOutsideCreateCityPanel, true);
+    document.addEventListener('click', swallowPointerOutsideCreateCityPanel, true);
+    document.addEventListener('touchstart', swallowPointerOutsideCreateCityPanel, { capture: true, passive: false });
+
+    const btnCloseCreateCity = document.querySelector('#createCityModal .modal-close');
+    if (btnCloseCreateCity) {
+        btnCloseCreateCity.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            hideCreateCityModal('user-close');
+        });
+    }
     
     /**
      * Muestra el modal de selección de ciudad
@@ -130,15 +157,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function showCreateCityModal() {
         createCityModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('create-city-form-open');
     }
     
     /**
-     * Oculta el modal de crear ciudad y limpia el formulario
+     * Oculta el modal de crear ciudad y limpia el formulario.
+     * Solo se ejecuta con motivo explícito para evitar cierres fantasma (clic fuera, listeners viejos, etc.).
+     * @param {'user-close'|'programmatic'} reason - 'user-close' = botón X; 'programmatic' = tras guardar/confirmar.
      */
-    function hideCreateCityModal() {
+    function hideCreateCityModal(reason) {
+        if (reason !== 'user-close' && reason !== 'programmatic') {
+            return;
+        }
+        if (!createCityModalOverlay) return;
         createCityModalOverlay.style.display = 'none';
         document.body.style.overflow = 'auto';
-        // Limpiar campos del formulario
+        document.body.classList.remove('create-city-form-open');
         clearCreateCityForm();
     }
     
@@ -301,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ciudadesData[cityData.codigo] = cityData;
         
         // Cerrar modal de creación y limpiar formulario
-        hideCreateCityModal();
+        hideCreateCityModal('programmatic');
         
         // Agregar la ciudad a la tabla
         console.log('Llamando a addCityToTable con:', cityData);
@@ -383,64 +417,43 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // EVENTOS DE MODALES
     // ========================================
-    
-    // Cerrar modal de selección de ciudad al hacer clic fuera
-    selectCityModalOverlay.addEventListener('click', function(e) {
-        if (e.target === selectCityModalOverlay) {
-            hideSelectCityModal();
+    // Los modales no se cierran al clic en el fondo (sólo con controles explícitos del modal).
+    (function setupModalInnerClickIsolation() {
+        document.querySelectorAll('.modal-overlay .modal').forEach(function (modalBox) {
+            modalBox.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+    })();
+
+    /**
+     * Bloquea clics en el fondo del overlay (fuera del panel .modal).
+     * No usar solo e.target === overlay: en flexbox el target a veces no es el contenedor y el evento llega al contenido de detrás.
+     */
+    function consumeBackdropPointer(overlayEl) {
+        if (!overlayEl) return;
+        const modalPanel = overlayEl.querySelector('.modal');
+        if (!modalPanel) return;
+        function stopIfOutsideModal(e) {
+            if (modalPanel.contains(e.target)) return;
+            e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
         }
-    });
-    
-    // Cerrar modal de búsqueda de ciudad al hacer clic fuera
-    citySearchModalOverlay.addEventListener('click', function(e) {
-        if (e.target === citySearchModalOverlay) {
-            hideModal();
-        }
-    });
-    
-    // Cerrar modal de crear ciudad al hacer clic fuera
-    createCityModalOverlay.addEventListener('click', function(e) {
-        if (e.target === createCityModalOverlay) {
-            hideCreateCityModal();
-        }
-    });
-    
-    // Cerrar modal de selección de filial al hacer clic fuera
-    if (branchModalOverlay) {
-        branchModalOverlay.addEventListener('click', function(e) {
-            if (e.target === branchModalOverlay) {
-                hideBranchModal();
-            }
-        });
+        overlayEl.addEventListener('mousedown', stopIfOutsideModal, true);
+        overlayEl.addEventListener('click', stopIfOutsideModal, true);
+        overlayEl.addEventListener('touchstart', stopIfOutsideModal, { capture: true, passive: true });
     }
+    [
+        selectCityModalOverlay,
+        citySearchModalOverlay,
+        createCityModalOverlay,
+        branchModalOverlay,
+        upsertBranchModalOverlay,
+        cityResultsModalOverlay,
+        branchResultsModalOverlay
+    ].forEach(consumeBackdropPointer);
     
-    // Cerrar modal crear/actualizar filial al hacer clic fuera
-    if (upsertBranchModalOverlay) {
-        upsertBranchModalOverlay.addEventListener('click', function(e) {
-            if (e.target === upsertBranchModalOverlay) {
-                hideUpsertBranchModal();
-            }
-        });
-    }
-    
-    // Cerrar modales de resultados al hacer clic fuera
-    if (cityResultsModalOverlay) {
-        cityResultsModalOverlay.addEventListener('click', function(e) {
-            if (e.target === cityResultsModalOverlay) {
-                hideCityResultsModal();
-            }
-        });
-    }
-    
-    if (branchResultsModalOverlay) {
-        branchResultsModalOverlay.addEventListener('click', function(e) {
-            if (e.target === branchResultsModalOverlay) {
-                hideBranchResultsModal();
-            }
-        });
-    }
-    
-    // Cerrar modales con la tecla Escape
+    // Cerrar modales con la tecla Escape (crear/editar ciudad: no cerrar con Escape; usar la X — ver data-close-on-escape + accessibility.js)
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (selectCityModalOverlay.style.display === 'flex') {
@@ -448,9 +461,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (citySearchModalOverlay.style.display === 'flex') {
                 hideModal();
-            }
-            if (createCityModalOverlay.style.display === 'flex') {
-                hideCreateCityModal();
             }
             if (branchModalOverlay && branchModalOverlay.style.display === 'flex') {
                 hideBranchModal();
@@ -467,42 +477,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // ========================================
-    // NAVEGACIÓN DEL SIDEBAR
-    // ========================================
-    
-    // Funcionalidad de navegación del sidebar
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remover clase activa de todos los elementos
-            navItems.forEach(nav => nav.classList.remove('active'));
-            // Agregar clase activa al elemento clickeado
-            this.classList.add('active');
-            
-            // Mostrar modal de selección de ciudad al navegar a cualquier sección
-            showSelectCityModal();
-        });
-    });
-    
-    // ========================================
-    // NAVEGACIÓN SUPERIOR
-    // ========================================
-    
-    // Funcionalidad de navegación superior
-    const topNavItems = document.querySelectorAll('.top-nav-item');
-    topNavItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remover clase activa de todos los elementos
-            topNavItems.forEach(nav => nav.classList.remove('active'));
-            // Agregar clase activa al elemento clickeado
-            this.classList.add('active');
-            
-            // Mostrar modal de selección de ciudad al navegar a cualquier sección
-            showSelectCityModal();
-        });
-    });
-    
+    // Navegación lateral y superior: enlaces reales (data-app-route + AppRoutes en admin-layout.js).
+
     // ========================================
     // PERFIL DE USUARIO Y DROPDOWN
     // ========================================
@@ -540,7 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Funcionalidad de cerrar sesión
                     sessionStorage.removeItem('isAuthenticated');
                     sessionStorage.removeItem('username');
-                    window.location.href = '../index.html';
+                    window.location.href = window.AppRoutes.resolve('LOGIN');
                 } else if (this.textContent.includes('ADMINISTRAR USUARIOS')) {
                     // Navegar a administración de usuarios
                     console.log('Navegando a administrar usuarios');
@@ -560,6 +536,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // MANEJADORES DE BOTONES
     // ========================================
+
+    // Handler explícito para "Crear Ciudad" (evita depender del switch por texto del botón)
+    const bCrearCiudad = document.getElementById('bCrearCiudad');
+    if (bCrearCiudad) {
+        bCrearCiudad.addEventListener('click', function (e) {
+            e.preventDefault();
+            showCreateCityModal();
+        });
+    }
     
     // Manejadores de clics para botones
     const buttons = document.querySelectorAll('.btn');
@@ -783,6 +768,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const bCancelarCrearCiudad = document.getElementById('bCancelarCrearCiudad');
+    if (bCancelarCrearCiudad) {
+        bCancelarCrearCiudad.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearCreateCityForm();
+        });
+    }
     
     /**
      * Procesa la actualización de una ciudad
@@ -812,7 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ciudadesData[codigo] = nuevaCiudad;
         
         // Cerrar modal y actualizar tabla
-        hideCreateCityModal();
+        hideCreateCityModal('programmatic');
         addCityToTable(nuevaCiudad, true);
         
         // Actualizar resultados de búsqueda si están abiertos
@@ -1110,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         processCityUpdate(ciudadData);
         
         // Cerrar modal de creación
-        hideCreateCityModal();
+        hideCreateCityModal('programmatic');
         
         // Mostrar modal de éxito
         showSuccessUpdateCityModal();
@@ -1415,58 +1409,6 @@ function resultsByCity(code) {
         hideModal();
         showUpsertBranchModal('update', filial);
     }
-    
-    // ========================================
-    // FUNCIONALIDAD RESPONSIVE
-    // ========================================
-    
-    /**
-     * Crea el botón toggle para el sidebar en dispositivos móviles
-     */
-    function createMobileToggle() {
-        const sidebar = document.querySelector('.sidebar');
-        const toggleButton = document.createElement('button');
-        toggleButton.className = 'mobile-toggle';
-        toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-        toggleButton.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: #DEB448;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #1a1a1a;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        `;
-        
-        toggleButton.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-        });
-        
-        document.body.appendChild(toggleButton);
-        
-        // Mostrar botón toggle en móviles
-        function checkMobile() {
-            if (window.innerWidth <= 768) {
-                toggleButton.style.display = 'flex';
-            } else {
-                toggleButton.style.display = 'none';
-                sidebar.classList.remove('open');
-            }
-        }
-        
-        window.addEventListener('resize', checkMobile);
-        checkMobile();
-    }
-    
-    createMobileToggle();
     
     // ========================================
     // INICIALIZACIÓN

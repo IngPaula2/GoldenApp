@@ -159,16 +159,10 @@ function initializeCitySelector() {
     const btnChangeCity = document.getElementById('changeCityButton');
     const btnSelectCity = document.getElementById('bSeleccionarCiudad');
     const btnCloseSelectCity = document.getElementById('btnCerrarSelectCityModal');
-    const modalSelectCity = document.getElementById('selectCityModal');
 
     if (btnChangeCity) btnChangeCity.addEventListener('click', showSelectCityModal);
     if (btnSelectCity) btnSelectCity.addEventListener('click', handleSelectCity);
     if (btnCloseSelectCity) btnCloseSelectCity.addEventListener('click', () => hideSelectCityModal(false));
-    if (modalSelectCity) {
-        modalSelectCity.addEventListener('click', function(e) {
-            if (e.target === this) hideSelectCityModal(false);
-        });
-    }
 
     showSelectCityModal();
     if (!getSelectedCityCode()) {
@@ -181,14 +175,7 @@ function initializeCitySelector() {
 // ========================================
 
 function initializeModals() {
-    // Cerrar modales al hacer clic fuera
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideAllModals();
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     
     // Cerrar modales con Escape (excepto confirmación y éxito)
     document.addEventListener('keydown', function(e) {
@@ -775,7 +762,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../../../index.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 // ========================================

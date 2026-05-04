@@ -41,14 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 function initializeModals() {
-    // Cerrar modales al hacer clic fuera
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideAllModals();
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     
     // Cerrar modales con Escape (excepto confirmación y éxito)
     document.addEventListener('keydown', function(e) {
@@ -560,7 +553,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../../../index.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 // Exportar funciones para uso en otros módulos

@@ -10,14 +10,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @media print {
+            @page {
+                size: A4 landscape;
+                margin: 10mm 8mm;
+            }
             .toolbar {
                 display: none !important;
             }
             body {
                 background: #fff;
             }
+            .report-container {
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+            #tableWrap {
+                overflow: visible !important;
+            }
+            #tableWrap table {
+                width: 100% !important;
+                table-layout: auto !important;
+                border-collapse: collapse !important;
+                font-size: 8pt !important;
+            }
+            #tableWrap th,
+            #tableWrap td {
+                padding: 3px 4px !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+            }
             .sheet-break {
                 page-break-before: always;
+            }
+            .resultados-wrap {
+                page-break-inside: avoid;
             }
         }
         .resultados-wrap {
@@ -94,6 +122,8 @@
         </div>
         <div class="footer">© 2025 - GOLDEN APP</div>
     </div>
+
+    <script src="../../../assets/js/utils/routes.js"></script>
 
     <script src="../../../assets/js/auditoria/reportes/reporte-liquidacion.js"></script>
 </body>

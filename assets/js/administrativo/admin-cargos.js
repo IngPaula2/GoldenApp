@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 if (this.classList.contains('logout-item')) {
                     // Redirigir inmediatamente al login
-                    window.location.href = '../../index.html';
+                    window.location.href = window.AppRoutes.resolve('LOGIN');
                 } else if (this.classList.contains('admin-users-item')) {
                     // Lógica de administrar usuarios
                     alert('Funcionalidad de administrar usuarios en desarrollo');
@@ -84,7 +84,7 @@ window.confirmLogout = function() {
     sessionStorage.clear();
     
     // Redirigir al index
-    window.location.href = '../../index.html';
+    window.location.href = window.AppRoutes.resolve('LOGIN');
 }
 
 // ========================================
@@ -716,21 +716,8 @@ function initializePage() {
     // Los formularios ya no existen, se manejan con onclick en los botones
     console.log('Formularios configurados para manejo directo');
     
-    // Cerrar modales al hacer clic fuera de ellos
     const modals = document.querySelectorAll('.modal-overlay');
-    modals.forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
-                
-                // Limpiar datos temporales si se cierra el modal de confirmación
-                if (modal.id === 'confirmCreateCargoModal') {
-                    window.tempCargoData = null;
-                }
-            }
-        });
-    });
+    // Los modales solo se cierran con la X o botones (no al clic fuera del overlay).
     
     // Cerrar modales con tecla Escape
     document.addEventListener('keydown', (e) => {

@@ -670,6 +670,8 @@
     display: flex;
     flex-direction: column;
     max-height: 90vh;
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 #selectCityModal .modal-header {
@@ -1264,4 +1266,387 @@
 
 .notification-info {
     background: #17a2b8;
+}
+
+/* Evitar corrimientos horizontales en cualquier tamaño */
+html,
+body.dashboard-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body.dashboard-page .main-content,
+body.dashboard-page .content-area,
+body.dashboard-page .auditoria-section,
+body.dashboard-page .auditoria-section-inner {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* ========================================
+  MENÚ MÓVIL COMPARTIDO (igual a Ciudades)
+  ======================================== */
+@media (max-width: 991px) {
+    body.dashboard-page .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        width: min(280px, 88vw) !important;
+        max-width: 100vw;
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+        z-index: 1001;
+    }
+
+    body.dashboard-page .sidebar.open {
+        transform: translateX(0);
+    }
+
+    body.dashboard-page .main-content {
+        margin-left: 0 !important;
+        width: 100%;
+        min-width: 0;
+    }
+
+    body.dashboard-page .main-content > .top-nav {
+        padding-left: 52px;
+    }
+
+    body.dashboard-page .sidebar-logo {
+        display: none;
+    }
+}
+
+.admin-mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1002;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #deb448;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+.admin-mobile-menu-toggle:focus-visible {
+    outline: 2px solid #1a1a1a;
+    outline-offset: 2px;
+}
+
+.admin-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.admin-sidebar-backdrop.is-visible {
+    display: block;
+}
+
+/* ========================================
+  RESPONSIVE - MÓDULO AUDITORÍA
+  ======================================== */
+@media (max-width: 1200px) {
+    .auditoria-section-inner {
+        padding: 18px;
+    }
+
+    .liquidacion-resumen-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #tablaLiquidacionHistorico,
+    #tablaLiquidacionDetalle,
+    #tablaComisiones,
+    #tablaBonos,
+    #tablaBonosConcurso,
+    #tablaResultadosLiquidacion {
+        min-width: 960px;
+    }
+}
+
+@media (max-width: 992px) {
+    .top-nav-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .top-nav-item {
+        flex: 1 1 calc(50% - 0.5rem);
+    }
+
+    .top-nav-link {
+        display: block;
+        text-align: center;
+    }
+
+    .auditoria-section .section-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .auditoria-section-header {
+        align-items: stretch;
+    }
+
+    .auditoria-section-header .section-title,
+    .auditoria-section-header .action-buttons {
+        width: 100%;
+    }
+
+    .auditoria-section-header .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .auditoria-section-header .action-buttons .btn {
+        flex: 1 1 220px;
+        justify-content: center;
+    }
+
+    .liquidacion-resumen-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .liquidacion-filtros-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .data-table {
+        overflow-x: auto;
+    }
+
+    .modal-overlay {
+        padding: 12px;
+    }
+
+    #modalTipoLiquidacion .modal,
+    #modalCrearLiquidacion .modal,
+    #modalBuscarLiquidacion .modal,
+    #modalTipoReporteLiquidacion .modal,
+    #modalResultadosLiquidacion .modal,
+    #selectCityModal .modal,
+    #modalComision .modal,
+    #modalBono .modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: calc(100vh - 24px);
+        padding: 18px;
+    }
+
+    #modalResultadosLiquidacion .modal-body,
+    #modalComision .modal-body,
+    #modalBono .modal-body {
+        max-height: calc(100vh - 260px);
+    }
+}
+
+@media (max-width: 768px) {
+    body.dashboard-page .content-area {
+        padding: 12px;
+    }
+
+    body.dashboard-page .auditoria-section {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .auditoria-section-inner {
+        padding: 14px;
+    }
+
+    .auditoria-section .section-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .top-nav-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        gap: 0;
+        overflow: hidden;
+    }
+
+    .top-nav-item {
+        flex: 0 0 auto;
+        min-width: 0;
+    }
+
+    .top-nav-link {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.2;
+    }
+
+    .top-nav-item.active .top-nav-link {
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .liquidacion-filtros-grid,
+    .liquidacion-resumen-grid,
+    .meses-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .liquidacion-reporte-wrap {
+        padding: 12px;
+    }
+
+    .liquidacion-reporte-header {
+        align-items: flex-start;
+    }
+
+    .liq-reporte-ciudades-list {
+        grid-template-columns: 1fr;
+        max-height: 220px;
+    }
+
+    .data-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .table th,
+    .table td {
+        white-space: nowrap;
+        font-size: 0.78rem;
+        line-height: 1.25;
+        padding: 10px 8px;
+    }
+
+    #tablaLiquidacionHistorico,
+    #tablaLiquidacionDetalle,
+    #tablaComisiones,
+    #tablaBonos,
+    #tablaBonosConcurso,
+    #tablaResultadosLiquidacion {
+        min-width: 980px;
+        table-layout: auto !important;
+    }
+
+    #tablaLiquidacionHistorico th,
+    #tablaLiquidacionHistorico td,
+    #tablaLiquidacionDetalle th,
+    #tablaLiquidacionDetalle td,
+    #tablaResultadosLiquidacion th,
+    #tablaResultadosLiquidacion td {
+        white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    #modalTipoLiquidacion .modal-footer,
+    #modalCrearLiquidacion .modal-footer,
+    #modalBuscarLiquidacion .modal-footer,
+    #modalTipoReporteLiquidacion .modal-footer,
+    #modalResultadosLiquidacion .modal-footer,
+    #selectCityModal .modal-footer,
+    #modalComision .modal-footer,
+    #modalBono .modal-footer,
+    #confirmActionAuditoriaModal .modal-footer,
+    #successActionAuditoriaModal .modal-footer {
+        flex-direction: column;
+    }
+
+    #modalTipoLiquidacion .modal-footer .btn,
+    #modalCrearLiquidacion .modal-footer .btn,
+    #modalBuscarLiquidacion .modal-footer .btn,
+    #modalTipoReporteLiquidacion .modal-footer .btn,
+    #modalResultadosLiquidacion .modal-footer .btn,
+    #selectCityModal .modal-footer .btn,
+    #modalComision .modal-footer .btn,
+    #modalBono .modal-footer .btn,
+    #confirmActionAuditoriaModal .modal-footer .btn,
+    #successActionAuditoriaModal .modal-footer .btn {
+        width: 100%;
+    }
+
+    .notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .auditoria-section-inner {
+        padding: 10px;
+    }
+
+    .auditoria-subsection {
+        margin-top: 1.2rem;
+        padding-top: 1rem;
+    }
+
+    .auditoria-section-header .action-buttons .btn {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 140px;
+        width: auto;
+    }
+
+    #modalTipoLiquidacion .modal,
+    #modalCrearLiquidacion .modal,
+    #modalBuscarLiquidacion .modal,
+    #modalTipoReporteLiquidacion .modal,
+    #modalResultadosLiquidacion .modal,
+    #selectCityModal .modal,
+    #modalComision .modal,
+    #modalBono .modal {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    #selectCityModal.modal-overlay {
+        padding: 10px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #selectCityModal .modal {
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+        margin: 0 auto;
+        padding: 14px;
+    }
+
+    #modalTipoLiquidacion .modal-header h3,
+    #modalCrearLiquidacion .modal-header h3,
+    #modalBuscarLiquidacion .modal-header h3,
+    #modalTipoReporteLiquidacion .modal-header h3,
+    #modalResultadosLiquidacion .modal-header h3,
+    #selectCityModal .modal-header h3 {
+        font-size: 1rem;
+    }
+
+    #tablaLiquidacionHistorico,
+    #tablaLiquidacionDetalle,
+    #tablaComisiones,
+    #tablaBonos,
+    #tablaBonosConcurso,
+    #tablaResultadosLiquidacion {
+        min-width: 1040px;
+        table-layout: auto !important;
+    }
 }

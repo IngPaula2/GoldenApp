@@ -638,6 +638,42 @@
         grid-template-columns: 1fr;
         gap: 16px;
     }
+
+    /* Crear Factura en móvil: evitar columnas recortadas */
+    #createInvoiceModal .modal.modal-large {
+        width: min(96vw, 560px) !important;
+        max-width: min(96vw, 560px) !important;
+        max-height: calc(100vh - 1.25rem);
+        padding: 18px 14px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    #createInvoiceModal .modal-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #createInvoiceModal .form-row,
+    #createInvoiceModal .form-row.two-col,
+    #createInvoiceModal .form-row.three-col {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    #createInvoiceModal .modal-footer {
+        flex-shrink: 0;
+        flex-wrap: wrap;
+    }
+
+    #createInvoiceModal .modal-footer .btn {
+        flex: 1 1 140px;
+    }
     
     .table {
         font-size: 12px;

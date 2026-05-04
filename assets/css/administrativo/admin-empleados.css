@@ -1076,6 +1076,60 @@
     }
 }
 
+/* Tablas empleados: scroll horizontal (mismo criterio que Cargos / Titulares) */
+@media (max-width: 991px) {
+    .empleados-section .data-table {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overflow-y: visible;
+    }
+
+    .empleado-section .section-content {
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .empleado-section .section-content .table {
+        display: table !important;
+        table-layout: auto !important;
+        min-width: 900px !important;
+        width: max-content !important;
+    }
+
+    .empleado-section .section-content .table th,
+    .empleado-section .section-content .table td {
+        white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    .empleado-section .section-content .table th:nth-child(3),
+    .empleado-section .section-content .table td:nth-child(3),
+    .empleado-section .section-content .table th:nth-child(4),
+    .empleado-section .section-content .table td:nth-child(4),
+    .empleado-section .section-content .table th:nth-child(5),
+    .empleado-section .section-content .table td:nth-child(5),
+    .empleado-section .section-content .table th:nth-child(6),
+    .empleado-section .section-content .table td:nth-child(6) {
+        display: table-cell !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .empleado-section .section-content .table {
+        min-width: 980px !important;
+        width: 980px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .empleado-section .section-content .table {
+        min-width: 1040px !important;
+        width: 1040px !important;
+    }
+}
+
 /* Móviles grandes - hacer más compacto */
 @media (max-width: 767px) {
     .empleados-section {
@@ -1159,14 +1213,6 @@
     .action-buttons .btn {
         padding: 0.5rem 0.8rem;
         font-size: 0.8rem;
-    }
-    
-    /* Ocultar columnas menos importantes en móviles muy pequeños */
-    .empleado-section .section-content .table th:nth-child(3),
-    .empleado-section .section-content .table td:nth-child(3),
-    .empleado-section .section-content .table th:nth-child(4),
-    .empleado-section .section-content .table td:nth-child(4) {
-        display: none;
     }
 }
 
