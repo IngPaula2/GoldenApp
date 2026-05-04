@@ -1,525 +1,291 @@
-# DOCUMENTACION GENERAL JAVASCRIPT - GOLDEN APP
+# Golden App — Documentación del proyecto
 
-## RESUMEN EJECUTIVO
+> Este archivo centraliza la documentación del **proyecto completo** (frontend estático, estructura, rutas, módulos y puntos de integración con backend). El nombre histórico del archivo se mantiene por compatibilidad con enlaces internos.
 
-Este documento describe la estructura y funcionalidad de todos los archivos JavaScript del proyecto Golden App. El sistema incluye autenticacion, dashboard administrativo para ciudades, titulares, cargos y funcionalidades de toggle para activar/desactivar elementos.
+---
 
-## ESTRUCTURA DEL PROYECTO
+## 1. Resumen ejecutivo
 
-### Archivos JavaScript
-- `assets/js/login.js` - Sistema de autenticacion
-- `assets/js/admin-ciudades.js` - Dashboard de ciudades y filiales
-- `assets/js/admin-titulares.js` - Dashboard de titulares y beneficiarios
-- `assets/js/admin-cargos.js` - Dashboard de cargos
-- `assets/js/admin-empleados.js` - Dashboard de empleados
-- `assets/js/admin-organizaciones.js` - Dashboard de organizaciones
+**Golden App** (Golden Bridge) es una aplicación web **multi-módulo** orientada a panel de gestión: administrativo, facturación, tesorería, nómina, cartera, auditoría, contabilidad y reportes. La interfaz está construida como **sitio estático**: HTML en `pages/`, estilos en `assets/css/` y lógica en `assets/js/`, sin bundler obligatorio en el repositorio.
 
-## ARCHIVO: LOGIN.JS
+- **Entrada principal de sesión:** `index.html` (raíz del proyecto).
+- **Vistas de negocio:** bajo `pages/` organizadas por dominio (`administrativo/`, `facturacion/`, `tesoreria/`, etc.).
+- **Backend:** la mayoría de operaciones están preparadas como comentarios o `fetch` puntuales; la lista de endpoints esperados se documenta en la sección 9.
 
-### Proposito
-Maneja la autenticacion de usuarios y la pagina de inicio de sesion.
+---
 
-### Funcionalidades Principales
-- Validacion de formularios de login
-- Efectos visuales en campos de entrada
-- Manejo de autenticacion
-- Redireccion post-login
+## 2. Arquitectura técnica
 
-### Estructura
-```javascript
-document.addEventListener('DOMContentLoaded', function() {
-    // Elementos del DOM
-    // Event listeners
-    // Funciones de validacion
-    // Manejo de autenticacion
-});
+| Aspecto | Descripción |
+|--------|-------------|
+| Tipo de app | Multi-página (MPA): cada vista es un `.html` con sus scripts |
+| Lenguajes | HTML5, CSS3, JavaScript (ES5/ES6 según archivo) |
+| Iconos | Font Awesome (CDN) en la mayoría de páginas |
+| Estado en cliente | `localStorage` / `sessionStorage` para sesión, ciudad seleccionada y datos de demostración |
+| Rutas absolutas / subcarpeta | `assets/js/utils/routes.js` expone `window.AppRoutes` para prefijos tipo GitHub Pages |
+
+### 2.1 Flujo típico de carga
+
+1. El usuario abre `index.html` o `pages/login.html`.
+2. Tras autenticación simulada o real, se redirige a un dashboard (p. ej. `pages/administrativo/admin-ciudades.html`).
+3. Cada página carga sus CSS (reset, `main.css` o `dashboard-base.css`, CSS del módulo) y scripts en orden: **`routes.js` → `admin-layout.js` (si aplica) → script del módulo** (y librerías CDN si existen).
+
+---
+
+## 3. Estructura de carpetas (resumen)
+
+```
+GoldenApp/
+├── index.html                 # Login / landing principal
+├── pages/                     # Todas las vistas HTML por módulo
+│   ├── administrativo/
+│   ├── facturacion/
+│   ├── tesoreria/
+│   ├── nomina/
+│   ├── cartera/
+│   ├── auditoria/
+│   ├── contabilidad/
+│   └── ...
+├── assets/
+│   ├── css/                   # Estilos por módulo + base
+│   ├── js/                    # Lógica por módulo + utilidades
+│   │   ├── administrativo/    # admin-layout.js, módulos admin...
+│   │   ├── utils/             # routes.js (AppRoutes)
+│   │   ├── facturacion/, tesoreria/, cartera/, ...
+│   │   └── login.js
+│   └── images/
+├── docs/
+│   └── DOCUMENTACION_BACKEND.md   # Este documento
+└── templates/                 # Plantillas HTML auxiliares (si existen)
 ```
 
-### Funciones Clave
-- Validacion de campos de entrada
-- Manejo de envio de formulario
-- Efectos visuales de focus/blur
-- Redireccion a dashboard
+---
 
-## ARCHIVO: ADMIN-CIUDADES.JS
+## 4. Mapa de módulos (vistas principales)
 
-### Proposito
-Dashboard administrativo para gestionar ciudades y filiales con sistema de toggle.
+La siguiente tabla orienta a desarrolladores sobre **dónde** está cada pieza. Los nombres exactos pueden variar ligeramente; use búsqueda por carpeta si falta algún reporte.
 
-### Variables Globales
-```javascript
-const ciudadesData = {};  // Almacena datos de ciudades
-const filialData = {};    // Almacena datos de filiales
+| Dominio | Ejemplos de HTML | JS principal (ejemplos) | CSS principal (ejemplos) |
+|---------|------------------|-------------------------|----------------------------|
+| Administrativo | `pages/administrativo/admin-ciudades.html`, `admin-empleados.html`, `cuentas-contables.html`, `admin-usuarios.html` | `assets/js/administrativo/*.js` | `assets/css/administrativo/*.css` |
+| Facturación | `pages/facturacion/contratos/fac-contratos.html`, `pages/facturacion/facturas/fac-facturas.html` | `assets/js/facturacion/**/*.js` | `assets/css/facturacion/**/*.css` |
+| Tesorería | `pages/tesoreria/ingreso-caja/ingreso-caja.html`, `cuentas-bancarias.html`, `mantenimiento/tipo-ingresos.html` | `assets/js/tesoreria/**/*.js` | `assets/css/tesoreria/**/*.css` |
+| Nómina | `pages/nomina/nomina-semanal/nomina-semanal.html` | `assets/js/nomina/**/*.js` | `assets/css/nomina/**/*.css` |
+| Cartera | `pages/cartera/estado-cuenta/estado-cuenta.html`, `notas/notas.html` | `assets/js/cartera/**/*.js` | `assets/css/cartera/**/*.css` |
+| Auditoría | `pages/auditoria/auditoria.html` | `assets/js/auditoria/auditoria.js` | `assets/css/auditoria/auditoria.css` |
+| Contabilidad | `pages/contabilidad/contabilidad.html` | `assets/js/contabilidad/contabilidad.js` | `assets/css/contabilidad/*.css` |
+
+---
+
+## 5. Componentes compartidos del frontend
+
+### 5.1 `assets/js/utils/routes.js` — `window.AppRoutes`
+
+- **Propósito:** Resolver URLs con el prefijo correcto cuando la app no está en la raíz del dominio (por ejemplo `/GoldenApp/...`).
+- **API:**
+  - `AppRoutes.resolve('CLAVE')` — resuelve una clave definida en `PATH` o una ruta que empiece por `/`.
+  - `AppRoutes.navigate('CLAVE')` — asigna `location.href`.
+  - `AppRoutes.getAppBasePath()` — prefijo detectado antes de `/pages/`.
+- **Claves habituales:** `LOGIN`, `ADMIN_CIUDADES`, `ADMIN_USUARIOS`, `MODULE_ADMIN`, `MODULE_FACTURACION`, `MODULE_TESORERIA`, `MODULE_NOMINA`, `MODULE_CARTERA`, `MODULE_AUDITORIA`, `MODULE_CONTABILIDAD`, etc.
+
+**Orden en HTML:** incluir **antes** de `admin-layout.js` y del JS del módulo:
+
+```html
+<script src=".../assets/js/utils/routes.js"></script>
+<script src=".../assets/js/administrativo/admin-layout.js"></script>
 ```
 
-### Funcionalidades Principales
+(Ajuste la ruta relativa según la profundidad de la carpeta `pages/`.)
 
-#### Gestion de Ciudades
-- Crear nuevas ciudades
-- Editar ciudades existentes
-- Eliminar ciudades
-- Buscar ciudades
-- Toggle activar/desactivar ciudades
+### 5.2 `assets/js/administrativo/admin-layout.js`
 
-#### Gestion de Filiales
-- Crear nuevas filiales
-- Editar filiales existentes
-- Eliminar filiales
-- Buscar filiales
-- Toggle activar/desactivar filiales
+- **Propósito:** Menú lateral tipo drawer en vista compacta (`<= 991px`), backdrop y utilidades globales del shell.
+- **Requisitos:** `body.dashboard-page`, `aside.sidebar`, Font Awesome.
+- **Funciones relevantes:**
+  - `bindDashboardSidebarRoutes()` — rellena `href` de enlaces `a.nav-link[data-app-route]` usando `AppRoutes`.
+  - `bindSidebarModuleNavigationCapture()` — navegación por captura de clic para evitar conflictos con otros listeners en algunas pantallas.
+  - Listener global para `.admin-users-item` → administración de usuarios (`resolveAdminUsersUrl()`).
 
-#### Sistema de Modales
-- Modal de seleccion de ciudad
-- Modal de busqueda de ciudad
-- Modal de creacion de ciudad
-- Modal de confirmacion para toggle
-- Modal de exito
+### 5.3 `assets/css/dashboard-base.css`
 
-### Funciones Principales
+- Hoja base usada en varios módulos (p. ej. auditoría, facturación) para sidebar, tablas responsivas y utilidades comunes.
+- Algunas páginas administrativas cargan solo `assets/css/administrativo/main.css` + CSS del módulo; el aspecto puede diferir ligeramente.
 
-#### Gestion de Ciudades
+### 5.4 `assets/js/accessibility.js`
+
+- Mejoras de accesibilidad donde esté enlazado (teclado, foco, etc.).
+
+---
+
+## 6. Navegación entre módulos (menú lateral)
+
+- En el HTML del sidebar, los ítems principales suelen usar **`data-app-route="MODULE_..."`** y `href="#"` temporal.
+- **`admin-layout.js`** reemplaza el `href` por la URL resuelta vía `AppRoutes`.
+- **Convención:** mantener las mismas claves `MODULE_*` en todas las vistas para coherencia.
+
+---
+
+## 7. Autenticación y sesión (cliente)
+
+| Clave / concepto | Uso típico |
+|------------------|------------|
+| `sessionStorage` | `isAuthenticated`, `username`, `selectedCity`, datos de flujo |
+| `localStorage` | `authToken`, `userData`, datos maestros de demo (`ciudadesData`, etc.) |
+| Logout | Limpieza de tokens y redirección a `AppRoutes.resolve('LOGIN')` donde esté implementado |
+
+> La política final de tokens debe alinearse con el backend real (cabecera `Authorization`, expiración, refresh).
+
+---
+
+## 8. Sincronización entre módulos (ciudades)
+
+Resumen de lo documentado en el código y comentarios:
+
+- **Evento:** `window.dispatchEvent(new CustomEvent('ciudades:updated'))` al crear o actualizar ciudades.
+- **API global:** `window.getCiudadesData()` y `window.refreshCitySelects()` cuando existan.
+- **Fallback:** lectura de `localStorage` solo si aplica el flag de sesión acordado (`ciudadesAllowLocal`).
+- **Reglas:** listar ciudades activas; normalización a mayúsculas en selects según implementación del módulo.
+
+---
+
+## 9. Integración con backend (endpoints y convenciones)
+
+### 9.1 Cabeceras sugeridas
+
 ```javascript
-function addCityToTable(ciudad, replaceIfExists = false)
-function editCity(codigo)
-function deleteCity(codigo)
-function searchCities()
-function toggleCityState(codigo)
-function confirmToggleCity()
-function cancelToggleCity()
-```
-
-#### Gestion de Filiales
-```javascript
-function addBranchToTable(filial, replaceIfExists = false)
-function editBranch(codigo)
-function deleteBranch(codigo)
-function toggleBranchState(codigo)
-function confirmToggleBranch()
-function cancelToggleBranch()
-```
-
-#### Modales
-```javascript
-function showSelectCityModal()
-function hideSelectCityModal()
-function showCitySearchModal()
-function hideModal()
-function showCreateCityModal()
-function hideCreateCityModal()
-```
-
-### Puntos de Integracion Backend
-
-#### 1. Toggle Ciudad
-**Funcion**: `confirmToggleCity()`  
-**Linea**: 1638  
-**Endpoint**: `PUT /api/ciudades/toggle`
-
-#### 2. Toggle Filial
-**Funcion**: `confirmToggleBranch()`  
-**Linea**: 2079  
-**Endpoint**: `PUT /api/filiales/toggle`
-
-#### 3. Crear Ciudad
-**Funcion**: `confirmCreateCity()`  
-**Linea**: 268  
-**Endpoint**: `POST /api/ciudades`
-
-#### 4. Crear Filial
-**Funcion**: `confirmCreateBranch()`  
-**Linea**: 852  
-**Endpoint**: `POST /api/filiales`
-
-## ARCHIVO: ADMIN-TITULARES.JS
-
-### Proposito
-Dashboard administrativo para gestionar titulares y beneficiarios.
-
-### Funcionalidades Principales
-
-#### Gestion de Titulares
-- Crear nuevos titulares
-- Editar titulares existentes
-- Eliminar titulares
-- Buscar titulares
-- Gestion de documentos
-
-#### Gestion de Beneficiarios
-- Agregar beneficiarios a titulares
-- Editar beneficiarios
-- Eliminar beneficiarios
-- Gestion de relaciones familiares
-
-#### Sistema de Modales
-- Modal de creacion de titular
-- Modal de edicion de titular
-- Modal de confirmacion de eliminacion
-- Modal de gestion de beneficiarios
-
-### Funciones Principales
-
-#### Gestion de Titulares
-```javascript
-function addTitularToTable(titular, replaceIfExists = false)
-function editTitular(codigo)
-function deleteTitular(codigo)
-function searchTitulares()
-function showCreateTitularModal()
-function hideCreateTitularModal()
-```
-
-#### Gestion de Beneficiarios
-```javascript
-function addBeneficiarioToTable(beneficiario, titularCodigo)
-function editBeneficiario(codigo, titularCodigo)
-function deleteBeneficiario(codigo, titularCodigo)
-function showBeneficiariosModal(titularCodigo)
-function hideBeneficiariosModal()
-```
-
-### Estructura de Datos
-```javascript
-const titularesData = {};     // Almacena datos de titulares
-const beneficiariosData = {}; // Almacena datos de beneficiarios
-```
-
-## ARCHIVO: ADMIN-CARGOS.JS
-
-### Proposito
-Dashboard administrativo para gestionar cargos y posiciones.
-
-### Funcionalidades Principales
-
-#### Gestion de Cargos
-- Crear nuevos cargos
-- Editar cargos existentes
-- Eliminar cargos
-- Buscar cargos
-- Gestion de jerarquias
-
-#### Sistema de Modales
-- Modal de creacion de cargo
-- Modal de edicion de cargo
-- Modal de confirmacion de eliminacion
-- Modal de exito
-
-### Funciones Principales
-
-#### Gestion de Cargos
-```javascript
-function addCargoToTable(cargo, replaceIfExists = false)
-function editCargo(codigo)
-function deleteCargo(codigo)
-function searchCargos()
-function showCreateCargoModal()
-function hideCreateCargoModal()
-```
-
-### Estructura de Datos
-```javascript
-const cargosData = {}; // Almacena datos de cargos
-```
-
-## ARCHIVO: ADMIN-EMPLEADOS.JS
-
-### Proposito
-Dashboard administrativo para gestionar empleados y su información básica, con selección obligatoria de ciudad, validaciones y notificaciones.
-
-### Funcionalidades Principales
-- CRUD de empleados
-- Gestión de beneficiarios
-- Modal de selección de ciudad y sincronización con ciudades
-- Notificaciones estilizadas de acciones
-
-### Puntos de Integracion Backend
-- `POST /api/empleados` (crear)
-- `PUT /api/empleados/{id}` (actualizar)
-- `GET /api/empleados/{id}` (buscar)
-- `DELETE /api/empleados/{id}` (eliminar)
-
-## ARCHIVO: ADMIN-ORGANIZACIONES.JS
-
-### Proposito
-Dashboard administrativo para gestionar organizaciones. Formulario simplificado (código y nombre), modal de selección de ciudad, sincronización con ciudades y notificaciones.
-
-### Estructura de Datos
-```javascript
-const organizacionesData = {
-  [codigo]: { codigo, nombre, activo }
+headers: {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer ' + (sessionStorage.getItem('authToken') || localStorage.getItem('authToken') || '')
 }
 ```
 
-### Funcionalidades Principales
-- Crear organización
-- Actualizar organización
-- Eliminar organización
-- Buscar por código
-- Selección de ciudad obligatoria y sincronizada
+(Ajustar según dónde se guarde el token en producción.)
 
-### Puntos de Integracion Backend (ubicación en el código)
-- `POST /api/organizaciones` → función `confirmCreateOrg()` (sección CONEXIÓN BACKEND)
-- `PUT /api/organizaciones/{codigo}` → función `confirmUpdateOrg()` (sección CONEXIÓN BACKEND)
-- `GET /api/organizaciones/{codigo}` → función `resultOrgByCode(code)` (sección CONEXIÓN BACKEND)
-- `DELETE /api/organizaciones/{codigo}` → función `confirmDeleteOrg()` (sección CONEXIÓN BACKEND)
+### 9.2 Administrativo — referencia (del código / documentación previa)
 
-Cada punto incluye comentarios con headers requeridos y estructura de body. El equipo backend debe reemplazar los bloques comentados por las llamadas reales.
+#### Ciudades
+- `GET /api/ciudades`
+- `POST /api/ciudades`
+- `PUT /api/ciudades/{codigo}`
+- `DELETE /api/ciudades/{codigo}`
+- `PUT /api/ciudades/toggle`
 
-## FUNCIONES DE UTILIDAD COMUNES
+#### Filiales
+- `GET /api/filiales`
+- `POST /api/filiales`
+- `PUT /api/filiales/{codigo}`
+- `DELETE /api/filiales/{codigo}`
+- `PUT /api/filiales/toggle`
 
-### Autenticacion
-```javascript
-function getAuthToken()
-function isAuthenticated()
-```
+#### Titulares / beneficiarios
+- `GET /api/titulares`, `POST /api/titulares`, `PUT /api/titulares/{codigo}`, `DELETE /api/titulares/{codigo}`
+- `GET /api/beneficiarios`, `POST /api/beneficiarios`, `PUT /api/beneficiarios/{codigo}`, `DELETE /api/beneficiarios/{codigo}`
 
-### Validacion de Formularios
-```javascript
-function validateForm(formElement)
-function validateRequiredFields(fields)
-function validateEmail(email)
-function validatePhone(phone)
-```
+#### Cargos
+- `GET /api/cargos`, `POST /api/cargos`, `PUT /api/cargos/{codigo}`, `DELETE /api/cargos/{codigo}`
 
-### Manejo de Modales
-```javascript
-function showModal(modalId)
-function hideModal(modalId)
-function closeModalOnOverlayClick(modalId)
-```
+#### Empleados
+- `POST /api/empleados`, `PUT /api/empleados/{id}`, `GET /api/empleados/{id}`, `DELETE /api/empleados/{id}`
+- Búsquedas comentadas: `GET /api/empleados/search?...`, `GET /api/empleados/buscar/{identificacion}`
 
-### Gestion de Tablas
-```javascript
-function addRowToTable(tableId, rowData)
-function updateRowInTable(tableId, rowId, newData)
-function removeRowFromTable(tableId, rowId)
-function clearTable(tableId)
-```
+#### Organizaciones
+- `POST /api/organizaciones`, `PUT /api/organizaciones/{codigo}`, `GET /api/organizaciones/{codigo}`, `DELETE /api/organizaciones/{codigo}`
 
-## SINCRONIZACIÓN ENTRE MÓDULOS (CIUDADES)
+### 9.3 Facturación — contratos (comentarios en `fac-contratos.js`)
 
-### Evento Global
-- `window.dispatchEvent(new CustomEvent('ciudades:updated'))` al crear/actualizar ciudades.
+Ejemplos de endpoints sugeridos en el código:
 
-### Funciones Globales
-- `window.getCiudadesData()` retorna el mapa de ciudades vigente.
-- `window.refreshCitySelects()` repuebla selects locales y persiste en localStorage.
+- `GET /api/contratos?ciudad={codigo}`
+- `POST /api/contratos`, `PUT /api/contratos/{id}`, `DELETE /api/contratos/{id}`
+- `GET /api/contratos/buscar?tipo=...&valor=...`
+- `GET /api/empleados?ciudad={codigo}`
+- `GET /api/titulares?ciudad={codigo}&cedula={cedula}`
+- `GET /api/planes`
+- `GET /api/consecutivos?ciudad={codigo}`
+- `GET /api/reportes/contratos?fechaInicio=...&fechaFin=...`
 
-### Fallback de Datos
-- Si `getCiudadesData` aún no está disponible, se permite fallback a `localStorage` únicamente si existe el flag de sesión `ciudadesAllowLocal`.
+> Los módulos de facturas, tesorería, cartera y auditoría pueden tener más endpoints en comentarios al inicio de sus respectivos `.js`; conviene generar una tabla por archivo cuando se conecte el API real.
 
-### Reglas de Selectores de Ciudad
-- Solo listar ciudades activas (`activo !== false`).
-- Convertir a mayúsculas el código y nombre al poblar selects.
+---
 
-## SISTEMA DE NOTIFICACIONES
-
-### Implementación
-- Función `showNotification(message, type)` disponible en todos los módulos.
-- Tipos soportados: `success`, `error`, `warning`, `info`.
-- Estilos CSS compartidos en `admin-cargos.css`, `admin-ciudades.css` y `admin-empleados.css`.
-
-### Reemplazos
-- Todos los `alert()` relacionados con selección de ciudad fueron reemplazados por `showNotification`.
-
-## ESTRUCTURA DE DATOS COMUN
+## 10. Estructuras de datos de referencia (cliente)
 
 ### Ciudad
 ```javascript
 {
-    codigo: "CIU001",
-    nombre: "Bogota",
-    direccion: "Calle 123 #45-67",
-    telefono: "601-123-4567",
-    correo: "bogota@goldenapp.com",
-    activo: true
+  codigo: "101",
+  nombre: "BOGOTA",
+  direccion: "...",
+  telefono: "...",
+  correo: "...",
+  activo: true
 }
 ```
 
 ### Filial
 ```javascript
 {
-    codigo: "FIL001",
-    nombre: "Sucursal Centro",
-    ciudad: "Bogota",
-    direccion: "Carrera 7 #32-10",
-    telefono: "601-987-6543",
-    activo: true
+  codigo: "FIL001",
+  nombre: "Sucursal Centro",
+  ciudad: "BOGOTA",
+  direccion: "...",
+  telefono: "...",
+  activo: true
 }
 ```
 
-### Titular
-```javascript
-{
-    codigo: "TIT001",
-    nombre: "Juan Perez",
-    documento: "12345678",
-    telefono: "300-123-4567",
-    correo: "juan@email.com",
-    direccion: "Calle 123 #45-67"
-}
-```
-
-### Beneficiario
-```javascript
-{
-    codigo: "BEN001",
-    titularCodigo: "TIT001",
-    nombre: "Maria Perez",
-    documento: "87654321",
-    parentesco: "Hija",
-    telefono: "300-987-6543"
-}
-```
-
-### Cargo
-```javascript
-{
-    codigo: "CAR001",
-    nombre: "Gerente General",
-    descripcion: "Responsable de la operacion general",
-    nivel: "Ejecutivo",
-    salario: 5000000
-}
-```
-
-## SISTEMA DE TOGGLE
-
-### Caracteristicas
-- Toggle animado ON/OFF
-- Badge de estado ACTIVA/INACTIVA
-- Modales de confirmacion
-- Reversion de cambios en caso de error
-
-### Implementacion
-- CSS con gradientes y sombras 3D
-- JavaScript para manejo de estado
-- Modales de confirmacion y exito
-- Integracion con backend
-
-## PUNTOS DE INTEGRACION BACKEND
-
-### Endpoints Requeridos
-
-#### Ciudades
-- `GET /api/ciudades` - Obtener lista de ciudades
-- `POST /api/ciudades` - Crear nueva ciudad
-- `PUT /api/ciudades/{codigo}` - Actualizar ciudad
-- `DELETE /api/ciudades/{codigo}` - Eliminar ciudad
-- `PUT /api/ciudades/toggle` - Toggle estado ciudad
-
-#### Filiales
-- `GET /api/filiales` - Obtener lista de filiales
-- `POST /api/filiales` - Crear nueva filial
-- `PUT /api/filiales/{codigo}` - Actualizar filial
-- `DELETE /api/filiales/{codigo}` - Eliminar filial
-- `PUT /api/filiales/toggle` - Toggle estado filial
-
-#### Titulares
-- `GET /api/titulares` - Obtener lista de titulares
-- `POST /api/titulares` - Crear nuevo titular
-- `PUT /api/titulares/{codigo}` - Actualizar titular
-- `DELETE /api/titulares/{codigo}` - Eliminar titular
-
-#### Beneficiarios
-- `GET /api/beneficiarios` - Obtener beneficiarios de un titular
-- `POST /api/beneficiarios` - Crear nuevo beneficiario
-- `PUT /api/beneficiarios/{codigo}` - Actualizar beneficiario
-- `DELETE /api/beneficiarios/{codigo}` - Eliminar beneficiario
-
-#### Cargos
-- `GET /api/cargos` - Obtener lista de cargos
-- `POST /api/cargos` - Crear nuevo cargo
-- `PUT /api/cargos/{codigo}` - Actualizar cargo
-- `DELETE /api/cargos/{codigo}` - Eliminar cargo
-
-### Autenticacion
-```javascript
-headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${getAuthToken()}`
-}
-```
-
-## MANEJO DE ERRORES
-
-### Estrategias Implementadas
-- Validacion de formularios en frontend
-- Manejo de errores de red
-- Reversion de cambios visuales en caso de error
-- Mensajes de error claros al usuario
-- Logs detallados en consola
-
-### Funciones de Error
-```javascript
-function handleApiError(error, context)
-function showErrorMessage(message)
-function revertVisualChanges(elementId)
-function logError(error, context)
-```
-
-## CONSIDERACIONES DE SEGURIDAD
-
-### Validaciones Frontend
-- Validacion de campos requeridos
-- Validacion de formatos (email, telefono)
-- Sanitizacion de inputs
-- Prevencion de XSS
-
-### Autenticacion
-- Token almacenado en sessionStorage
-- Verificacion de autenticacion en cada request
-- Logout automatico en caso de token invalido
-
-## OPTIMIZACIONES IMPLEMENTADAS
-
-### Performance
-- Event delegation para elementos dinamicos
-- Debounce en funciones de busqueda
-- Lazy loading de modales
-- Cache de datos en memoria
-
-### UX/UI
-- Feedback visual inmediato
-- Estados de carga
-- Confirmaciones para acciones destructivas
-- Navegacion intuitiva
-
-## TESTING Y DEBUGGING
-
-### Funciones de Debug
-```javascript
-function debugLog(message, data)
-function testToggleWithSampleData()
-function validateDataIntegrity()
-```
-
-### Logs Implementados
-- Logs de operaciones CRUD
-- Logs de errores de API
-- Logs de cambios de estado
-- Logs de autenticacion
-
-## PROXIMOS PASOS
-
-### Mejoras Sugeridas
-1. Implementar conexiones backend completas
-2. Agregar validaciones de permisos
-3. Implementar cache con localStorage
-4. Agregar tests automatizados
-5. Optimizar rendimiento de tablas grandes
-6. Implementar paginacion
-7. Agregar filtros avanzados
-8. Implementar exportacion de datos
-
-### Mantenimiento
-1. Actualizar dependencias
-2. Revisar compatibilidad de navegadores
-3. Optimizar queries de base de datos
-4. Implementar monitoreo de errores
-5. Documentar APIs con Swagger
+### Titular / beneficiario / cargo
+Ver secciones equivalentes en versiones anteriores del repositorio (objetos con `codigo`, nombres y relaciones).
 
 ---
 
-**Fecha de creacion**: 2024  
-**Desarrollado por**: Paula Pachon  
-**Version**: 1.0.0
+## 11. UI responsiva, tablas y modales
+
+- **Tablas:** muchos módulos usan `overflow-x: auto` y reglas en `dashboard-base.css` o CSS del módulo para evitar cortes en móvil.
+- **Modales grandes (crear factura, contrato, etc.):** en `max-width: 768px` suelen forzarse columnas a una sola columna y `max-height` + scroll en el cuerpo del modal.
+- **Menú móvil:** clase `open` en `aside.sidebar` y backdrop; breakpoint típico `991px` en `admin-layout.js`.
+
+---
+
+## 12. Manejo de errores y depuración
+
+- Validación de formularios en el cliente antes de llamadas a API.
+- Mensajes al usuario: `showNotification` donde esté definido; evitar `alert` en flujos nuevos.
+- Errores de red: capturar en `fetch`, revertir estado visual si aplica y registrar en consola.
+
+---
+
+## 13. Seguridad (orientación)
+
+- Validar y sanitizar entradas en **servidor**; el frontend solo ayuda a la UX.
+- No exponer secretos en el repositorio; usar variables de entorno en el backend.
+- Cookies vs `localStorage` para tokens: decidir con el equipo de seguridad.
+
+---
+
+## 14. Despliegue y ejecución local
+
+1. Servir la carpeta del proyecto con cualquier servidor estático (`npx serve`, IIS, nginx, extensión Live Server).
+2. Abrir `http://localhost:.../index.html` o la ruta equivalente si hay subcarpeta: usar `AppRoutes` para enlaces internos.
+3. Si se despliega bajo un **path base** (p. ej. `https://usuario.github.io/GoldenApp/`), todas las navegaciones internas deben pasar por **`AppRoutes.resolve`** o rutas relativas correctas desde cada HTML.
+
+---
+
+## 15. Mantenimiento del documento
+
+- Al añadir un **módulo nuevo:** actualizar la tabla de la sección 4, las claves en `routes.js` si aplica, y la sección 9 con los endpoints reales.
+- Al cambiar **flujo de login:** actualizar secciones 2 y 7.
+- Este archivo sustituye la documentación fragmentada anterior bajo el mismo nombre; el historial detallado línea-a-línea de cada función queda en el propio código fuente y en comentarios `// Endpoint:`.
+
+---
+
+## 16. Créditos y versión
+
+| Campo | Valor |
+|-------|--------|
+| Proyecto | Golden App / Golden Bridge |
+| Documento | Consolidado proyecto + API de referencia |
+| Versión documento | 2.0.0 |
+| Fecha | 2026-05-04 |
+
+*Contenido previo (v1) incorporado: descripción de módulos administrativos, endpoints de referencia, sincronización de ciudades y notificaciones.*
