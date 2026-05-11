@@ -19,7 +19,7 @@
         'Tesoreria': ['Ingreso a Caja', 'Ingreso a Bancos', 'Cuentas Bancarias', 'Cuentas Contables', 'Mantenimiento'],
         'Nomina': ['Nómina Semanal'],
         'Cartera': ['Asignar Factura', 'Estado de Cuenta', 'Historial Cartera', 'Notas'],
-        'Auditoria': ['Liquidación', 'Reportes'],
+        'Auditoria': ['Comisión', 'Bonos', 'Liquidación', 'Reportes'],
         'Contabilidad': ['Contabilidad'],
         'Administración de usuarios': ['Administrar Usuarios']
     };
